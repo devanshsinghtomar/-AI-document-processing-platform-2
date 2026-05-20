@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>AI Translator & Summarizer</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- PDF SUPPORT -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+</script>
+
+<!-- DOCX SUPPORT -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.21/mammoth.browser.min.js"></script>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
+}
+
+body{
+min-height:100vh;
+background:linear-gradient(135deg,#0f172a,#111827,#1e293b);
+display:flex;
+justify-content:center;
+align-items:center;
+padding:30px;
+overflow-x:hidden;
+}
+
+.container{
+width:100%;
+max-width:1200px;
+background:rgba(255,255,255,0.08);
+border:1px solid rgba(255,255,255,0.1);
+backdrop-filter:blur(20px);
+border-radius:30px;
+padding:35px;
+box-shadow:0 15px 45px rgba(0,0,0,0.4);
+animation:fadeIn 0.8s ease;
+}
+
+@keyframes fadeIn{
+from{
+opacity:0;
+transform:translateY(20px);
+}
+to{
+opacity:1;
+transform:translateY(0);
+}
+}
+
+.title{
+text-align:center;
+margin-bottom:30px;
+}
+
+.title h1{
+font-size:42px;
+color:white;
+font-weight:700;
+margin-bottom:10px;
+}
+
+.title p{
+color:#cbd5e1;
+font-size:16px;
+}
+
+.main-grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:25px;
+margin-top:20px;
+}
+
+.panel{
+background:rgba(255,255,255,0.05);
+border-radius:25px;
+padding:25px;
+border:1px solid rgba(255,255,255,0.08);
+}
+
+.upload-box{
+border:2px dashed rgba(255,255,255,0.25);
+border-radius:20px;
+padding:35px;
+text-align:center;
+transition:0.3s;
+cursor:pointer;
+background:rgba(255,255,255,0.03);
+}
+
+.upload-box:hover{
+background:rgba(255,255,255,0.08);
+transform:scale(1.01);
+}
+
+.upload-box h3{
+color:white;
+margin-bottom:10px;
+font-size:22px;
+}
+
+.upload-box p{
+color:#cbd5e1;
+font-size:15px;
+}
+
+.upload-btn{
+margin-top:20px;
+padding:14px 24px;
+border:none;
+border-radius:14px;
+background:linear-gradient(135deg,#3b82f6,#06b6d4);
+color:white;
+font-size:15px;
+font-weight:600;
+cursor:pointer;
+transition:0.3s;
+}
+
+.upload-btn:hover{
+transform:translateY(-2px);
+}
+
+input[type=file]{
+display:none;
+}
+
+textarea{
+width:100%;
+height:320px;
+margin-top:25px;
+padding:20px;
+border:none;
+outline:none;
+border-radius:20px;
+background:rgba(255,255,255,0.08);
+color:white;
+font-size:15px;
+resize:none;
+line-height:1.8;
+box-shadow:inset 0 0 10px rgba(0,0,0,0.3);
+}
+
+textarea::placeholder{
+color:#cbd5e1;
+}
+
+.controls{
+display:flex;
+flex-wrap:wrap;
+gap:15px;
+margin-top:25px;
+align-items:center;
+}
+
+select{
+flex:1;
+min-width:180px;
+padding:14px;
+border:none;
+border-radius:15px;
+background:rgba(255,255,255,0.08);
+color:white;
+font-size:15px;
+outline:none;
+}
+
+select option{
+background:#111827;
+}
+
+button{
+padding:14px 20px;
+border:none;
+border-radius:15px;
+font-size:15px;
+font-weight:600;
+cursor:pointer;
+transition:0.3s;
+color:white;
+}
+
+button:hover{
+transform:translateY(-3px);
+box-shadow:0 10px 20px rgba(0,0,0,0.3);
+}
+
+.translate-btn{
+background:linear-gradient(135deg,#3b82f6,#06b6d4);
+}
+
+.summary-btn{
+background:linear-gradient(135deg,#8b5cf6,#ec4899);
+}
+
+.copy-btn{
+background:linear-gradient(135deg,#10b981,#14b8a6);
+}
+
+.clear-btn{
+background:linear-gradient(135deg,#ef4444,#f97316);
+}
+
+.output-box{
+height:550px;
+overflow-y:auto;
+background:rgba(255,255,255,0.08);
+border-radius:20px;
+padding:25px;
+color:white;
+line-height:1.9;
+font-size:15px;
+word-wrap:break-word;
+}
+
+.output-box h2{
+margin-bottom:15px;
+font-size:24px;
+}
+
+.loading{
+display:none;
+text-align:center;
+margin-top:20px;
+}
+
+.loader{
+width:55px;
+height:55px;
+border:5px solid rgba(255,255,255,0.2);
+border-top:5px solid #38bdf8;
+border-radius:50%;
+animation:spin 1s linear infinite;
+margin:auto;
+}
+
+@keyframes spin{
+100%{
+transform:rotate(360deg);
+}
+}
+
+.footer{
+margin-top:25px;
+text-align:center;
+color:#cbd5e1;
+font-size:14px;
+}
+
+@media(max-width:1000px){
+
+.main-grid{
+grid-template-columns:1fr;
+}
+
+.output-box{
+height:auto;
+min-height:300px;
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="title">
+
+<h1>🌍 AI Translator & Summarizer</h1>
+
+<p>
+Upload TXT, PDF, DOCX files and instantly translate or summarize content
+</p>
+
+</div>
+
+<div class="main-grid">
+
+<!-- LEFT PANEL -->
+
+<div class="panel">
+
+<div class="upload-box" id="dropArea">
+
+<h3>📂 Upload Document</h3>
+
+<p>Drag & Drop or Click Below</p>
+
+<p style="margin-top:8px;">
+Supported: TXT, PDF, DOCX
+</p>
+
+<input type="file"
+id="fileInput"
+accept=".txt,.pdf,.docx">
+
+<button class="upload-btn"
+onclick="document.getElementById('fileInput').click()">
+
+Select File
+
+</button>
+
+</div>
+
+<textarea
+id="inputText"
+placeholder="Type or upload your text here..."></textarea>
+
+<div class="controls">
+
+<select id="languageSelect">
+
+<option value="hi">Hindi</option>
+<option value="fr">French</option>
+<option value="es">Spanish</option>
+<option value="de">German</option>
+<option value="ja">Japanese</option>
+<option value="ko">Korean</option>
+<option value="ru">Russian</option>
+<option value="ar">Arabic</option>
+<option value="zh-CN">Chinese</option>
+
+</select>
+
+<button class="translate-btn"
+onclick="translateText()">
+
+🌐 Translate
+
+</button>
+
+<button class="summary-btn"
+onclick="summarizeText()">
+
+✨ Summarize
+
+</button>
+
+<button class="copy-btn"
+onclick="copyOutput()">
+
+📋 Copy
+
+</button>
+
+<button class="clear-btn"
+onclick="clearAll()">
+
+🗑 Clear
+
+</button>
+
+</div>
+
+<div class="loading" id="loading">
+
+<div class="loader"></div>
+
+<p style="margin-top:10px;color:white;">
+Processing...
+</p>
+
+</div>
+
+</div>
+
+<!-- RIGHT PANEL -->
+
+<div class="panel">
+
+<div class="output-box" id="outputBox">
+
+<h2>📄 Output</h2>
+
+<p>
+Your translated or summarized text will appear here...
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="footer">
+
+Built using HTML, CSS & JavaScript
+
+</div>
+
+</div>
+
+<script>
+
+const fileInput = document.getElementById('fileInput');
+const inputText = document.getElementById('inputText');
+const outputBox = document.getElementById('outputBox');
+const loading = document.getElementById('loading');
+const dropArea = document.getElementById('dropArea');
+
+
+// FILE SELECT
+
+fileInput.addEventListener('change', async (e)=>{
+
+const file = e.target.files[0];
+
+if(file){
+
+await processFile(file);
+
+}
+
+});
+
+
+// DRAG OVER
+
+dropArea.addEventListener('dragover',(e)=>{
+
+e.preventDefault();
+
+dropArea.style.borderColor='#38bdf8';
+
+});
+
+
+// DRAG LEAVE
+
+dropArea.addEventListener('dragleave',()=>{
+
+dropArea.style.borderColor='rgba(255,255,255,0.25)';
+
+});
+
+
+// DROP
+
+dropArea.addEventListener('drop', async (e)=>{
+
+e.preventDefault();
+
+dropArea.style.borderColor='rgba(255,255,255,0.25)';
+
+const file = e.dataTransfer.files[0];
+
+if(file){
+
+await processFile(file);
+
+}
+
+});
+
+
+// FILE PROCESSOR
+
+async function processFile(file){
+
+loading.style.display='block';
+
+const extension = file.name.split('.').pop().toLowerCase();
+
+try{
+
+
+// TXT
+
+if(extension === 'txt'){
+
+const text = await file.text();
+
+inputText.value = text;
+
+}
+
+
+// PDF
+
+else if(extension === 'pdf'){
+
+const arrayBuffer = await file.arrayBuffer();
+
+const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+
+let fullText = '';
+
+for(let i=1;i<=pdf.numPages;i++){
+
+const page = await pdf.getPage(i);
+
+const content = await page.getTextContent();
+
+const strings = content.items.map(item=>item.str);
+
+fullText += strings.join(' ') + '\n\n';
+
+}
+
+inputText.value = fullText;
+
+}
+
+
+// DOCX
+
+else if(extension === 'docx'){
+
+const arrayBuffer = await file.arrayBuffer();
+
+const result = await mammoth.extractRawText({
+
+arrayBuffer:arrayBuffer
+
+});
+
+inputText.value = result.value;
+
+}
+
+
+// INVALID
+
+else{
+
+alert('Unsupported file type');
+
+}
+
+}
+
+catch(error){
+
+console.error(error);
+
+alert('Error reading file');
+
+}
+
+loading.style.display='none';
+
+}
+
+
+// SUMMARIZE
+
+function summarizeText(){
+
+const text = inputText.value.trim();
+
+if(text === ''){
+
+alert('Please enter text');
+
+return;
+
+}
+
+loading.style.display='block';
+
+setTimeout(()=>{
+
+const sentences = text.split(/[.!?]+/);
+
+const summary = sentences.slice(0,5).join('. ') + '.';
+
+outputBox.innerHTML = `
+
+<h2>✨ Summary</h2>
+
+<p>${summary}</p>
+
+`;
+
+loading.style.display='none';
+
+},1500);
+
+}
+
+
+// TRANSLATE
+
+async function translateText(){
+
+const text = inputText.value.trim();
+
+if(text === ''){
+
+alert('Please enter text');
+
+return;
+
+}
+
+loading.style.display='block';
+
+const lang = document.getElementById('languageSelect').value;
+
+try{
+
+const chunks = text.match(/[\s\S]{1,400}/g);
+
+let translatedText = '';
+
+for(const chunk of chunks){
+
+const response = await fetch(
+
+`https://api.mymemory.translated.net/get?q=${encodeURIComponent(chunk)}&langpair=en|${lang}`
+
+);
+
+const data = await response.json();
+
+translatedText += data.responseData.translatedText + ' ';
+
+}
+
+outputBox.innerHTML = `
+
+<h2>🌐 Translation</h2>
+
+<p>${translatedText}</p>
+
+`;
+
+}
+
+catch(error){
+
+console.error(error);
+
+alert('Translation failed');
+
+}
+
+loading.style.display='none';
+
+}
+
+
+// COPY
+
+function copyOutput(){
+
+navigator.clipboard.writeText(outputBox.innerText);
+
+alert('Copied Successfully!');
+
+}
+
+
+// CLEAR
+
+function clearAll(){
+
+inputText.value='';
+
+outputBox.innerHTML=`
+
+<h2>📄 Output</h2>
+
+<p>Your translated or summarized text will appear here...</p>
+
+`;
+
+}
+
+</script>
+
+</body>
+
+</html>
