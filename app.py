@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, request, jsonify
 from werkzeug.utils import secure_filename
 import cloudinary
 import cloudinary.uploader
@@ -23,9 +23,9 @@ app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 # ==========================================
 
 cloudinary.config(
-    cloud_name="dityosbba",
-    api_key="645318632592627",
-    api_secret="YOUR_CLOUDINARY_SECRET"
+    cloud_name=os.environ.get("CLOUDINARY_CLOUD_NAME"),
+    api_key=os.environ.get("CLOUDINARY_API_KEY"),
+    api_secret=os.environ.get("CLOUDINARY_API_SECRET")
 )
 
 # ==========================================
@@ -34,7 +34,10 @@ cloudinary.config(
 
 @app.route("/")
 def home():
-    return "AI Document Platform Running"
+
+    return jsonify({
+        "message": "AI Document Processing Platform Running Successfully"
+    })
 
 # ==========================================
 # UPLOAD
@@ -70,18 +73,22 @@ def upload():
 
         file.save(filepath)
 
-        # Upload to Cloudinary
+        # ==========================================
+        # CLOUDINARY UPLOAD
+        # ==========================================
 
         upload_result = cloudinary.uploader.upload(
             filepath,
             resource_type="auto"
         )
 
-        file_url = upload_result["secure_url"]
+        file_url = upload_result.get("secure_url", "")
 
         extracted_text = ""
 
-        # PDF Extraction
+        # ==========================================
+        # PDF EXTRACTION
+        # ==========================================
 
         if filename.lower().endswith(".pdf"):
 
@@ -119,7 +126,7 @@ def translate():
 
         data = request.json
 
-        text = data.get("text")
+        text = data.get("text", "")
 
         translated = "Translated Version:\n\n" + text
 
@@ -146,7 +153,7 @@ def summarize():
 
         data = request.json
 
-        text = data.get("text")
+        text = data.get("text", "")
 
         summary = text[:500]
 
@@ -167,5 +174,11 @@ def summarize():
 # ==========================================
 
 if __name__ == "__main__":
+
     port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=False)
+
+    app.run(
+        host="0.0.0.0",
+        port=port,
+        debug=False
+    )
