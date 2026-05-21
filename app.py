@@ -1,53 +1,64 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, render_template, request, jsonify
 from werkzeug.utils import secure_filename
 import os
-from PyPDF2 import PdfReader
+import re
+
+from utils.document_processor import extract_text_from_file
+from utils.llm_handler import (
+    summarize_text,
+    answer_question,
+    translate_text
+)
 
 app = Flask(__name__)
 
-# ==========================================
-# UPLOAD FOLDER
-# ==========================================
+# =========================
+# CONFIG
+# =========================
 
 UPLOAD_FOLDER = "uploads"
 
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
-
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
-# ==========================================
-# HOME ROUTE
-# ==========================================
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+# Store uploaded document text
+current_document = ""
+
+
+# =========================
+# HOME PAGE
+# =========================
 
 @app.route("/")
 def home():
     return render_template("index.html")
 
-# ==========================================
+
+# =========================
 # FILE UPLOAD
-# ==========================================
+# =========================
 
 @app.route("/upload", methods=["POST"])
 def upload():
+
+    global current_document
 
     try:
 
         if "file" not in request.files:
 
             return jsonify({
-                "success": False,
-                "message": "No file uploaded"
-            })
+                "error": "No file uploaded"
+            }), 400
 
         file = request.files["file"]
 
         if file.filename == "":
 
             return jsonify({
-                "success": False,
-                "message": "No selected file"
-            })
+                "error": "No file selected"
+            }), 400
 
         filename = secure_filename(file.filename)
 
@@ -58,101 +69,215 @@ def upload():
 
         file.save(filepath)
 
-        extracted_text = ""
+        # Extract text
+        current_document = extract_text_from_file(filepath)
 
-        # ==========================================
-        # PDF TEXT EXTRACTION
-        # ==========================================
+        if not current_document.strip():
 
-        if filename.lower().endswith(".pdf"):
-
-            pdf_reader = PdfReader(filepath)
-
-            for page in pdf_reader.pages:
-
-                text = page.extract_text()
-
-                if text:
-                    extracted_text += text + "\n"
+            return jsonify({
+                "error": "No readable text found in document"
+            }), 400
 
         return jsonify({
-            "success": True,
-            "filename": filename,
             "message": "File uploaded successfully",
-            "text": extracted_text
+            "text": current_document[:1000]
         })
 
     except Exception as e:
 
         return jsonify({
-            "success": False,
-            "message": str(e)
-        })
+            "error": str(e)
+        }), 500
 
-# ==========================================
-# TRANSLATE
-# ==========================================
 
-@app.route("/translate", methods=["POST"])
-def translate():
-
-    try:
-
-        data = request.get_json()
-
-        text = data.get("text", "")
-
-        translated = "Translated Version:\n\n" + text
-
-        return jsonify({
-            "success": True,
-            "translated_text": translated
-        })
-
-    except Exception as e:
-
-        return jsonify({
-            "success": False,
-            "message": str(e)
-        })
-
-# ==========================================
+# =========================
 # SUMMARIZE
-# ==========================================
+# =========================
 
 @app.route("/summarize", methods=["POST"])
 def summarize():
 
+    global current_document
+
     try:
+
+        if not current_document:
+
+            return jsonify({
+                "error": "Upload document first"
+            }), 400
 
         data = request.get_json()
 
-        text = data.get("text", "")
+        language = data.get(
+            "language",
+            "English"
+        )
 
-        summary = text[:500]
+        summary = summarize_text(
+            current_document,
+            language
+        )
 
         return jsonify({
-            "success": True,
             "summary": summary
         })
 
     except Exception as e:
 
         return jsonify({
-            "success": False,
-            "message": str(e)
+            "error": str(e)
+        }), 500
+
+
+# =========================
+# TRANSLATE
+# =========================
+
+@app.route("/translate", methods=["POST"])
+def translate():
+
+    global current_document
+
+    try:
+
+        if not current_document:
+
+            return jsonify({
+                "error": "Upload document first"
+            }), 400
+
+        data = request.get_json()
+
+        language = data.get(
+            "language",
+            "Hindi"
+        )
+
+        translated = translate_text(
+            current_document[:1500],
+            language
+        )
+
+        return jsonify({
+            "translation": translated
         })
 
-# ==========================================
+    except Exception as e:
+
+        return jsonify({
+            "error": str(e)
+        }), 500
+
+
+# =========================
+# EXTRACT EMAILS + PHONES
+# =========================
+
+@app.route("/extract", methods=["POST"])
+def extract():
+
+    global current_document
+
+    try:
+
+        if not current_document:
+
+            return jsonify({
+                "error": "Upload document first"
+            }), 400
+
+        # Extract emails
+        emails = re.findall(
+            r'[\w\.-]+@[\w\.-]+\.\w+',
+            current_document
+        )
+
+        # Extract phone numbers
+        phones = re.findall(
+            r'\+?\d[\d\s\-]{8,15}',
+            current_document
+        )
+
+        return jsonify({
+            "emails": list(set(emails)),
+            "phones": list(set(phones))
+        })
+
+    except Exception as e:
+
+        return jsonify({
+            "error": str(e)
+        }), 500
+
+
+# =========================
+# CHAT WITH DOCUMENT
+# =========================
+
+@app.route("/chat", methods=["POST"])
+def chat():
+
+    global current_document
+
+    try:
+
+        if not current_document:
+
+            return jsonify({
+                "error": "Upload document first"
+            }), 400
+
+        data = request.get_json()
+
+        question = data.get("question")
+
+        if not question:
+
+            return jsonify({
+                "error": "Question missing"
+            }), 400
+
+        answer = answer_question(
+            current_document,
+            question
+        )
+
+        return jsonify({
+            "answer": answer
+        })
+
+    except Exception as e:
+
+        return jsonify({
+            "error": str(e)
+        }), 500
+
+
+# =========================
+# CLEAR DOCUMENT
+# =========================
+
+@app.route("/clear", methods=["POST"])
+def clear():
+
+    global current_document
+
+    current_document = ""
+
+    return jsonify({
+        "message": "Document cleared successfully"
+    })
+
+
+# =========================
 # MAIN
-# ==========================================
+# =========================
 
 if __name__ == "__main__":
 
-    port = int(os.environ.get("PORT", 5000))
-
     app.run(
+        debug=True,
         host="0.0.0.0",
-        port=port,
-        debug=False
-    )
+        port=5000
+    ) 
