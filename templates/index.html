@@ -555,73 +555,9 @@ loading.style.display='none';
 }
 
 
-// SUMMARIZE
+// TRANSLATION FUNCTION
 
-function summarizeText(){
-
-const text = inputText.value.trim();
-
-if(text === ''){
-
-alert('Please enter text');
-
-return;
-
-}
-
-loading.style.display='block';
-
-setTimeout(()=>{
-
-const sentences = text.split(/[.!?]+/);
-
-let summary = '';
-
-if(sentences.length > 5){
-
-summary = sentences.slice(0,5).join('. ') + '.';
-
-}
-else{
-
-summary = text;
-
-}
-
-outputBox.innerHTML = `
-
-<h2>✨ Summary</h2>
-
-<p>${summary}</p>
-
-`;
-
-loading.style.display='none';
-
-},1000);
-
-}
-
-
-// TRANSLATE
-
-async function translateText(){
-
-const text = inputText.value.trim();
-
-if(text === ''){
-
-alert('Please enter text');
-
-return;
-
-}
-
-loading.style.display='block';
-
-const lang = document.getElementById('languageSelect').value;
-
-try{
+async function getTranslation(text, lang){
 
 const chunks = text.match(/[\s\S]{1,300}/g);
 
@@ -650,6 +586,33 @@ translatedText += chunkTranslation + ' ';
 
 }
 
+return translatedText;
+
+}
+
+
+// TRANSLATE
+
+async function translateText(){
+
+const text = inputText.value.trim();
+
+if(text === ''){
+
+alert('Please enter text');
+
+return;
+
+}
+
+loading.style.display='block';
+
+const lang = document.getElementById('languageSelect').value;
+
+try{
+
+const translatedText = await getTranslation(text, lang);
+
 outputBox.innerHTML = `
 
 <h2>🌐 Translation</h2>
@@ -665,6 +628,67 @@ catch(error){
 console.error(error);
 
 alert('Translation failed');
+
+}
+
+loading.style.display='none';
+
+}
+
+
+// SUMMARIZE + TRANSLATE SUMMARY
+
+async function summarizeText(){
+
+const text = inputText.value.trim();
+
+if(text === ''){
+
+alert('Please enter text');
+
+return;
+
+}
+
+loading.style.display='block';
+
+const lang = document.getElementById('languageSelect').value;
+
+try{
+
+const sentences = text.split(/[.!?]+/);
+
+let summary = '';
+
+if(sentences.length > 5){
+
+summary = sentences.slice(0,5).join('. ') + '.';
+
+}
+else{
+
+summary = text;
+
+}
+
+// TRANSLATE SUMMARY
+summary = await getTranslation(summary, lang);
+
+outputBox.innerHTML = `
+
+<h2>✨ Summary</h2>
+
+<p>${summary}</p>
+
+`;
+
+}
+
+catch(error){
+
+console.error(error);
+
+alert('Summarization failed');
 
 }
 
