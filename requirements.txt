@@ -8,3 +8,6 @@ werkzeug
 jinja2
 PyMuPDF
 python-dotenv
+transformers
+torch
+sentencepiece
