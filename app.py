@@ -1,7 +1,5 @@
 from flask import Flask, request, jsonify
 from werkzeug.utils import secure_filename
-import cloudinary
-import cloudinary.uploader
 import os
 from PyPDF2 import PdfReader
 
@@ -19,28 +17,19 @@ if not os.path.exists(UPLOAD_FOLDER):
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 # ==========================================
-# CLOUDINARY CONFIG
-# ==========================================
-
-cloudinary.config(
-    cloud_name=os.environ.get("CLOUDINARY_CLOUD_NAME"),
-    api_key=os.environ.get("CLOUDINARY_API_KEY"),
-    api_secret=os.environ.get("CLOUDINARY_API_SECRET")
-)
-
-# ==========================================
-# HOME
+# HOME ROUTE
 # ==========================================
 
 @app.route("/")
 def home():
 
     return jsonify({
+        "success": True,
         "message": "AI Document Processing Platform Running Successfully"
     })
 
 # ==========================================
-# UPLOAD
+# FILE UPLOAD
 # ==========================================
 
 @app.route("/upload", methods=["POST"])
@@ -73,21 +62,10 @@ def upload():
 
         file.save(filepath)
 
-        # ==========================================
-        # CLOUDINARY UPLOAD
-        # ==========================================
-
-        upload_result = cloudinary.uploader.upload(
-            filepath,
-            resource_type="auto"
-        )
-
-        file_url = upload_result.get("secure_url", "")
-
         extracted_text = ""
 
         # ==========================================
-        # PDF EXTRACTION
+        # PDF TEXT EXTRACTION
         # ==========================================
 
         if filename.lower().endswith(".pdf"):
@@ -103,9 +81,9 @@ def upload():
 
         return jsonify({
             "success": True,
-            "url": file_url,
-            "text": extracted_text,
-            "filename": filename
+            "filename": filename,
+            "message": "File uploaded successfully",
+            "text": extracted_text
         })
 
     except Exception as e:
@@ -124,7 +102,7 @@ def translate():
 
     try:
 
-        data = request.json
+        data = request.get_json()
 
         text = data.get("text", "")
 
@@ -151,7 +129,7 @@ def summarize():
 
     try:
 
-        data = request.json
+        data = request.get_json()
 
         text = data.get("text", "")
 
