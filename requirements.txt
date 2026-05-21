@@ -8,7 +8,5 @@ werkzeug
 jinja2
 PyMuPDF
 python-dotenv
-transformers==4.41.2
-torch
 sentencepiece
 accelerate
