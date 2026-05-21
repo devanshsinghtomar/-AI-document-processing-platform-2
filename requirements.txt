@@ -3,3 +3,5 @@ gunicorn
 cloudinary
 PyPDF2
 uvicorn
+werkzeug
+jinja2
