@@ -1,19 +1,20 @@
 from transformers import pipeline
 
 summarizer = pipeline(
-    "summarization",
+    "text-generation",
     model="sshleifer/distilbart-cnn-12-6"
 )
 
 def summarize_text(text):
 
-    text = text[:2000]
+    text = text[:1000]
+
+    prompt = f"Summarize this:\n{text}"
 
     result = summarizer(
-        text,
-        max_length=120,
-        min_length=30,
+        prompt,
+        max_new_tokens=120,
         do_sample=False
     )
 
-    return result[0]["summary_text"]
+    return result[0]["generated_text"]
