@@ -1,24 +1,25 @@
-import re
+import fitz
 
-def extract_data(text):
 
-    emails = re.findall(
+def extract_text_from_file(filepath):
 
-        r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}",
+    text=""
 
-        text
-    )
+    if filepath.endswith(".pdf"):
 
-    phones = re.findall(
+        pdf=fitz.open(filepath)
 
-        r"\d{10}",
+        for page in pdf:
+            text+=page.get_text()
 
-        text
-    )
+    elif filepath.endswith(".txt"):
 
-    return {
+        with open(
+            filepath,
+            "r",
+            encoding="utf-8"
+        ) as f:
 
-        "emails": emails,
+            text=f.read()
 
-        "phones": phones
-    }
+    return text 
