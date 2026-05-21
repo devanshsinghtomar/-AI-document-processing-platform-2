@@ -22,11 +22,7 @@ app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 @app.route("/")
 def home():
-
-    return jsonify({
-        "success": True,
-        "message": "AI Document Processing Platform Running Successfully"
-    })
+    return render_template("index.html")
 
 # ==========================================
 # FILE UPLOAD
