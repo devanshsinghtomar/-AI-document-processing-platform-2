@@ -1,112 +1,43 @@
-from transformers import pipeline
-
-# Summarization model
-summarizer = pipeline(
-    "summarization",
-    model="sshleifer/distilbart-cnn-12-6"
-)
-
-# Question answering model
-qa_pipeline = pipeline(
-    "question-answering"
-)
-
-# Translation models
-translator_hi = pipeline(
-    "translation",
-    model="Helsinki-NLP/opus-mt-en-hi"
-)
-
-translator_fr = pipeline(
-    "translation",
-    model="Helsinki-NLP/opus-mt-en-fr"
-)
-
-translator_de = pipeline(
-    "translation",
-    model="Helsinki-NLP/opus-mt-en-de"
-)
-
-translator_es = pipeline(
-    "translation",
-    model="Helsinki-NLP/opus-mt-en-es"
-)
-
+# ==========================================
+# LIGHTWEIGHT AI FUNCTIONS
+# ==========================================
 
 def summarize_text(text, language="English"):
 
     if len(text.strip()) == 0:
-        return "No text found in document."
+        return "No text found."
 
-    # limit text size
-    text = text[:2000]
+    # Simple summary
+    sentences = text.split(".")
 
-    try:
+    summary = ".".join(sentences[:5])
 
-        result = summarizer(
-            text,
-            max_length=120,
-            min_length=40,
-            do_sample=False
-        )
+    return summary + "."
 
-        summary = result[0]["summary_text"]
 
-        # translate summary if language not English
-        if language != "English":
-            summary = translate_text(summary, language)
-
-        return summary
-
-    except Exception as e:
-        return f"Summarization Error: {str(e)}"
-
+# ==========================================
+# TRANSLATION
+# ==========================================
 
 def translate_text(text, language):
 
-    text = text[:1500]
+    # Dummy lightweight translation
 
-    try:
+    return f"[Translated to {language}]\n\n{text}"
 
-        if language == "Hindi":
 
-            result = translator_hi(text)
-
-        elif language == "French":
-
-            result = translator_fr(text)
-
-        elif language == "German":
-
-            result = translator_de(text)
-
-        elif language == "Spanish":
-
-            result = translator_es(text)
-
-        else:
-            return text
-
-        return result[0]["translation_text"]
-
-    except Exception as e:
-
-        return f"Translation Error: {str(e)}"
-
+# ==========================================
+# QUESTION ANSWERING
+# ==========================================
 
 def answer_question(context, question):
 
-    try:
+    context = context[:1000]
 
-        context = context[:2000]
+    # Simple keyword response
 
-        result = qa_pipeline(
-            question=question,
-            context=context
-        )
+    if question.lower() in context.lower():
 
-        return result["answer"]
+        return "Answer found in document."
 
-    except Exception as e:
-
-        return f"Chat Error: {str(e)}" 
+    return context[:300]
