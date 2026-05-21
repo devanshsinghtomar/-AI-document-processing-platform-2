@@ -5,11 +5,11 @@ import cloudinary.uploader
 
 cloudinary.config(
 
-    cloud_name="YOUR_CLOUD_NAME",
+    cloud_name="dm2itd8tx",
 
-    api_key="YOUR_API_KEY",
+    api_key="178668573783122",
 
-    api_secret="YOUR_API_SECRET"
+    api_secret="@dm2itd8tx"
 )
 
 
