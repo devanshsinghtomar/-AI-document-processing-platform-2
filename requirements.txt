@@ -1,7 +1,10 @@
 flask
 gunicorn
+openai
 cloudinary
 PyPDF2
 uvicorn
 werkzeug
 jinja2
+PyMuPDF
+python-dotenv
