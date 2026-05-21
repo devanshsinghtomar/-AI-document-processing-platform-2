@@ -4,8 +4,6 @@ import os
 import re
 
 from utils.document_processor import extract_text_from_file
-from utils.llm_handler import summarize_text, translate_text
-
 app = Flask(__name__)
 
 # =========================
