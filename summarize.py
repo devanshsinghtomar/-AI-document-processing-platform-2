@@ -1,17 +1,22 @@
+
 from transformers import pipeline
+
+
+# LOAD SUMMARIZER MODEL
 
 summarizer = pipeline(
 
-    "summarization",
+    task="summarization",
 
-    model="sshleifer/distilbart-cnn-12-6"
+    model="facebook/bart-large-cnn"
 )
+
 
 def summarize_text(text):
 
-    if len(text) > 1000:
+    # LIMIT VERY LARGE TEXT
 
-        text = text[:1000]
+    text = text[:2000]
 
     result = summarizer(
 
@@ -24,4 +29,4 @@ def summarize_text(text):
         do_sample=False
     )
 
-    return result[0]["summary_text"]
+    return result[0]["summary_text"] 
