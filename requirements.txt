@@ -1,10 +1,4 @@
 flask
 gunicorn
-python-docx
+cloudinary
 PyPDF2
-transformers
-torch
-googletrans==4.0.0rc1
-openai
-langchain
-faiss-cpu
