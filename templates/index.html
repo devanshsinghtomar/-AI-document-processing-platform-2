@@ -484,9 +484,7 @@ const extension = file.name.split('.').pop().toLowerCase();
 
 try{
 
-
 // TXT
-
 if(extension === 'txt'){
 
 const text = await file.text();
@@ -495,9 +493,7 @@ inputText.value = text;
 
 }
 
-
 // PDF
-
 else if(extension === 'pdf'){
 
 const arrayBuffer = await file.arrayBuffer();
@@ -522,9 +518,7 @@ inputText.value = fullText;
 
 }
 
-
 // DOCX
-
 else if(extension === 'docx'){
 
 const arrayBuffer = await file.arrayBuffer();
@@ -539,9 +533,7 @@ inputText.value = result.value;
 
 }
 
-
 // INVALID
-
 else{
 
 alert('Unsupported file type');
@@ -583,7 +575,18 @@ setTimeout(()=>{
 
 const sentences = text.split(/[.!?]+/);
 
-const summary = sentences.slice(0,5).join('. ') + '.';
+let summary = '';
+
+if(sentences.length > 5){
+
+summary = sentences.slice(0,5).join('. ') + '.';
+
+}
+else{
+
+summary = text;
+
+}
 
 outputBox.innerHTML = `
 
@@ -595,7 +598,7 @@ outputBox.innerHTML = `
 
 loading.style.display='none';
 
-},1500);
+},1000);
 
 }
 
@@ -620,21 +623,30 @@ const lang = document.getElementById('languageSelect').value;
 
 try{
 
-const chunks = text.match(/[\s\S]{1,400}/g);
+const chunks = text.match(/[\s\S]{1,300}/g);
 
 let translatedText = '';
 
 for(const chunk of chunks){
 
 const response = await fetch(
-
-`https://api.mymemory.translated.net/get?q=${encodeURIComponent(chunk)}&langpair=en|${lang}`
-
+'https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl='
++ lang +
+'&dt=t&q=' +
+encodeURIComponent(chunk)
 );
 
 const data = await response.json();
 
-translatedText += data.responseData.translatedText + ' ';
+let chunkTranslation = '';
+
+data[0].forEach(item => {
+
+chunkTranslation += item[0];
+
+});
+
+translatedText += chunkTranslation + ' ';
 
 }
 
