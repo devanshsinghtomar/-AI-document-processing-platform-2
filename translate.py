@@ -1,12 +1,13 @@
-from googletrans import Translator
+from deep_translator import GoogleTranslator
 
-translator = Translator()
+def translate_text(text, target_language):
 
-def translate_text(text):
+    translated = GoogleTranslator(
 
-    translated = translator.translate(
-        text,
-        dest="hi"
-    )
+        source="auto",
 
-    return translated.text
+        target=target_language
+
+    ).translate(text)
+
+    return translated

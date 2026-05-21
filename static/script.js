@@ -1,181 +1,230 @@
-const fileInput = document.getElementById("fileInput");
-const fileName = document.getElementById("fileName");
-const output = document.getElementById("output");
-const loader = document.getElementById("loader");
+function setOutput(text) {
 
-/* Show File Name */
+    document.getElementById("output")
+        .innerText = text;
+}
 
-fileInput.addEventListener("change", () => {
+/* UPLOAD */
 
-    if(fileInput.files.length > 0){
+async function uploadFile() {
 
-        fileName.textContent = fileInput.files[0].name;
+    try {
 
-    }else{
+        setOutput("Uploading files...");
 
-        fileName.textContent = "No file selected";
+        let fileInput =
+            document.getElementById("fileInput");
 
-    }
+        if(fileInput.files.length === 0) {
 
-});
+            setOutput(
+                "Please select files first"
+            );
 
-/* Upload Document */
-
-document.getElementById("uploadForm")
-.addEventListener("submit", async function(e){
-
-    e.preventDefault();
-
-    const file = fileInput.files[0];
-
-    if(!file){
-
-        alert("Please select a file");
-
-        return;
-    }
-
-    loader.classList.remove("hidden");
-
-    const formData = new FormData();
-
-    formData.append("file", file);
-
-    try{
-
-        const response = await fetch("/upload", {
-
-            method:"POST",
-            body:formData
-
-        });
-
-        const result = await response.json();
-
-        loader.classList.add("hidden");
-
-        output.innerHTML = `
-            <h2 style="color:lightgreen;">
-                Upload Successful ✅
-            </h2>
-
-            <p>${result.message}</p>
-        `;
-
-    }catch(error){
-
-        loader.classList.add("hidden");
-
-        output.innerHTML = `
-            <p style="color:red;">
-                Upload failed.
-            </p>
-        `;
-    }
-
-});
-
-/* Summarize */
-
-document.getElementById("summarizeBtn")
-.addEventListener("click", async function(){
-
-    loader.classList.remove("hidden");
-
-    try{
-
-        const response = await fetch("/summarize");
-
-        const result = await response.json();
-
-        loader.classList.add("hidden");
-
-        typeWriter(result.summary, "output");
-
-    }catch(error){
-
-        loader.classList.add("hidden");
-
-        output.innerHTML = `
-            <p style="color:red;">
-                Summary failed.
-            </p>
-        `;
-    }
-
-});
-
-/* Translate */
-
-document.getElementById("translateBtn")
-.addEventListener("click", async function(){
-
-    const text = output.innerText;
-
-    const target = document.getElementById("languageSelect").value;
-
-    loader.classList.remove("hidden");
-
-    try{
-
-        const response = await fetch("/translate", {
-
-            method:"POST",
-
-            headers:{
-                "Content-Type":"application/json"
-            },
-
-            body:JSON.stringify({
-                text:text,
-                target:target
-            })
-
-        });
-
-        const result = await response.json();
-
-        loader.classList.add("hidden");
-
-        typeWriter(result.translated_text, "output");
-
-    }catch(error){
-
-        loader.classList.add("hidden");
-
-        output.innerHTML = `
-            <p style="color:red;">
-                Translation failed.
-            </p>
-        `;
-    }
-
-});
-
-/* Typewriter Animation */
-
-function typeWriter(text, elementId, speed = 20){
-
-    let i = 0;
-
-    const element = document.getElementById(elementId);
-
-    element.innerHTML = "";
-
-    function typing(){
-
-        if(i < text.length){
-
-            element.innerHTML += text.charAt(i);
-
-            i++;
-
-            setTimeout(typing, speed);
-
+            return;
         }
 
+        let formData = new FormData();
+
+        for(let i = 0; i < fileInput.files.length; i++) {
+
+            formData.append(
+                "file",
+                fileInput.files[i]
+            );
+        }
+
+        let response = await fetch("/upload", {
+
+            method: "POST",
+
+            body: formData
+        });
+
+        let data = await response.json();
+
+        setOutput(data.message);
+
+    } catch(error) {
+
+        setOutput(
+            "Upload Error:\n" + error
+        );
     }
+}
 
-    typing();
+/* SUMMARY */
 
+async function summarize() {
+
+    try {
+
+        setOutput(
+            "Generating AI summary...\nPlease wait..."
+        );
+
+        let response = await fetch("/summarize", {
+
+            method: "POST"
+        });
+
+        let data = await response.json();
+
+        setOutput(data.summary);
+
+    } catch(error) {
+
+        setOutput(
+            "Summary Error:\n" + error
+        );
+    }
+}
+
+/* TRANSLATE */
+
+async function translateText() {
+
+    try {
+
+        setOutput(
+            "Translating document..."
+        );
+
+        let response = await fetch("/translate", {
+
+            method: "POST"
+        });
+
+        let data = await response.json();
+
+        setOutput(data.translated);
+
+    } catch(error) {
+
+        setOutput(
+            "Translation Error:\n" + error
+        );
+    }
+}
+
+/* EXTRACT */
+
+async function extractData() {
+
+    try {
+
+        setOutput(
+            "Extracting structured data..."
+        );
+
+        let response = await fetch("/extract", {
+
+            method: "POST"
+        });
+
+        let data = await response.json();
+
+        setOutput(
+            JSON.stringify(data, null, 2)
+        );
+
+    } catch(error) {
+
+        setOutput(
+            "Extraction Error:\n" + error
+        );
+    }
+}
+
+/* CHAT */
+
+async function chatDocument() {
+
+    try {
+
+        let question =
+            document.getElementById("question").value;
+
+        if(question === "") {
+
+            setOutput(
+                "Please enter a question"
+            );
+
+            return;
+        }
+
+        setOutput(
+            "AI is analyzing document..."
+        );
+
+        let response = await fetch("/chat", {
+
+            method: "POST",
+
+            headers: {
+
+                "Content-Type":
+                "application/json"
+            },
+
+            body: JSON.stringify({
+
+                question: question
+            })
+        });
+
+        let data = await response.json();
+
+        setOutput(data.answer);
+
+    } catch(error) {
+
+        setOutput(
+            "Chat Error:\n" + error
+        );
+    }
+}
+
+/* EXPORT */
+
+function downloadJSON() {
+
+    let content =
+        document.getElementById("output").innerText;
+
+    let blob = new Blob(
+
+        [content],
+
+        {
+            type: "application/json"
+        }
+    );
+
+    let a =
+        document.createElement("a");
+
+    a.href =
+        URL.createObjectURL(blob);
+
+    a.download = "output.json";
+
+    a.click();
+}
+
+/* CLEAR */
+
+function clearOutput() {
+
+    setOutput("");
+}
+
+/* HOME */
+
+function showHome() {
+
+    setOutput(
+        "Welcome to AI Document Processing Platform"
+    );
 }

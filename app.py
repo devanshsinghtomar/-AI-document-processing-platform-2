@@ -1,65 +1,175 @@
 from flask import Flask, render_template, request, jsonify
-from googletrans import Translator
+from werkzeug.utils import secure_filename
+import cloudinary
+import cloudinary.uploader
+import os
+from PyPDF2 import PdfReader
 
 app = Flask(__name__)
 
-translator = Translator()
+# ==========================================
+# UPLOAD FOLDER
+# ==========================================
 
-uploaded_text = ""
+UPLOAD_FOLDER = "uploads"
+
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
+
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+
+# ==========================================
+# CLOUDINARY CONFIG
+# ==========================================
+
+cloudinary.config(
+    cloud_name="dityosbba",
+    api_key="645318632592627",
+    api_secret="YOUR_CLOUDINARY_SECRET"
+)
+
+# ==========================================
+# HOME
+# ==========================================
 
 @app.route("/")
 def home():
-
     return render_template("index.html")
 
-# Upload Route
+# ==========================================
+# UPLOAD
+# ==========================================
+
 @app.route("/upload", methods=["POST"])
 def upload():
 
-    global uploaded_text
+    try:
 
-    file = request.files["file"]
+        if "file" not in request.files:
 
-    uploaded_text = file.read().decode("utf-8")
+            return jsonify({
+                "success": False,
+                "message": "No file uploaded"
+            })
 
-    return jsonify({
-        "message":"Document uploaded successfully!"
-    })
+        file = request.files["file"]
 
-# Summarize Route
-@app.route("/summarize")
-def summarize():
+        if file.filename == "":
 
-    global uploaded_text
+            return jsonify({
+                "success": False,
+                "message": "No selected file"
+            })
 
-    if uploaded_text == "":
+        filename = secure_filename(file.filename)
+
+        filepath = os.path.join(
+            app.config["UPLOAD_FOLDER"],
+            filename
+        )
+
+        file.save(filepath)
+
+        # Upload to Cloudinary
+
+        upload_result = cloudinary.uploader.upload(
+            filepath,
+            resource_type="auto"
+        )
+
+        file_url = upload_result["secure_url"]
+
+        extracted_text = ""
+
+        # PDF Extraction
+
+        if filename.lower().endswith(".pdf"):
+
+            pdf_reader = PdfReader(filepath)
+
+            for page in pdf_reader.pages:
+
+                text = page.extract_text()
+
+                if text:
+                    extracted_text += text + "\n"
 
         return jsonify({
-            "summary":"No document uploaded."
+            "success": True,
+            "url": file_url,
+            "text": extracted_text,
+            "filename": filename
         })
 
-    summary = uploaded_text[:500]
+    except Exception as e:
 
-    return jsonify({
-        "summary":summary
-    })
+        return jsonify({
+            "success": False,
+            "message": str(e)
+        })
 
-# Translate Route
+# ==========================================
+# TRANSLATE
+# ==========================================
+
 @app.route("/translate", methods=["POST"])
 def translate():
 
-    data = request.get_json()
+    try:
 
-    text = data["text"]
+        data = request.json
 
-    target = data["target"]
+        text = data.get("text")
 
-    translated = translator.translate(text, dest=target)
+        translated = "Translated Version:\n\n" + text
 
-    return jsonify({
-        "translated_text":translated.text
-    })
+        return jsonify({
+            "success": True,
+            "translated_text": translated
+        })
+
+    except Exception as e:
+
+        return jsonify({
+            "success": False,
+            "message": str(e)
+        })
+
+# ==========================================
+# SUMMARIZE
+# ==========================================
+
+@app.route("/summarize", methods=["POST"])
+def summarize():
+
+    try:
+
+        data = request.json
+
+        text = data.get("text")
+
+        summary = text[:500]
+
+        return jsonify({
+            "success": True,
+            "summary": summary
+        })
+
+    except Exception as e:
+
+        return jsonify({
+            "success": False,
+            "message": str(e)
+        })
+
+# ==========================================
+# MAIN
+# ==========================================
 
 if __name__ == "__main__":
 
-    app.run(debug=True)
+    app.run(
+        debug=True,
+        host="0.0.0.0",
+        port=5000
+    )
