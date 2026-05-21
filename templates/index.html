@@ -21,6 +21,9 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
 <!-- DOCX SUPPORT -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.21/mammoth.browser.min.js"></script>
 
+<!-- PDF DOWNLOAD -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 <style>
 
 *{
@@ -49,18 +52,6 @@ backdrop-filter:blur(20px);
 border-radius:30px;
 padding:35px;
 box-shadow:0 15px 45px rgba(0,0,0,0.4);
-animation:fadeIn 0.8s ease;
-}
-
-@keyframes fadeIn{
-from{
-opacity:0;
-transform:translateY(20px);
-}
-to{
-opacity:1;
-transform:translateY(0);
-}
 }
 
 .title{
@@ -84,7 +75,6 @@ font-size:16px;
 display:grid;
 grid-template-columns:1fr 1fr;
 gap:25px;
-margin-top:20px;
 }
 
 .panel{
@@ -99,14 +89,8 @@ border:2px dashed rgba(255,255,255,0.25);
 border-radius:20px;
 padding:35px;
 text-align:center;
-transition:0.3s;
 cursor:pointer;
 background:rgba(255,255,255,0.03);
-}
-
-.upload-box:hover{
-background:rgba(255,255,255,0.08);
-transform:scale(1.01);
 }
 
 .upload-box h3{
@@ -130,11 +114,6 @@ color:white;
 font-size:15px;
 font-weight:600;
 cursor:pointer;
-transition:0.3s;
-}
-
-.upload-btn:hover{
-transform:translateY(-2px);
 }
 
 input[type=file]{
@@ -154,7 +133,6 @@ color:white;
 font-size:15px;
 resize:none;
 line-height:1.8;
-box-shadow:inset 0 0 10px rgba(0,0,0,0.3);
 }
 
 textarea::placeholder{
@@ -166,12 +144,10 @@ display:flex;
 flex-wrap:wrap;
 gap:15px;
 margin-top:25px;
-align-items:center;
 }
 
 select{
 flex:1;
-min-width:180px;
 padding:14px;
 border:none;
 border-radius:15px;
@@ -192,13 +168,7 @@ border-radius:15px;
 font-size:15px;
 font-weight:600;
 cursor:pointer;
-transition:0.3s;
 color:white;
-}
-
-button:hover{
-transform:translateY(-3px);
-box-shadow:0 10px 20px rgba(0,0,0,0.3);
 }
 
 .translate-btn{
@@ -217,6 +187,10 @@ background:linear-gradient(135deg,#10b981,#14b8a6);
 background:linear-gradient(135deg,#ef4444,#f97316);
 }
 
+.download-btn{
+background:linear-gradient(135deg,#f59e0b,#f97316);
+}
+
 .output-box{
 height:550px;
 overflow-y:auto;
@@ -226,34 +200,13 @@ padding:25px;
 color:white;
 line-height:1.9;
 font-size:15px;
-word-wrap:break-word;
-}
-
-.output-box h2{
-margin-bottom:15px;
-font-size:24px;
 }
 
 .loading{
 display:none;
 text-align:center;
 margin-top:20px;
-}
-
-.loader{
-width:55px;
-height:55px;
-border:5px solid rgba(255,255,255,0.2);
-border-top:5px solid #38bdf8;
-border-radius:50%;
-animation:spin 1s linear infinite;
-margin:auto;
-}
-
-@keyframes spin{
-100%{
-transform:rotate(360deg);
-}
+color:white;
 }
 
 .footer{
@@ -267,11 +220,6 @@ font-size:14px;
 
 .main-grid{
 grid-template-columns:1fr;
-}
-
-.output-box{
-height:auto;
-min-height:300px;
 }
 
 }
@@ -357,6 +305,13 @@ onclick="summarizeText()">
 
 </button>
 
+<button class="download-btn"
+onclick="downloadPDF()">
+
+⬇ Download PDF
+
+</button>
+
 <button class="copy-btn"
 onclick="copyOutput()">
 
@@ -375,11 +330,7 @@ onclick="clearAll()">
 
 <div class="loading" id="loading">
 
-<div class="loader"></div>
-
-<p style="margin-top:10px;color:white;">
-Processing...
-</p>
+<p>Processing...</p>
 
 </div>
 
@@ -417,10 +368,11 @@ const fileInput = document.getElementById('fileInput');
 const inputText = document.getElementById('inputText');
 const outputBox = document.getElementById('outputBox');
 const loading = document.getElementById('loading');
-const dropArea = document.getElementById('dropArea');
+
+let latestOutput = '';
 
 
-// FILE SELECT
+// FILE UPLOAD
 
 fileInput.addEventListener('change', async (e)=>{
 
@@ -435,46 +387,7 @@ await processFile(file);
 });
 
 
-// DRAG OVER
-
-dropArea.addEventListener('dragover',(e)=>{
-
-e.preventDefault();
-
-dropArea.style.borderColor='#38bdf8';
-
-});
-
-
-// DRAG LEAVE
-
-dropArea.addEventListener('dragleave',()=>{
-
-dropArea.style.borderColor='rgba(255,255,255,0.25)';
-
-});
-
-
-// DROP
-
-dropArea.addEventListener('drop', async (e)=>{
-
-e.preventDefault();
-
-dropArea.style.borderColor='rgba(255,255,255,0.25)';
-
-const file = e.dataTransfer.files[0];
-
-if(file){
-
-await processFile(file);
-
-}
-
-});
-
-
-// FILE PROCESSOR
+// PROCESS FILE
 
 async function processFile(file){
 
@@ -488,7 +401,6 @@ try{
 if(extension === 'txt'){
 
 const text = await file.text();
-
 inputText.value = text;
 
 }
@@ -533,7 +445,6 @@ inputText.value = result.value;
 
 }
 
-// INVALID
 else{
 
 alert('Unsupported file type');
@@ -545,7 +456,6 @@ alert('Unsupported file type');
 catch(error){
 
 console.error(error);
-
 alert('Error reading file');
 
 }
@@ -555,43 +465,32 @@ loading.style.display='none';
 }
 
 
-// TRANSLATION FUNCTION
+// TRANSLATION API
 
-async function getTranslation(text, lang){
-
-const chunks = text.match(/[\s\S]{1,300}/g);
-
-let translatedText = '';
-
-for(const chunk of chunks){
+async function translateViaAPI(text, lang){
 
 const response = await fetch(
 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl='
 + lang +
-'&dt=t&q=' +
-encodeURIComponent(chunk)
+'&dt=t&q=' + encodeURIComponent(text)
 );
 
 const data = await response.json();
 
-let chunkTranslation = '';
+let translated = '';
 
-data[0].forEach(item => {
+data[0].forEach(item=>{
 
-chunkTranslation += item[0];
+translated += item[0];
 
 });
 
-translatedText += chunkTranslation + ' ';
-
-}
-
-return translatedText;
+return translated;
 
 }
 
 
-// TRANSLATE
+// TRANSLATE TEXT
 
 async function translateText(){
 
@@ -611,7 +510,9 @@ const lang = document.getElementById('languageSelect').value;
 
 try{
 
-const translatedText = await getTranslation(text, lang);
+const translatedText = await translateViaAPI(text, lang);
+
+latestOutput = translatedText;
 
 outputBox.innerHTML = `
 
@@ -636,7 +537,26 @@ loading.style.display='none';
 }
 
 
-// SUMMARIZE + TRANSLATE SUMMARY
+// SUMMARY
+
+function createSummary(text){
+
+const sentences = text.match(/[^\.!\?]+[\.!\?]+/g) || [text];
+
+let summary = sentences.slice(0,5).join(' ');
+
+if(summary.length > 1000){
+
+summary = summary.substring(0,1000);
+
+}
+
+return summary;
+
+}
+
+
+// SUMMARIZE + TRANSLATE
 
 async function summarizeText(){
 
@@ -656,29 +576,17 @@ const lang = document.getElementById('languageSelect').value;
 
 try{
 
-const sentences = text.split(/[.!?]+/);
+const summary = createSummary(text);
 
-let summary = '';
+const translatedSummary = await translateViaAPI(summary, lang);
 
-if(sentences.length > 5){
-
-summary = sentences.slice(0,5).join('. ') + '.';
-
-}
-else{
-
-summary = text;
-
-}
-
-// TRANSLATE SUMMARY
-summary = await getTranslation(summary, lang);
+latestOutput = translatedSummary;
 
 outputBox.innerHTML = `
 
 <h2>✨ Summary</h2>
 
-<p>${summary}</p>
+<p>${translatedSummary}</p>
 
 `;
 
@@ -688,7 +596,7 @@ catch(error){
 
 console.error(error);
 
-alert('Summarization failed');
+alert('Summary failed');
 
 }
 
@@ -697,11 +605,42 @@ loading.style.display='none';
 }
 
 
+// DOWNLOAD PDF
+
+function downloadPDF(){
+
+if(latestOutput.trim() === ''){
+
+alert('No translated/summarized text available');
+
+return;
+
+}
+
+const { jsPDF } = window.jspdf;
+
+const doc = new jsPDF();
+
+doc.setFontSize(18);
+
+doc.text("Translated Document", 20, 20);
+
+doc.setFontSize(12);
+
+const lines = doc.splitTextToSize(latestOutput, 170);
+
+doc.text(lines, 20, 40);
+
+doc.save("translated_document.pdf");
+
+}
+
+
 // COPY
 
 function copyOutput(){
 
-navigator.clipboard.writeText(outputBox.innerText);
+navigator.clipboard.writeText(latestOutput);
 
 alert('Copied Successfully!');
 
@@ -713,6 +652,8 @@ alert('Copied Successfully!');
 function clearAll(){
 
 inputText.value='';
+
+latestOutput='';
 
 outputBox.innerHTML=`
 
