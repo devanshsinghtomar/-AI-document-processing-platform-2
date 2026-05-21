@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify,render_template
 from werkzeug.utils import secure_filename
 import os
 import re
