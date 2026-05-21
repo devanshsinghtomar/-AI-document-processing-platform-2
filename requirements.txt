@@ -2,3 +2,4 @@ flask
 gunicorn
 cloudinary
 PyPDF2
+uvicorn
