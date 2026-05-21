@@ -7,6 +7,5 @@ uvicorn
 werkzeug
 jinja2
 PyMuPDF
-python-dotenv
-sentencepiece
-accelerate
+
+
