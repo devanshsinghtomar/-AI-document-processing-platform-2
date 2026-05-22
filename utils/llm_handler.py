@@ -1,109 +1,44 @@
-from googletrans import Translator
-import re
-
-translator = Translator()
-
-
-# =========================================
-# TRANSLATION
-# =========================================
-
-def translate_text(text, language):
-
-    try:
-
-        language_codes = {
-            "Hindi": "hi",
-            "French": "fr",
-            "German": "de",
-            "Spanish": "es",
-            "Japanese": "ja",
-            "Korean": "ko",
-            "Russian": "ru",
-            "Arabic": "ar",
-            "Chinese": "zh-cn",
-            "English": "en"
-        }
-
-        lang_code = language_codes.get(language, "en")
-
-        translated = translator.translate(
-            text,
-            dest=lang_code
-        )
-
-        return translated.text
-
-    except Exception as e:
-
-        return f"Translation Error: {str(e)}"
+import os
+from PyPDF2 import PdfReader
+from docx import Document
 
 
-# =========================================
-# SUMMARY
-# =========================================
+def extract_text_from_file(filepath):
 
-def summarize_text(text, language="English"):
+    ext = os.path.splitext(filepath)[1].lower()
+
+    text = ""
 
     try:
 
-        if not text.strip():
+        # TXT
+        if ext == ".txt":
 
-            return "No text found."
+            with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
+                text = f.read()
 
-        text = re.sub(r'\s+', ' ', text)
+        # PDF
+        elif ext == ".pdf":
 
-        sentences = re.split(r'(?<=[.!?]) +', text)
+            reader = PdfReader(filepath)
 
-        summary = " ".join(sentences[:5])
+            for page in reader.pages:
 
-        if language != "English":
+                page_text = page.extract_text()
 
-            summary = translate_text(
-                summary,
-                language
-            )
+                if page_text:
+                    text += page_text + "\n"
 
-        return summary
+        # DOCX
+        elif ext == ".docx":
 
-    except Exception as e:
+            doc = Document(filepath)
 
-        return f"Summary Error: {str(e)}"
+            for para in doc.paragraphs:
+                text += para.text + "\n"
 
-
-# =========================================
-# CHAT
-# =========================================
-
-def answer_question(context, question):
-
-    try:
-
-        context_sentences = re.split(
-            r'(?<=[.!?]) +',
-            context
-        )
-
-        question_words = question.lower().split()
-
-        matched = []
-
-        for sentence in context_sentences:
-
-            for word in question_words:
-
-                if word in sentence.lower():
-
-                    matched.append(sentence)
-
-                    break
-
-        if matched:
-
-            return " ".join(matched[:3])
-
-        return "Answer not found."
+        return text.strip()
 
     except Exception as e:
 
-        return f"Chat Error: {str(e)}"
+        return f"Error extracting text: {str(e)}"
