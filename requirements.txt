@@ -17,3 +17,5 @@ Pillow
 pdf2image
 sumy
 nltk
+Flask-SQLAlchemy
+Flask-Login
