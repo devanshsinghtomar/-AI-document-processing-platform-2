@@ -1,11 +1,7 @@
 import os
-import fitz  # PyMuPDF
+import fitz
 from docx import Document
 
-
-# =========================================
-# EXTRACT TEXT FROM FILE
-# =========================================
 
 def extract_text_from_file(filepath):
 
@@ -13,9 +9,9 @@ def extract_text_from_file(filepath):
 
         ext = os.path.splitext(filepath)[1].lower()
 
-        # =====================
+        # =========================
         # TXT FILE
-        # =====================
+        # =========================
 
         if ext == ".txt":
 
@@ -24,48 +20,50 @@ def extract_text_from_file(filepath):
                 "r",
                 encoding="utf-8",
                 errors="ignore"
-            ) as file:
+            ) as f:
 
-                return file.read()
+                return f.read()
 
-        # =====================
+        # =========================
         # PDF FILE
-        # =====================
+        # =========================
 
         elif ext == ".pdf":
 
             text = ""
 
-            pdf = fitz.open(filepath)
+            pdf_document = fitz.open(filepath)
 
-            for page in pdf:
+            for page_num in range(len(pdf_document)):
 
-                text += page.get_text()
+                page = pdf_document[page_num]
 
-            pdf.close()
+                text += page.get_text("text")
+
+            pdf_document.close()
 
             return text.strip()
 
-        # =====================
+        # =========================
         # DOCX FILE
-        # =====================
+        # =========================
 
         elif ext == ".docx":
 
             doc = Document(filepath)
 
-            full_text = []
+            text = []
 
             for para in doc.paragraphs:
 
-                full_text.append(para.text)
+                text.append(para.text)
 
-            return "\n".join(full_text)
+            return "\n".join(text)
 
         else:
 
-            return "Unsupported file format."
+            return "Unsupported file format"
 
     except Exception as e:
 
-        return f"File Processing Error: {str(e)}"
+        return f"Extraction Error: {str(e)}"
