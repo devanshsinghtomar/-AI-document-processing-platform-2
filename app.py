@@ -27,20 +27,7 @@ from werkzeug.security import (
 from werkzeug.utils import secure_filename
 
 from deep_translator import GoogleTranslator
-
-from reportlab.platypus import (
-    SimpleDocTemplate,
-    Paragraph,
-    Spacer
-)
-
-from reportlab.lib.styles import getSampleStyleSheet
-
-from reportlab.pdfbase import pdfmetrics
-
-from reportlab.pdfbase.cidfonts import UnicodeCIDFont
-
-from reportlab.lib.pagesizes import letter
+from fpdf import FPDF
 
 import os
 import uuid
@@ -104,7 +91,7 @@ class History(db.Model):
 
     user_id = db.Column(db.Integer)
 
-    action = db.Column(db.String(50))
+    action = db.Column(db.String(100))
 
     content = db.Column(db.Text)
 
@@ -174,7 +161,7 @@ def extract_text(filepath):
 
 
 # =========================================
-# SIMPLE SUMMARY
+# SUMMARY
 # =========================================
 
 def generate_summary(text):
@@ -211,7 +198,7 @@ def translate_text(text, target_language):
 
 
 # =========================================
-# PDF DOWNLOAD FIXED
+# PDF CREATOR
 # =========================================
 
 def create_pdf(text):
@@ -225,43 +212,51 @@ def create_pdf(text):
             filename
         )
 
-        # Register Unicode font
-        pdfmetrics.registerFont(
-            UnicodeCIDFont('HYSMyeongJo-Medium')
+        pdf = FPDF()
+
+        pdf.set_auto_page_break(
+            auto=True,
+            margin=15
         )
 
-        doc = SimpleDocTemplate(
-            filepath,
-            pagesize=letter
+        pdf.add_page()
+
+        # Unicode Font
+        font_path = os.path.join(
+            "static",
+            "fonts",
+            "DejaVuSans.ttf"
         )
 
-        styles = getSampleStyleSheet()
-
-        style = styles['BodyText']
-
-        style.fontName = 'HYSMyeongJo-Medium'
-
-        style.fontSize = 12
-
-        style.leading = 18
-
-        content = []
-
-        # Title
-        title_style = styles['Heading1']
-
-        title_style.fontName = 'HYSMyeongJo-Medium'
-
-        content.append(
-            Paragraph(
-                "AI Translator & Summarizer Output",
-                title_style
-            )
+        pdf.add_font(
+            "DejaVu",
+            "",
+            font_path,
+            uni=True
         )
 
-        content.append(Spacer(1, 20))
+        # Heading
+        pdf.set_font(
+            "DejaVu",
+            size=16
+        )
 
-        # Text
+        pdf.cell(
+            200,
+            10,
+            txt="AI Translator & Summarizer Output",
+            ln=True,
+            align="C"
+        )
+
+        pdf.ln(10)
+
+        # Content
+        pdf.set_font(
+            "DejaVu",
+            size=12
+        )
+
         lines = text.split("\n")
 
         for line in lines:
@@ -270,15 +265,15 @@ def create_pdf(text):
 
             if line:
 
-                content.append(
-                    Paragraph(line, style)
+                pdf.multi_cell(
+                    0,
+                    10,
+                    txt=line
                 )
 
-                content.append(
-                    Spacer(1, 8)
-                )
+                pdf.ln(2)
 
-        doc.build(content)
+        pdf.output(filepath)
 
         return filepath
 
@@ -438,6 +433,17 @@ def upload():
 
         extracted_text = extract_text(filepath)
 
+        # SAVE HISTORY
+        history = History(
+            user_id=current_user.id,
+            action=f"Uploaded File: {filename}",
+            content=extracted_text[:1000]
+        )
+
+        db.session.add(history)
+
+        db.session.commit()
+
         return jsonify({
             "success": True,
             "text": extracted_text
@@ -473,7 +479,7 @@ def translate():
 
         history = History(
             user_id=current_user.id,
-            action="Translate",
+            action=f"Translated to {language}",
             content=translated_text
         )
 
@@ -519,7 +525,7 @@ def summarize():
 
         history = History(
             user_id=current_user.id,
-            action="Summary",
+            action=f"Summary ({language})",
             content=summary
         )
 
@@ -539,7 +545,7 @@ def summarize():
 
 
 # =========================================
-# DOWNLOAD PDF FIXED
+# DOWNLOAD PDF
 # =========================================
 
 @app.route("/download", methods=["POST"])
@@ -581,7 +587,7 @@ def download():
 
 
 # =========================================
-# HISTORY
+# HISTORY PAGE
 # =========================================
 
 @app.route("/history")
@@ -594,22 +600,10 @@ def history():
         History.created_at.desc()
     ).all()
 
-    history_data = []
-
-    for item in records:
-
-        history_data.append({
-
-            "action": item.action,
-
-            "content": item.content,
-
-            "date": item.created_at.strftime(
-                "%d-%m-%Y %H:%M"
-            )
-        })
-
-    return jsonify(history_data)
+    return render_template(
+        "history.html",
+        records=records
+    )
 
 
 # =========================================
