@@ -1,86 +1,150 @@
-from googletrans import Translator
-from sumy.parsers.plaintext import PlaintextParser
-from sumy.nlp.tokenizers import Tokenizer
-from sumy.summarizers.lsa import LsaSummarizer
+from deep_translator import GoogleTranslator
 
-translator = Translator()
+# =========================
+# SIMPLE SENTENCE SPLITTER
+# =========================
 
-LANGUAGE_CODES = {
-    "Hindi": "hi",
-    "French": "fr",
-    "German": "de",
-    "Spanish": "es",
-    "Japanese": "ja",
-    "Korean": "ko",
-    "Russian": "ru",
-    "Arabic": "ar",
-    "Chinese": "zh-cn",
-    "English": "en"
-}
+def split_sentences(text):
+    separators = [".", "!", "?"]
+
+    for sep in separators:
+        text = text.replace(sep, sep + "|")
+
+    sentences = text.split("|")
+
+    clean_sentences = []
+
+    for sentence in sentences:
+        sentence = sentence.strip()
+
+        if len(sentence) > 5:
+            clean_sentences.append(sentence)
+
+    return clean_sentences
 
 
-def translate_text(text, language):
-
-    try:
-
-        if language == "English":
-            return text
-
-        lang_code = LANGUAGE_CODES.get(language, "en")
-
-        translated = translator.translate(
-            text,
-            dest=lang_code
-        )
-
-        return translated.text
-
-    except Exception as e:
-
-        return f"Translation Error: {str(e)}"
-
+# =========================
+# SUMMARIZE TEXT
+# =========================
 
 def summarize_text(text, language="English"):
 
     try:
 
-        # STEP 1:
-        # Translate FULL document first
+        if not text.strip():
+            return "No text found."
 
+        # Clean text
+        text = text.replace("\n", " ").strip()
+
+        # Split into sentences
+        sentences = split_sentences(text)
+
+        if len(sentences) == 0:
+            return "Unable to summarize."
+
+        # Take first important sentences
+        summary_sentences = sentences[:5]
+
+        summary = ". ".join(summary_sentences)
+
+        if not summary.endswith("."):
+            summary += "."
+
+        # Translate summary if needed
         if language != "English":
 
-            translated_full_text = translate_text(
-                text,
-                language
-            )
+            lang_map = {
+                "Hindi": "hi",
+                "French": "fr",
+                "German": "de",
+                "Spanish": "es",
+                "Japanese": "ja",
+                "Korean": "ko",
+                "Russian": "ru",
+                "Arabic": "ar",
+                "Chinese": "zh-CN"
+            }
 
-            working_text = translated_full_text
+            target_lang = lang_map.get(language)
 
-        else:
+            if target_lang:
 
-            working_text = text
-
-        # STEP 2:
-        # Create summary from translated text
-
-        parser = PlaintextParser.from_string(
-            working_text,
-            Tokenizer("english")
-        )
-
-        summarizer = LsaSummarizer()
-
-        summary_sentences = summarizer(
-            parser.document,
-            5
-        )
-
-        summary = " ".join(
-            [str(sentence) for sentence in summary_sentences]
-        )
+                summary = GoogleTranslator(
+                    source='auto',
+                    target=target_lang
+                ).translate(summary)
 
         return summary
 
     except Exception as e:
-
         return f"Summary Error: {str(e)}"
+
+
+# =========================
+# TRANSLATE TEXT
+# =========================
+
+def translate_text(text, language):
+
+    try:
+
+        if not text.strip():
+            return "No text found."
+
+        lang_map = {
+            "Hindi": "hi",
+            "French": "fr",
+            "German": "de",
+            "Spanish": "es",
+            "Japanese": "ja",
+            "Korean": "ko",
+            "Russian": "ru",
+            "Arabic": "ar",
+            "Chinese": "zh-CN"
+        }
+
+        target_lang = lang_map.get(language)
+
+        if not target_lang:
+            return text
+
+        translated = GoogleTranslator(
+            source='auto',
+            target=target_lang
+        ).translate(text)
+
+        return translated
+
+    except Exception as e:
+        return f"Translation Error: {str(e)}"
+
+
+# =========================
+# CHAT WITH DOCUMENT
+# =========================
+
+def answer_question(context, question):
+
+    try:
+
+        context = context.lower()
+        question = question.lower()
+
+        sentences = split_sentences(context)
+
+        best_sentence = ""
+
+        for sentence in sentences:
+
+            if any(word in sentence for word in question.split()):
+                best_sentence = sentence
+                break
+
+        if best_sentence:
+            return best_sentence
+
+        return "Answer not found in document."
+
+    except Exception as e:
+        return f"Chat Error: {str(e)}"
