@@ -11,3 +11,7 @@ googletrans==4.0.0rc1
 fpdf
 python-docx
 deep-translator
+reportlab
+pytesseract
+Pillow
+pdf2image
