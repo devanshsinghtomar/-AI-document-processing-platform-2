@@ -1,0 +1,130 @@
+# templates/history.html
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>History</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
+}
+
+body{
+background:linear-gradient(135deg,#0f172a,#111827,#1e293b);
+min-height:100vh;
+padding:30px;
+color:white;
+}
+
+.container{
+max-width:1200px;
+margin:auto;
+}
+
+.header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:25px;
+}
+
+.header a{
+text-decoration:none;
+background:#2563eb;
+padding:12px 20px;
+border-radius:12px;
+color:white;
+}
+
+.history-grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:20px;
+}
+
+.card{
+background:rgba(255,255,255,0.08);
+padding:20px;
+border-radius:20px;
+backdrop-filter:blur(10px);
+}
+
+.card h3{
+margin-bottom:10px;
+}
+
+.card p{
+line-height:1.7;
+white-space:pre-wrap;
+}
+
+.date{
+margin-top:15px;
+font-size:13px;
+color:#cbd5e1;
+}
+
+@media(max-width:800px){
+.history-grid{
+grid-template-columns:1fr;
+}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<div class="header">
+<h1>📜 History</h1>
+<a href="/">⬅ Back</a>
+</div>
+
+<div class="history-grid" id="historyContainer"></div>
+
+</div>
+
+<script>
+
+async function loadHistory(){
+
+const response = await fetch('/history');
+
+const data = await response.json();
+
+const container = document.getElementById('historyContainer');
+
+container.innerHTML='';
+
+if(data.length===0){
+container.innerHTML='<p>No history found</p>';
+return;
+}
+
+for(let item of data){
+
+container.innerHTML += `
+<div class="card">
+<h3>${item.action}</h3>
+<p>${item.content}</p>
+<div class="date">${item.date}</div>
+</div>
+`;
+}
+}
+
+loadHistory();
+
+</script>
+
+</body>
+</html>
