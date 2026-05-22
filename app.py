@@ -1,18 +1,60 @@
-from flask import Flask, render_template, request, jsonify, send_file
+from flask import (
+    Flask,
+    render_template,
+    request,
+    jsonify,
+    send_file,
+    session,
+    redirect,
+    url_for
+)
+
 from werkzeug.utils import secure_filename
+from werkzeug.security import (
+    generate_password_hash,
+    check_password_hash
+)
+
+from functools import wraps
+
 import os
 import json
+
 from datetime import datetime
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+
+from reportlab.platypus import (
+    SimpleDocTemplate,
+    Paragraph,
+    Spacer
+)
+
 from reportlab.lib.styles import getSampleStyleSheet
 
 from utils.document_processor import extract_text_from_file
+
 from utils.llm_handler import (
     translate_text,
     summarize_text,
 )
 
 app = Flask(__name__)
+
+# =========================================================
+# SECURITY CONFIG
+# =========================================================
+
+app.secret_key = os.environ.get(
+    "SECRET_KEY",
+    "super-secret-key-change-this"
+)
+
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SECURE'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+
+# =========================================================
+# FOLDERS
+# =========================================================
 
 UPLOAD_FOLDER = "uploads"
 DOWNLOAD_FOLDER = "downloads"
@@ -24,21 +66,154 @@ os.makedirs("history", exist_ok=True)
 
 current_document = ""
 
+# =========================================================
+# DEMO USER DATABASE
+# =========================================================
+# Change username/password as needed
+
+users = {
+    "admin": generate_password_hash("admin123")
+}
+
+# =========================================================
+# LOGIN REQUIRED DECORATOR
+# =========================================================
+
+def login_required(f):
+
+    @wraps(f)
+
+    def decorated_function(*args, **kwargs):
+
+        if "user" not in session:
+
+            return jsonify({
+                "success": False,
+                "error": "Unauthorized. Please login first."
+            }), 401
+
+        return f(*args, **kwargs)
+
+    return decorated_function
+
+# =========================================================
+# HOME
+# =========================================================
 
 @app.route("/")
 def home():
+
     return render_template("index.html")
 
+# =========================================================
+# LOGIN
+# =========================================================
 
+@app.route("/login", methods=["POST"])
+def login():
+
+    try:
+
+        data = request.get_json()
+
+        username = data.get("username", "").strip()
+        password = data.get("password", "").strip()
+
+        # Empty validation
+        if not username or not password:
+
+            return jsonify({
+                "success": False,
+                "error": "Username and password required"
+            }), 400
+
+        # Check user
+        if username in users:
+
+            # Verify password
+            if check_password_hash(
+                users[username],
+                password
+            ):
+
+                session["user"] = username
+
+                return jsonify({
+                    "success": True,
+                    "message": "Login successful"
+                })
+
+        return jsonify({
+            "success": False,
+            "error": "Invalid credentials"
+        }), 401
+
+    except Exception as e:
+
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+# =========================================================
+# LOGOUT
+# =========================================================
+
+@app.route("/logout")
+def logout():
+
+    session.clear()
+
+    return jsonify({
+        "success": True,
+        "message": "Logged out successfully"
+    })
+
+# =========================================================
+# CHECK SESSION
+# =========================================================
+
+@app.route("/check-auth")
+def check_auth():
+
+    if "user" in session:
+
+        return jsonify({
+            "authenticated": True,
+            "user": session["user"]
+        })
+
+    return jsonify({
+        "authenticated": False
+    })
+
+# =========================================================
 # UPLOAD
+# =========================================================
+
 @app.route("/upload", methods=["POST"])
+@login_required
 def upload():
 
     global current_document
 
     try:
 
+        if "file" not in request.files:
+
+            return jsonify({
+                "success": False,
+                "error": "No file uploaded"
+            })
+
         file = request.files["file"]
+
+        if file.filename == "":
+
+            return jsonify({
+                "success": False,
+                "error": "Empty filename"
+            })
 
         filename = secure_filename(file.filename)
 
@@ -63,83 +238,170 @@ def upload():
             "error": str(e)
         })
 
-
+# =========================================================
 # TRANSLATE
+# =========================================================
+
 @app.route("/translate", methods=["POST"])
+@login_required
 def translate():
 
-    data = request.get_json()
+    try:
 
-    text = data.get("text", "")
+        data = request.get_json()
 
-    language = data.get("language", "Hindi")
+        text = data.get("text", "").strip()
 
-    translated = translate_text(text, language)
-
-    save_history("Translate", translated)
-
-    return jsonify({
-        "result": translated
-    })
-
-
-# SUMMARIZE
-@app.route("/summarize", methods=["POST"])
-def summarize():
-
-    data = request.get_json()
-
-    text = data.get("text", "")
-
-    language = data.get("language", "English")
-
-    summary = summarize_text(text, language)
-
-    save_history("Summary", summary)
-
-    return jsonify({
-        "result": summary
-    })
-
-
-# DOWNLOAD PDF
-@app.route("/download", methods=["POST"])
-def download():
-
-    data = request.get_json()
-
-    content = data.get("content", "")
-
-    filename = f"output_{datetime.now().strftime('%Y%m%d%H%M%S')}.pdf"
-
-    filepath = os.path.join(
-        DOWNLOAD_FOLDER,
-        filename
-    )
-
-    doc = SimpleDocTemplate(filepath)
-
-    styles = getSampleStyleSheet()
-
-    story = []
-
-    for line in content.split("\n"):
-
-        story.append(
-            Paragraph(line, styles["BodyText"])
+        language = data.get(
+            "language",
+            "Hindi"
         )
 
-        story.append(Spacer(1, 10))
+        if not text:
 
-    doc.build(story)
+            return jsonify({
+                "success": False,
+                "error": "Text is required"
+            })
 
-    return send_file(
-        filepath,
-        as_attachment=True
-    )
+        translated = translate_text(
+            text,
+            language
+        )
 
+        save_history(
+            "Translate",
+            translated
+        )
 
-# HISTORY SAVE
+        return jsonify({
+            "success": True,
+            "result": translated
+        })
+
+    except Exception as e:
+
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        })
+
+# =========================================================
+# SUMMARIZE
+# =========================================================
+
+@app.route("/summarize", methods=["POST"])
+@login_required
+def summarize():
+
+    try:
+
+        data = request.get_json()
+
+        text = data.get("text", "").strip()
+
+        language = data.get(
+            "language",
+            "English"
+        )
+
+        if not text:
+
+            return jsonify({
+                "success": False,
+                "error": "Text is required"
+            })
+
+        summary = summarize_text(
+            text,
+            language
+        )
+
+        save_history(
+            "Summary",
+            summary
+        )
+
+        return jsonify({
+            "success": True,
+            "result": summary
+        })
+
+    except Exception as e:
+
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        })
+
+# =========================================================
+# DOWNLOAD PDF
+# =========================================================
+
+@app.route("/download", methods=["POST"])
+@login_required
+def download():
+
+    try:
+
+        data = request.get_json()
+
+        content = data.get(
+            "content",
+            ""
+        )
+
+        if not content:
+
+            return jsonify({
+                "success": False,
+                "error": "No content provided"
+            })
+
+        filename = f"output_{datetime.now().strftime('%Y%m%d%H%M%S')}.pdf"
+
+        filepath = os.path.join(
+            DOWNLOAD_FOLDER,
+            filename
+        )
+
+        doc = SimpleDocTemplate(filepath)
+
+        styles = getSampleStyleSheet()
+
+        story = []
+
+        for line in content.split("\n"):
+
+            story.append(
+                Paragraph(
+                    line,
+                    styles["BodyText"]
+                )
+            )
+
+            story.append(
+                Spacer(1, 10)
+            )
+
+        doc.build(story)
+
+        return send_file(
+            filepath,
+            as_attachment=True
+        )
+
+    except Exception as e:
+
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        })
+
+# =========================================================
+# SAVE HISTORY
+# =========================================================
+
 def save_history(action, content):
 
     history = []
@@ -147,8 +409,10 @@ def save_history(action, content):
     if os.path.exists(HISTORY_FILE):
 
         with open(HISTORY_FILE, "r") as f:
+
             try:
                 history = json.load(f)
+
             except:
                 history = []
 
@@ -159,28 +423,41 @@ def save_history(action, content):
     })
 
     with open(HISTORY_FILE, "w") as f:
-        json.dump(history, f, indent=4)
 
+        json.dump(
+            history,
+            f,
+            indent=4
+        )
 
-# HISTORY GET
+# =========================================================
+# GET HISTORY
+# =========================================================
+
 @app.route("/history")
+@login_required
 def history():
 
     if not os.path.exists(HISTORY_FILE):
+
         return jsonify([])
 
     with open(HISTORY_FILE, "r") as f:
 
         try:
             data = json.load(f)
+
         except:
             data = []
 
     return jsonify(data)
 
-
+# =========================================================
 # CLEAR
+# =========================================================
+
 @app.route("/clear", methods=["POST"])
+@login_required
 def clear():
 
     global current_document
@@ -188,9 +465,13 @@ def clear():
     current_document = ""
 
     return jsonify({
+        "success": True,
         "message": "Cleared"
     })
 
+# =========================================================
+# RUN APP
+# =========================================================
 
 if __name__ == "__main__":
 
