@@ -15,3 +15,5 @@ reportlab
 pytesseract
 Pillow
 pdf2image
+sumy
+nltk
