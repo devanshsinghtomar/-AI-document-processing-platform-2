@@ -587,14 +587,41 @@ def download():
 
 
 # =========================================
-# HISTORY PAGE UI
+# HISTORY PAGE
 # =========================================
 
-@app.route("/history-page")
+@app.route("/history")
 @login_required
 def history_page():
 
     return render_template("history.html")
+
+
+# =========================================
+# HISTORY API DATA
+# =========================================
+
+@app.route("/history-data")
+@login_required
+def history_data():
+
+    records = History.query.filter_by(
+        user_id=current_user.id
+    ).order_by(
+        History.created_at.desc()
+    ).all()
+
+    result = []
+
+    for item in records:
+
+        result.append({
+            "action": item.action,
+            "content": item.content,
+            "date": item.created_at.strftime("%d-%m-%Y %H:%M")
+        })
+
+    return jsonify(result)
 
 
 # =========================================
