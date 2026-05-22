@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, jsonify, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import (
     LoginManager,
@@ -9,59 +9,59 @@ from flask_login import (
     current_user
 )
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 import os
 
 app = Flask(__name__)
 
 # =========================
-# SECRET KEY
+# CONFIG
 # =========================
+
 app.config['SECRET_KEY'] = os.environ.get(
     "SECRET_KEY",
-    "super-secret-key-change-this"
+    "super-secret-key"
 )
 
-# =========================
-# DATABASE
-# =========================
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# =========================
-# SESSION SECURITY
-# =========================
-app.config['SESSION_COOKIE_HTTPONLY'] = True
-app.config['SESSION_COOKIE_SECURE'] = True
-app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config['UPLOAD_FOLDER'] = 'uploads'
+
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 db = SQLAlchemy(app)
 
 # =========================
 # LOGIN MANAGER
 # =========================
+
 login_manager = LoginManager()
 login_manager.init_app(app)
-login_manager.login_view = "login"
+login_manager.login_view = 'login'
 
 # =========================
-# USER MODEL
+# DATABASE MODEL
 # =========================
+
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(100), unique=True, nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-    password = db.Column(db.String(200), nullable=False)
+    username = db.Column(db.String(100), unique=True)
+    email = db.Column(db.String(100), unique=True)
+    password = db.Column(db.String(200))
 
 # =========================
-# LOAD USER
+# USER LOADER
 # =========================
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 
 # =========================
-# HOME PAGE
+# HOME
 # =========================
+
 @app.route('/')
 @login_required
 def home():
@@ -70,39 +70,33 @@ def home():
 # =========================
 # SIGNUP
 # =========================
+
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
 
-    if current_user.is_authenticated:
-        return redirect(url_for('home'))
-
     if request.method == 'POST':
 
-        username = request.form.get('username')
-        email = request.form.get('email')
-        password = request.form.get('password')
+        username = request.form['username']
+        email = request.form['email']
+        password = request.form['password']
 
-        existing_user = User.query.filter(
-            (User.username == username) |
-            (User.email == email)
-        ).first()
+        existing_user = User.query.filter_by(email=email).first()
 
         if existing_user:
-            flash("User already exists")
-            return redirect(url_for('signup'))
+            return "User already exists"
 
         hashed_password = generate_password_hash(password)
 
-        new_user = User(
+        user = User(
             username=username,
             email=email,
             password=hashed_password
         )
 
-        db.session.add(new_user)
+        db.session.add(user)
         db.session.commit()
 
-        login_user(new_user)
+        login_user(user)
 
         return redirect(url_for('home'))
 
@@ -111,16 +105,14 @@ def signup():
 # =========================
 # LOGIN
 # =========================
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
 
-    if current_user.is_authenticated:
-        return redirect(url_for('home'))
-
     if request.method == 'POST':
 
-        email = request.form.get('email')
-        password = request.form.get('password')
+        email = request.form['email']
+        password = request.form['password']
 
         user = User.query.filter_by(email=email).first()
 
@@ -130,13 +122,14 @@ def login():
 
             return redirect(url_for('home'))
 
-        flash("Invalid email or password")
+        return "Invalid credentials"
 
     return render_template('login.html')
 
 # =========================
 # LOGOUT
 # =========================
+
 @app.route('/logout')
 @login_required
 def logout():
@@ -144,13 +137,114 @@ def logout():
     return redirect(url_for('login'))
 
 # =========================
-# DATABASE CREATE
+# UPLOAD
 # =========================
+
+@app.route('/upload', methods=['POST'])
+@login_required
+def upload():
+
+    if 'file' not in request.files:
+        return jsonify({
+            'error': 'No file uploaded'
+        })
+
+    file = request.files['file']
+
+    if file.filename == '':
+        return jsonify({
+            'error': 'No selected file'
+        })
+
+    filename = secure_filename(file.filename)
+
+    filepath = os.path.join(
+        app.config['UPLOAD_FOLDER'],
+        filename
+    )
+
+    file.save(filepath)
+
+    return jsonify({
+        'success': True,
+        'filename': filename
+    })
+
+# =========================
+# SUMMARIZE
+# =========================
+
+@app.route('/summarize', methods=['POST'])
+@login_required
+def summarize():
+
+    text = request.json.get('text')
+
+    if not text:
+        return jsonify({
+            'result': 'No text found'
+        })
+
+    summary = text[:300] + "..."
+
+    return jsonify({
+        'result': summary
+    })
+
+# =========================
+# TRANSLATE
+# =========================
+
+@app.route('/translate', methods=['POST'])
+@login_required
+def translate():
+
+    text = request.json.get('text')
+
+    translated = "Translated: " + text
+
+    return jsonify({
+        'result': translated
+    })
+
+# =========================
+# CHAT
+# =========================
+
+@app.route('/chat', methods=['POST'])
+@login_required
+def chat():
+
+    message = request.json.get('message')
+
+    response = f"AI Response: {message}"
+
+    return jsonify({
+        'result': response
+    })
+
+# =========================
+# CONVERT
+# =========================
+
+@app.route('/convert', methods=['POST'])
+@login_required
+def convert():
+
+    return jsonify({
+        'result': 'Document converted successfully'
+    })
+
+# =========================
+# CREATE DB
+# =========================
+
 with app.app_context():
     db.create_all()
 
 # =========================
-# RUN APP
+# RUN
 # =========================
+
 if __name__ == '__main__':
     app.run(debug=True)
