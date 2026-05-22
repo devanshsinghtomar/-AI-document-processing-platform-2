@@ -587,23 +587,14 @@ def download():
 
 
 # =========================================
-# HISTORY PAGE
+# HISTORY PAGE UI
 # =========================================
 
-@app.route("/history")
+@app.route("/history-page")
 @login_required
-def history():
+def history_page():
 
-    records = History.query.filter_by(
-        user_id=current_user.id
-    ).order_by(
-        History.created_at.desc()
-    ).all()
-
-    return render_template(
-        "history.html",
-        records=records
-    )
+    return render_template("history.html")
 
 
 # =========================================
