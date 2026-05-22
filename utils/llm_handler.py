@@ -5,7 +5,7 @@ translator = Translator()
 
 
 # =========================================
-# TRANSLATE TEXT
+# TRANSLATION
 # =========================================
 
 def translate_text(text, language):
@@ -40,7 +40,7 @@ def translate_text(text, language):
 
 
 # =========================================
-# SUMMARIZE TEXT
+# SUMMARY
 # =========================================
 
 def summarize_text(text, language="English"):
@@ -51,18 +51,12 @@ def summarize_text(text, language="English"):
 
             return "No text found."
 
-        # Clean text
         text = re.sub(r'\s+', ' ', text)
 
-        # Split into sentences
         sentences = re.split(r'(?<=[.!?]) +', text)
 
-        # Simple lightweight summary
-        summary_sentences = sentences[:5]
+        summary = " ".join(sentences[:5])
 
-        summary = " ".join(summary_sentences)
-
-        # Translate summary if needed
         if language != "English":
 
             summary = translate_text(
@@ -78,38 +72,37 @@ def summarize_text(text, language="English"):
 
 
 # =========================================
-# QUESTION ANSWERING
+# CHAT
 # =========================================
 
 def answer_question(context, question):
 
     try:
 
-        context_lower = context.lower()
-        question_lower = question.lower()
+        context_sentences = re.split(
+            r'(?<=[.!?]) +',
+            context
+        )
 
-        # Very lightweight QA
-        sentences = re.split(r'(?<=[.!?]) +', context)
+        question_words = question.lower().split()
 
-        matching_sentences = []
+        matched = []
 
-        for sentence in sentences:
+        for sentence in context_sentences:
 
-            words = question_lower.split()
-
-            for word in words:
+            for word in question_words:
 
                 if word in sentence.lower():
 
-                    matching_sentences.append(sentence)
+                    matched.append(sentence)
 
                     break
 
-        if matching_sentences:
+        if matched:
 
-            return " ".join(matching_sentences[:3])
+            return " ".join(matched[:3])
 
-        return "Answer not found in document."
+        return "Answer not found."
 
     except Exception as e:
 
