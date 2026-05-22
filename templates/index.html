@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 
 <meta charset="UTF-8">
@@ -7,25 +8,397 @@
 
 <title>AI Document Platform</title>
 
-<link rel="stylesheet" href="/static/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
+}
+
+body{
+background:#0f172a;
+min-height:100vh;
+overflow-x:hidden;
+color:white;
+}
+
+/* =========================
+LOGIN PAGE
+========================= */
+
+.auth-container{
+width:100%;
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+background:
+linear-gradient(rgba(15,23,42,0.85),rgba(15,23,42,0.9)),
+url('https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2070&auto=format&fit=crop');
+background-size:cover;
+background-position:center;
+}
+
+.auth-box{
+width:420px;
+background:rgba(255,255,255,0.08);
+backdrop-filter:blur(20px);
+padding:40px;
+border-radius:25px;
+border:1px solid rgba(255,255,255,0.1);
+box-shadow:0 10px 40px rgba(0,0,0,0.5);
+animation:fadeIn 1s ease;
+}
+
+@keyframes fadeIn{
+from{
+opacity:0;
+transform:translateY(20px);
+}
+to{
+opacity:1;
+transform:translateY(0);
+}
+}
+
+.auth-box h1{
+font-size:35px;
+margin-bottom:10px;
+text-align:center;
+}
+
+.auth-box p{
+text-align:center;
+color:#cbd5e1;
+margin-bottom:30px;
+}
+
+.auth-box input{
+width:100%;
+padding:15px;
+margin-bottom:20px;
+border:none;
+outline:none;
+border-radius:15px;
+background:rgba(255,255,255,0.08);
+color:white;
+font-size:15px;
+}
+
+.auth-box button{
+width:100%;
+padding:15px;
+border:none;
+border-radius:15px;
+background:linear-gradient(135deg,#3b82f6,#06b6d4);
+color:white;
+font-size:16px;
+font-weight:600;
+cursor:pointer;
+transition:0.3s;
+}
+
+.auth-box button:hover{
+transform:translateY(-3px);
+}
+
+/* =========================
+MAIN APP
+========================= */
+
+.app{
+display:none;
+padding:30px;
+}
+
+.navbar{
+width:100%;
+padding:20px 30px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+background:rgba(255,255,255,0.05);
+border-radius:20px;
+backdrop-filter:blur(10px);
+margin-bottom:25px;
+}
+
+.logo{
+font-size:28px;
+font-weight:700;
+}
+
+.nav-right{
+display:flex;
+gap:15px;
+align-items:center;
+}
+
+.logout-btn{
+padding:12px 18px;
+border:none;
+border-radius:12px;
+background:linear-gradient(135deg,#ef4444,#f97316);
+color:white;
+font-weight:600;
+cursor:pointer;
+}
+
+.main-grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:25px;
+}
+
+.panel{
+background:rgba(255,255,255,0.05);
+padding:25px;
+border-radius:25px;
+border:1px solid rgba(255,255,255,0.08);
+backdrop-filter:blur(15px);
+}
+
+.upload-area{
+border:2px dashed rgba(255,255,255,0.2);
+border-radius:20px;
+padding:40px;
+text-align:center;
+cursor:pointer;
+transition:0.3s;
+background:rgba(255,255,255,0.03);
+}
+
+.upload-area:hover{
+background:rgba(255,255,255,0.08);
+transform:scale(1.01);
+}
+
+.upload-area h2{
+margin-bottom:10px;
+}
+
+.upload-area p{
+color:#cbd5e1;
+}
+
+textarea{
+width:100%;
+height:300px;
+margin-top:20px;
+padding:20px;
+border:none;
+outline:none;
+border-radius:20px;
+background:rgba(255,255,255,0.08);
+color:white;
+font-size:15px;
+resize:none;
+line-height:1.8;
+}
+
+textarea::placeholder{
+color:#cbd5e1;
+}
+
+.controls{
+display:flex;
+flex-wrap:wrap;
+gap:15px;
+margin-top:20px;
+}
+
+select{
+flex:1;
+padding:15px;
+border:none;
+outline:none;
+border-radius:15px;
+background:rgba(255,255,255,0.08);
+color:white;
+}
+
+select option{
+background:#111827;
+}
+
+button{
+padding:14px 20px;
+border:none;
+border-radius:15px;
+cursor:pointer;
+font-weight:600;
+transition:0.3s;
+color:white;
+}
+
+button:hover{
+transform:translateY(-3px);
+}
+
+.translate-btn{
+background:linear-gradient(135deg,#3b82f6,#06b6d4);
+}
+
+.summary-btn{
+background:linear-gradient(135deg,#8b5cf6,#ec4899);
+}
+
+.copy-btn{
+background:linear-gradient(135deg,#10b981,#14b8a6);
+}
+
+.download-btn{
+background:linear-gradient(135deg,#f59e0b,#f97316);
+}
+
+.clear-btn{
+background:linear-gradient(135deg,#ef4444,#dc2626);
+}
+
+.history-btn{
+background:linear-gradient(135deg,#6366f1,#8b5cf6);
+}
+
+.output-box{
+height:550px;
+overflow-y:auto;
+padding:25px;
+border-radius:20px;
+background:rgba(255,255,255,0.08);
+line-height:1.9;
+font-size:15px;
+white-space:pre-wrap;
+}
+
+.output-box h2{
+margin-bottom:15px;
+}
+
+.history-section{
+margin-top:25px;
+}
+
+.history-card{
+background:rgba(255,255,255,0.08);
+padding:20px;
+border-radius:20px;
+margin-top:15px;
+}
+
+.history-card h3{
+margin-bottom:10px;
+}
+
+.loading{
+display:none;
+text-align:center;
+margin-top:20px;
+}
+
+.loader{
+width:55px;
+height:55px;
+border:5px solid rgba(255,255,255,0.15);
+border-top:5px solid #38bdf8;
+border-radius:50%;
+animation:spin 1s linear infinite;
+margin:auto;
+}
+
+@keyframes spin{
+100%{
+transform:rotate(360deg);
+}
+}
+
+@media(max-width:1000px){
+
+.main-grid{
+grid-template-columns:1fr;
+}
+
+.navbar{
+flex-direction:column;
+gap:15px;
+}
+
+}
+
+</style>
 
 </head>
 
 <body>
 
-<div class="container">
+<!-- LOGIN PAGE -->
 
-<h1>AI Document Platform</h1>
+<div class="auth-container" id="authPage">
 
-<div class="upload-box">
+<div class="auth-box">
 
-<input type="file" id="fileInput">
+<h1>AI Platform</h1>
 
-<button onclick="uploadFile()">Upload</button>
+<p>Translate, Summarize & Chat with Documents</p>
+
+<input type="text" placeholder="Enter Username">
+
+<input type="password" placeholder="Enter Password">
+
+<button onclick="login()">Login / Sign Up</button>
 
 </div>
 
-<textarea id="inputText" placeholder="Uploaded text"></textarea>
+</div>
+
+<!-- MAIN APP -->
+
+<div class="app" id="mainApp">
+
+<div class="navbar">
+
+<div class="logo">🌍 AI Document Platform</div>
+
+<div class="nav-right">
+
+<span>Welcome User</span>
+
+<button class="logout-btn" onclick="logout()">Logout</button>
+
+</div>
+
+</div>
+
+<div class="main-grid">
+
+<!-- LEFT -->
+
+<div class="panel">
+
+<div class="upload-area">
+
+<h2>📂 Upload File</h2>
+
+<p>Upload TXT, PDF or DOCX</p>
+
+<input type="file" id="fileInput" hidden>
+
+<button class="translate-btn"
+onclick="document.getElementById('fileInput').click()"
+style="margin-top:20px;">
+Choose File
+</button>
+
+</div>
+
+<textarea
+id="inputText"
+placeholder="Uploaded text will appear here..."></textarea>
+
+<div class="controls">
 
 <select id="language">
 
@@ -35,184 +408,283 @@
 <option>Spanish</option>
 <option>Japanese</option>
 <option>Russian</option>
+<option>Arabic</option>
 
 </select>
 
-<div class="buttons">
+<button class="translate-btn"
+onclick="translateText()">
+🌐 Translate
+</button>
 
-<button onclick="translateText()">Translate</button>
+<button class="summary-btn"
+onclick="summarizeText()">
+✨ Summarize
+</button>
 
-<button onclick="summarizeText()">Summarize</button>
+<button class="copy-btn"
+onclick="copyText()">
+📋 Copy
+</button>
 
-<button onclick="downloadPDF()">Download PDF</button>
+<button class="download-btn"
+onclick="downloadPDF()">
+⬇ Download
+</button>
 
-<button onclick="copyText()">Copy</button>
+<button class="history-btn"
+onclick="loadHistory()">
+🕘 History
+</button>
 
-<button onclick="clearAll()">Clear</button>
-
-<button onclick="loadHistory()">History</button>
+<button class="clear-btn"
+onclick="clearAll()">
+🗑 Clear
+</button>
 
 </div>
 
-<div id="output"></div>
+<div class="loading" id="loading">
 
-<div id="historyBox"></div>
+<div class="loader"></div>
+
+<p style="margin-top:10px;">
+Processing...
+</p>
+
+</div>
+
+</div>
+
+<!-- RIGHT -->
+
+<div class="panel">
+
+<div class="output-box" id="outputBox">
+
+<h2>📄 Output</h2>
+
+<p>
+Translated or summarized text will appear here...
+</p>
+
+</div>
+
+<div class="history-section" id="historySection"></div>
+
+</div>
+
+</div>
 
 </div>
 
 <script>
 
-async function uploadFile(){
+function login(){
 
-    const fileInput = document.getElementById("fileInput")
+document.getElementById("authPage").style.display="none";
 
-    const formData = new FormData()
+document.getElementById("mainApp").style.display="block";
 
-    formData.append(
-        "file",
-        fileInput.files[0]
-    )
-
-    const response = await fetch("/upload",{
-        method:"POST",
-        body:formData
-    })
-
-    const data = await response.json()
-
-    document.getElementById("inputText").value = data.text
 }
 
+function logout(){
 
-async function translateText(){
+location.reload();
 
-    const text = document.getElementById("inputText").value
-
-    const language = document.getElementById("language").value
-
-    const response = await fetch("/translate",{
-
-        method:"POST",
-
-        headers:{
-            "Content-Type":"application/json"
-        },
-
-        body:JSON.stringify({
-            text,
-            language
-        })
-
-    })
-
-    const data = await response.json()
-
-    document.getElementById("output").innerText = data.result
 }
-
-
-async function summarizeText(){
-
-    const text = document.getElementById("inputText").value
-
-    const language = document.getElementById("language").value
-
-    const response = await fetch("/summarize",{
-
-        method:"POST",
-
-        headers:{
-            "Content-Type":"application/json"
-        },
-
-        body:JSON.stringify({
-            text,
-            language
-        })
-
-    })
-
-    const data = await response.json()
-
-    document.getElementById("output").innerText = data.result
-}
-
-
-async function downloadPDF(){
-
-    const content = document.getElementById("output").innerText
-
-    const response = await fetch("/download",{
-
-        method:"POST",
-
-        headers:{
-            "Content-Type":"application/json"
-        },
-
-        body:JSON.stringify({
-            content
-        })
-
-    })
-
-    const blob = await response.blob()
-
-    const url = window.URL.createObjectURL(blob)
-
-    const a = document.createElement("a")
-
-    a.href = url
-
-    a.download = "translated.pdf"
-
-    a.click()
-}
-
 
 function copyText(){
 
-    navigator.clipboard.writeText(
-        document.getElementById("output").innerText
-    )
+const text =
+document.getElementById("outputBox").innerText;
 
-    alert("Copied")
+navigator.clipboard.writeText(text);
+
+alert("Copied Successfully");
+
 }
 
+function clearAll(){
 
-async function clearAll(){
+document.getElementById("inputText").value="";
 
-    document.getElementById("inputText").value = ""
+document.getElementById("outputBox").innerHTML=`
+<h2>📄 Output</h2>
+<p>Translated or summarized text will appear here...</p>
+`;
 
-    document.getElementById("output").innerText = ""
-
-    await fetch("/clear",{
-        method:"POST"
-    })
 }
 
+async function translateText(){
+
+const text =
+document.getElementById("inputText").value;
+
+const lang =
+document.getElementById("language").value;
+
+if(text===""){
+alert("Please upload text");
+return;
+}
+
+document.getElementById("loading").style.display="block";
+
+const response = await fetch("/translate",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+text:text,
+language:lang
+})
+
+});
+
+const data = await response.json();
+
+document.getElementById("outputBox").innerHTML=`
+<h2>🌐 Translation</h2>
+<p>${data.result}</p>
+`;
+
+document.getElementById("loading").style.display="none";
+
+}
+
+async function summarizeText(){
+
+const text =
+document.getElementById("inputText").value;
+
+const lang =
+document.getElementById("language").value;
+
+if(text===""){
+alert("Please upload text");
+return;
+}
+
+document.getElementById("loading").style.display="block";
+
+const response = await fetch("/summarize",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+text:text,
+language:lang
+})
+
+});
+
+const data = await response.json();
+
+document.getElementById("outputBox").innerHTML=`
+<h2>✨ Summary</h2>
+<p>${data.result}</p>
+`;
+
+document.getElementById("loading").style.display="none";
+
+}
+
+async function downloadPDF(){
+
+const content =
+document.getElementById("outputBox").innerText;
+
+const response = await fetch("/download",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+content:content
+})
+
+});
+
+const blob = await response.blob();
+
+const url = window.URL.createObjectURL(blob);
+
+const a = document.createElement("a");
+
+a.href = url;
+
+a.download = "translated_document.pdf";
+
+a.click();
+
+}
 
 async function loadHistory(){
 
-    const response = await fetch("/history")
+const response = await fetch("/history");
 
-    const data = await response.json()
+const data = await response.json();
 
-    let html = "<h2>History</h2>"
+let html = "<h2 style='margin-top:20px;'>🕘 History</h2>";
 
-    data.reverse().forEach(item=>{
+data.reverse().forEach(item=>{
 
-        html += `
-        <div class="history-item">
-            <h3>${item.action}</h3>
-            <p>${item.content}</p>
-            <small>${item.time}</small>
-        </div>
-        `
-    })
+html += `
+<div class="history-card">
 
-    document.getElementById("historyBox").innerHTML = html
+<h3>${item.action}</h3>
+
+<p>${item.content}</p>
+
+<small>${item.time}</small>
+
+</div>
+`;
+
+});
+
+document.getElementById("historySection").innerHTML=html;
+
 }
+
+document.getElementById("fileInput")
+.addEventListener("change",async function(){
+
+const file = this.files[0];
+
+const formData = new FormData();
+
+formData.append("file",file);
+
+document.getElementById("loading").style.display="block";
+
+const response = await fetch("/upload",{
+
+method:"POST",
+
+body:formData
+
+});
+
+const data = await response.json();
+
+document.getElementById("inputText").value=data.text;
+
+document.getElementById("loading").style.display="none";
+
+});
 
 </script>
 
