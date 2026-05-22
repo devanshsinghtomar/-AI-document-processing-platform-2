@@ -4,12 +4,11 @@ from flask import (
     request,
     jsonify,
     send_file,
-    session,
-    redirect,
-    url_for
+    session
 )
 
 from werkzeug.utils import secure_filename
+
 from werkzeug.security import (
     generate_password_hash,
     check_password_hash
@@ -37,16 +36,24 @@ from utils.llm_handler import (
     summarize_text,
 )
 
+# =========================================================
+# FLASK APP
+# =========================================================
+
 app = Flask(__name__)
 
 # =========================================================
-# SECURITY CONFIG
+# SECRET KEY
 # =========================================================
 
 app.secret_key = os.environ.get(
     "SECRET_KEY",
     "super-secret-key-change-this"
 )
+
+# =========================================================
+# SESSION SECURITY
+# =========================================================
 
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SECURE'] = True
@@ -67,9 +74,9 @@ os.makedirs("history", exist_ok=True)
 current_document = ""
 
 # =========================================================
-# DEMO USER DATABASE
+# USER DATABASE
 # =========================================================
-# Change username/password as needed
+# Change credentials if needed
 
 users = {
     "admin": generate_password_hash("admin123")
@@ -89,7 +96,7 @@ def login_required(f):
 
             return jsonify({
                 "success": False,
-                "error": "Unauthorized. Please login first."
+                "error": "Unauthorized access. Please login."
             }), 401
 
         return f(*args, **kwargs)
@@ -109,15 +116,26 @@ def home():
 # LOGIN
 # =========================================================
 
-@app.route("/login", methods=["POST"])
+@app.route("/login", methods=["GET", "POST"])
 def login():
+
+    if request.method == "GET":
+
+        return render_template("login.html")
 
     try:
 
         data = request.get_json()
 
-        username = data.get("username", "").strip()
-        password = data.get("password", "").strip()
+        username = data.get(
+            "username",
+            ""
+        ).strip()
+
+        password = data.get(
+            "password",
+            ""
+        ).strip()
 
         # Empty validation
         if not username or not password:
@@ -130,7 +148,6 @@ def login():
         # Check user
         if username in users:
 
-            # Verify password
             if check_password_hash(
                 users[username],
                 password
@@ -145,7 +162,7 @@ def login():
 
         return jsonify({
             "success": False,
-            "error": "Invalid credentials"
+            "error": "Invalid username or password"
         }), 401
 
     except Exception as e:
@@ -170,7 +187,7 @@ def logout():
     })
 
 # =========================================================
-# CHECK SESSION
+# CHECK AUTH
 # =========================================================
 
 @app.route("/check-auth")
@@ -215,7 +232,9 @@ def upload():
                 "error": "Empty filename"
             })
 
-        filename = secure_filename(file.filename)
+        filename = secure_filename(
+            file.filename
+        )
 
         filepath = os.path.join(
             UPLOAD_FOLDER,
@@ -224,7 +243,9 @@ def upload():
 
         file.save(filepath)
 
-        current_document = extract_text_from_file(filepath)
+        current_document = extract_text_from_file(
+            filepath
+        )
 
         return jsonify({
             "success": True,
@@ -250,7 +271,10 @@ def translate():
 
         data = request.get_json()
 
-        text = data.get("text", "").strip()
+        text = data.get(
+            "text",
+            ""
+        ).strip()
 
         language = data.get(
             "language",
@@ -298,7 +322,10 @@ def summarize():
 
         data = request.get_json()
 
-        text = data.get("text", "").strip()
+        text = data.get(
+            "text",
+            ""
+        ).strip()
 
         language = data.get(
             "language",
@@ -358,14 +385,19 @@ def download():
                 "error": "No content provided"
             })
 
-        filename = f"output_{datetime.now().strftime('%Y%m%d%H%M%S')}.pdf"
+        filename = (
+            f"output_"
+            f"{datetime.now().strftime('%Y%m%d%H%M%S')}.pdf"
+        )
 
         filepath = os.path.join(
             DOWNLOAD_FOLDER,
             filename
         )
 
-        doc = SimpleDocTemplate(filepath)
+        doc = SimpleDocTemplate(
+            filepath
+        )
 
         styles = getSampleStyleSheet()
 
@@ -411,15 +443,19 @@ def save_history(action, content):
         with open(HISTORY_FILE, "r") as f:
 
             try:
+
                 history = json.load(f)
 
             except:
+
                 history = []
 
     history.append({
+
         "action": action,
         "content": content,
         "time": str(datetime.now())
+
     })
 
     with open(HISTORY_FILE, "w") as f:
@@ -445,9 +481,11 @@ def history():
     with open(HISTORY_FILE, "r") as f:
 
         try:
+
             data = json.load(f)
 
         except:
+
             data = []
 
     return jsonify(data)
