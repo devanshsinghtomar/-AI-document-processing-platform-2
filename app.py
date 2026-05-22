@@ -198,41 +198,83 @@ def translate_text(text, target_language):
 
 
 # =========================================
-# PDF DOWNLOAD
+# PDF DOWNLOAD FIXED
 # =========================================
 
 def create_pdf(text):
 
-    filename = f"{uuid.uuid4()}.pdf"
+    try:
 
-    filepath = os.path.join(
-        app.config["DOWNLOAD_FOLDER"],
-        filename
-    )
+        filename = f"{uuid.uuid4()}.pdf"
 
-    pdf = FPDF()
+        filepath = os.path.join(
+            app.config["DOWNLOAD_FOLDER"],
+            filename
+        )
 
-    pdf.add_page()
+        # Clean unsupported characters
+        clean_text = text.encode(
+            "latin-1",
+            "replace"
+        ).decode("latin-1")
 
-    pdf.set_auto_page_break(auto=True, margin=15)
+        pdf = FPDF()
 
-    pdf.set_font("Arial", size=12)
+        pdf.set_auto_page_break(
+            auto=True,
+            margin=15
+        )
 
-    lines = text.split("\n")
+        pdf.add_page()
 
-    for line in lines:
+        # Heading
+        pdf.set_font(
+            "Arial",
+            "B",
+            16
+        )
 
-        try:
+        pdf.cell(
+            200,
+            10,
+            txt="AI Translator & Summarizer Output",
+            ln=True,
+            align="C"
+        )
 
-            pdf.multi_cell(0, 10, line)
+        pdf.ln(10)
 
-        except:
+        # Content
+        pdf.set_font(
+            "Arial",
+            size=12
+        )
 
-            pass
+        lines = clean_text.split("\n")
 
-    pdf.output(filepath)
+        for line in lines:
 
-    return filepath
+            line = line.strip()
+
+            if line:
+
+                pdf.multi_cell(
+                    0,
+                    10,
+                    txt=line
+                )
+
+                pdf.ln(2)
+
+        pdf.output(filepath)
+
+        return filepath
+
+    except Exception as e:
+
+        print("PDF Error:", str(e))
+
+        return None
 
 
 # =========================================
@@ -456,7 +498,6 @@ def summarize():
 
         summary = generate_summary(text)
 
-        # Translate summary also
         if language != "en":
 
             summary = translate_text(
@@ -486,7 +527,7 @@ def summarize():
 
 
 # =========================================
-# DOWNLOAD PDF
+# DOWNLOAD PDF FIXED
 # =========================================
 
 @app.route("/download", methods=["POST"])
@@ -495,15 +536,29 @@ def download():
 
     try:
 
-        data = request.json
+        data = request.get_json()
 
-        text = data.get("text")
+        text = data.get("text", "")
+
+        if not text.strip():
+
+            return jsonify({
+                "error": "No text available for download"
+            })
 
         filepath = create_pdf(text)
 
+        if not filepath:
+
+            return jsonify({
+                "error": "PDF generation failed"
+            })
+
         return send_file(
             filepath,
-            as_attachment=True
+            as_attachment=True,
+            download_name="translated_document.pdf",
+            mimetype="application/pdf"
         )
 
     except Exception as e:
