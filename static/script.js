@@ -1,230 +1,101 @@
-function setOutput(text) {
+let historyData = [];
 
-    document.getElementById("output")
-        .innerText = text;
+function uploadFile(){
+
+document.getElementById("fileInput").click();
+
 }
 
-/* UPLOAD */
+async function translateText(){
 
-async function uploadFile() {
+const text = document.getElementById("inputText").value;
 
-    try {
+const language = document.getElementById("language").value;
 
-        setOutput("Uploading files...");
+const response = await fetch("/translate",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+text:text,
+language:language
+})
+});
 
-        let fileInput =
-            document.getElementById("fileInput");
+const data = await response.json();
 
-        if(fileInput.files.length === 0) {
+document.getElementById("output").innerText=data.translation;
 
-            setOutput(
-                "Please select files first"
-            );
+saveHistory("Translation completed");
 
-            return;
-        }
-
-        let formData = new FormData();
-
-        for(let i = 0; i < fileInput.files.length; i++) {
-
-            formData.append(
-                "file",
-                fileInput.files[i]
-            );
-        }
-
-        let response = await fetch("/upload", {
-
-            method: "POST",
-
-            body: formData
-        });
-
-        let data = await response.json();
-
-        setOutput(data.message);
-
-    } catch(error) {
-
-        setOutput(
-            "Upload Error:\n" + error
-        );
-    }
 }
 
-/* SUMMARY */
+async function summarizeText(){
 
-async function summarize() {
+const text = document.getElementById("inputText").value;
 
-    try {
+const language = document.getElementById("language").value;
 
-        setOutput(
-            "Generating AI summary...\nPlease wait..."
-        );
+const response = await fetch("/summarize",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+text:text,
+language:language
+})
+});
 
-        let response = await fetch("/summarize", {
+const data = await response.json();
 
-            method: "POST"
-        });
+document.getElementById("output").innerText=data.summary;
 
-        let data = await response.json();
+saveHistory("Summary completed");
 
-        setOutput(data.summary);
-
-    } catch(error) {
-
-        setOutput(
-            "Summary Error:\n" + error
-        );
-    }
 }
 
-/* TRANSLATE */
+function copyOutput(){
 
-async function translateText() {
+const text = document.getElementById("output").innerText;
 
-    try {
+navigator.clipboard.writeText(text);
 
-        setOutput(
-            "Translating document..."
-        );
+alert("Copied");
 
-        let response = await fetch("/translate", {
-
-            method: "POST"
-        });
-
-        let data = await response.json();
-
-        setOutput(data.translated);
-
-    } catch(error) {
-
-        setOutput(
-            "Translation Error:\n" + error
-        );
-    }
 }
 
-/* EXTRACT */
+function clearData(){
 
-async function extractData() {
+document.getElementById("inputText").value="";
 
-    try {
+document.getElementById("output").innerText="";
 
-        setOutput(
-            "Extracting structured data..."
-        );
-
-        let response = await fetch("/extract", {
-
-            method: "POST"
-        });
-
-        let data = await response.json();
-
-        setOutput(
-            JSON.stringify(data, null, 2)
-        );
-
-    } catch(error) {
-
-        setOutput(
-            "Extraction Error:\n" + error
-        );
-    }
 }
 
-/* CHAT */
+function saveHistory(text){
 
-async function chatDocument() {
+historyData.push(text);
 
-    try {
+const historyList=document.getElementById("historyList");
 
-        let question =
-            document.getElementById("question").value;
+historyList.innerHTML="";
 
-        if(question === "") {
+historyData.forEach(item=>{
 
-            setOutput(
-                "Please enter a question"
-            );
+const li=document.createElement("li");
 
-            return;
-        }
+li.innerText=item;
 
-        setOutput(
-            "AI is analyzing document..."
-        );
+historyList.appendChild(li);
 
-        let response = await fetch("/chat", {
+});
 
-            method: "POST",
-
-            headers: {
-
-                "Content-Type":
-                "application/json"
-            },
-
-            body: JSON.stringify({
-
-                question: question
-            })
-        });
-
-        let data = await response.json();
-
-        setOutput(data.answer);
-
-    } catch(error) {
-
-        setOutput(
-            "Chat Error:\n" + error
-        );
-    }
 }
 
-/* EXPORT */
+function downloadPDF(){
 
-function downloadJSON() {
+window.print();
 
-    let content =
-        document.getElementById("output").innerText;
-
-    let blob = new Blob(
-
-        [content],
-
-        {
-            type: "application/json"
-        }
-    );
-
-    let a =
-        document.createElement("a");
-
-    a.href =
-        URL.createObjectURL(blob);
-
-    a.download = "output.json";
-
-    a.click();
-}
-
-/* CLEAR */
-
-function clearOutput() {
-
-    setOutput("");
-}
-
-/* HOME */
-
-function showHome() {
-
-    setOutput(
-        "Welcome to AI Document Processing Platform"
-    );
 }
