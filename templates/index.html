@@ -2,78 +2,246 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Document Processing Platform</title>
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>AI Docs</title>
 
     <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+          href="{{ url_for('static', filename='style.css') }}">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
 </head>
 
 <body>
 
-    <nav class="navbar">
+<nav class="navbar">
 
-        <div class="logo">
-            <i class="fa-solid fa-file-waveform"></i>
-            AI Docs
-        </div>
+    <div class="logo">
+        <i class="fa-solid fa-file"></i>
+        AI Docs
+    </div>
 
-        <div class="user-section">
+    <div class="nav-right">
 
-            <span class="username">
-                <i class="fa-solid fa-user"></i>
-                {{ current_user.username }}
-            </span>
+        <span class="username">
+            {{ current_user.username }}
+        </span>
 
-            <a href="{{ url_for('logout') }}" class="logout-btn">
-                Logout
-            </a>
-
-        </div>
-
-    </nav>
-
-    <div class="hero">
-
-        <h1>AI Document Processing Platform</h1>
-
-        <p>
-            Upload, summarize, translate and chat with documents
-        </p>
-
-        <div class="card-container">
-
-            <div class="feature-card">
-                <i class="fa-solid fa-file-lines"></i>
-                <h3>Summarize</h3>
-                <p>Generate document summaries instantly.</p>
-            </div>
-
-            <div class="feature-card">
-                <i class="fa-solid fa-language"></i>
-                <h3>Translate</h3>
-                <p>Translate documents into multiple languages.</p>
-            </div>
-
-            <div class="feature-card">
-                <i class="fa-solid fa-comments"></i>
-                <h3>Chat</h3>
-                <p>Interact with your document using AI chat.</p>
-            </div>
-
-            <div class="feature-card">
-                <i class="fa-solid fa-file-export"></i>
-                <h3>Convert</h3>
-                <p>Convert documents into multiple formats.</p>
-            </div>
-
-        </div>
+        <a href="/logout" class="logout-btn">
+            Logout
+        </a>
 
     </div>
 
-</body>
+</nav>
 
+<div class="container">
+
+    <div class="upload-section">
+
+        <input type="file" id="fileInput">
+
+        <button onclick="uploadFile()">
+            Upload
+        </button>
+
+    </div>
+
+    <textarea id="textArea"
+              placeholder="Enter document text here..."></textarea>
+
+    <div class="button-group">
+
+        <button onclick="summarizeText()">
+            Summarize
+        </button>
+
+        <button onclick="translateText()">
+            Translate
+        </button>
+
+        <button onclick="chatDoc()">
+            Chat
+        </button>
+
+        <button onclick="convertDoc()">
+            Convert
+        </button>
+
+        <button onclick="copyText()">
+            Copy
+        </button>
+
+        <button onclick="clearText()">
+            Clear
+        </button>
+
+    </div>
+
+    <div class="history">
+
+        <h3>History</h3>
+
+        <ul id="historyList"></ul>
+
+    </div>
+
+    <div class="result-box"
+         id="resultBox">
+
+    </div>
+
+</div>
+
+<script>
+
+function addHistory(action){
+
+    let li = document.createElement("li");
+
+    li.innerText = action;
+
+    document.getElementById("historyList")
+            .appendChild(li);
+}
+
+async function uploadFile(){
+
+    let fileInput = document.getElementById("fileInput");
+
+    let file = fileInput.files[0];
+
+    let formData = new FormData();
+
+    formData.append("file", file);
+
+    let response = await fetch("/upload", {
+        method: "POST",
+        body: formData
+    });
+
+    let data = await response.json();
+
+    document.getElementById("resultBox")
+            .innerText = data.filename;
+
+    addHistory("Uploaded File");
+}
+
+async function summarizeText(){
+
+    let text = document.getElementById("textArea").value;
+
+    let response = await fetch("/summarize", {
+
+        method: "POST",
+
+        headers: {
+            "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+            text: text
+        })
+    });
+
+    let data = await response.json();
+
+    document.getElementById("resultBox")
+            .innerText = data.result;
+
+    addHistory("Summarized Text");
+}
+
+async function translateText(){
+
+    let text = document.getElementById("textArea").value;
+
+    let response = await fetch("/translate", {
+
+        method: "POST",
+
+        headers: {
+            "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+            text: text
+        })
+    });
+
+    let data = await response.json();
+
+    document.getElementById("resultBox")
+            .innerText = data.result;
+
+    addHistory("Translated Text");
+}
+
+async function chatDoc(){
+
+    let text = document.getElementById("textArea").value;
+
+    let response = await fetch("/chat", {
+
+        method: "POST",
+
+        headers: {
+            "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+            message: text
+        })
+    });
+
+    let data = await response.json();
+
+    document.getElementById("resultBox")
+            .innerText = data.result;
+
+    addHistory("Chat Used");
+}
+
+async function convertDoc(){
+
+    let response = await fetch("/convert", {
+        method: "POST"
+    });
+
+    let data = await response.json();
+
+    document.getElementById("resultBox")
+            .innerText = data.result;
+
+    addHistory("Converted Document");
+}
+
+function clearText(){
+
+    document.getElementById("textArea").value = "";
+
+    document.getElementById("resultBox").innerText = "";
+
+    addHistory("Cleared");
+}
+
+function copyText(){
+
+    let text = document.getElementById("resultBox").innerText;
+
+    navigator.clipboard.writeText(text);
+
+    addHistory("Copied Result");
+}
+
+</script>
+
+</body>
 </html>
