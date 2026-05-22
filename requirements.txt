@@ -19,3 +19,4 @@ sumy
 nltk
 Flask-SQLAlchemy
 Flask-Login
+reportlab
