@@ -1,7 +1,15 @@
 import os
 import fitz
+import pytesseract
+
+from PIL import Image
+from pdf2image import convert_from_path
 from docx import Document
 
+
+# =========================================
+# EXTRACT TEXT
+# =========================================
 
 def extract_text_from_file(filepath):
 
@@ -9,9 +17,9 @@ def extract_text_from_file(filepath):
 
         ext = os.path.splitext(filepath)[1].lower()
 
-        # =========================
+        # =====================================
         # TXT FILE
-        # =========================
+        # =====================================
 
         if ext == ".txt":
 
@@ -24,29 +32,9 @@ def extract_text_from_file(filepath):
 
                 return f.read()
 
-        # =========================
-        # PDF FILE
-        # =========================
-
-        elif ext == ".pdf":
-
-            text = ""
-
-            pdf_document = fitz.open(filepath)
-
-            for page_num in range(len(pdf_document)):
-
-                page = pdf_document[page_num]
-
-                text += page.get_text("text")
-
-            pdf_document.close()
-
-            return text.strip()
-
-        # =========================
+        # =====================================
         # DOCX FILE
-        # =========================
+        # =====================================
 
         elif ext == ".docx":
 
@@ -59,6 +47,50 @@ def extract_text_from_file(filepath):
                 text.append(para.text)
 
             return "\n".join(text)
+
+        # =====================================
+        # PDF FILE
+        # =====================================
+
+        elif ext == ".pdf":
+
+            text = ""
+
+            # TRY NORMAL PDF EXTRACTION FIRST
+            pdf_document = fitz.open(filepath)
+
+            for page_num in range(len(pdf_document)):
+
+                page = pdf_document[page_num]
+
+                extracted = page.get_text("text")
+
+                text += extracted
+
+            pdf_document.close()
+
+            # IF TEXT IS VALID
+            if len(text.strip()) > 50:
+
+                return text
+
+            # =====================================
+            # OCR FOR SCANNED PDF
+            # =====================================
+
+            print("Using OCR extraction...")
+
+            images = convert_from_path(filepath)
+
+            ocr_text = ""
+
+            for image in images:
+
+                extracted_text = pytesseract.image_to_string(image)
+
+                ocr_text += extracted_text + "\n"
+
+            return ocr_text
 
         else:
 
