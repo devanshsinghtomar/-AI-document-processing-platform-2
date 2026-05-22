@@ -1,89 +1,115 @@
-from transformers import pipeline
-from deep_translator import GoogleTranslator
+from googletrans import Translator
+import re
 
-# SMALL MODELS FOR LOW RAM
+translator = Translator()
 
-summarizer = pipeline(
-    "text2text-generation",
-    model="google/flan-t5-small"
-)
 
-qa_pipeline = pipeline(
-    "question-answering",
-    model="distilbert-base-cased-distilled-squad"
-)
-
+# =========================================
+# TRANSLATE TEXT
+# =========================================
 
 def translate_text(text, language):
 
-    lang_map = {
-        "Hindi": "hi",
-        "French": "fr",
-        "German": "de",
-        "Spanish": "es",
-        "Japanese": "ja",
-        "Korean": "ko",
-        "Russian": "ru",
-        "Arabic": "ar",
-        "Chinese": "zh-CN"
-    }
-
-    if language == "English":
-        return text
-
     try:
 
-        translated = GoogleTranslator(
-            source='auto',
-            target=lang_map[language]
-        ).translate(text)
+        language_codes = {
+            "Hindi": "hi",
+            "French": "fr",
+            "German": "de",
+            "Spanish": "es",
+            "Japanese": "ja",
+            "Korean": "ko",
+            "Russian": "ru",
+            "Arabic": "ar",
+            "Chinese": "zh-cn",
+            "English": "en"
+        }
 
-        return translated
+        lang_code = language_codes.get(language, "en")
+
+        translated = translator.translate(
+            text,
+            dest=lang_code
+        )
+
+        return translated.text
 
     except Exception as e:
 
         return f"Translation Error: {str(e)}"
 
 
+# =========================================
+# SUMMARIZE TEXT
+# =========================================
+
 def summarize_text(text, language="English"):
-
-    if len(text.strip()) == 0:
-        return "No text found."
-
-    text = text[:1500]
 
     try:
 
-        result = summarizer(
-            f"summarize: {text}",
-            max_length=120,
-            min_length=40
-        )
+        if not text.strip():
 
-        summary = result[0]["generated_text"]
+            return "No text found."
 
+        # Clean text
+        text = re.sub(r'\s+', ' ', text)
+
+        # Split into sentences
+        sentences = re.split(r'(?<=[.!?]) +', text)
+
+        # Simple lightweight summary
+        summary_sentences = sentences[:5]
+
+        summary = " ".join(summary_sentences)
+
+        # Translate summary if needed
         if language != "English":
-            summary = translate_text(summary, language)
+
+            summary = translate_text(
+                summary,
+                language
+            )
 
         return summary
 
     except Exception as e:
 
-        return f"Summarization Error: {str(e)}"
+        return f"Summary Error: {str(e)}"
 
+
+# =========================================
+# QUESTION ANSWERING
+# =========================================
 
 def answer_question(context, question):
 
     try:
 
-        context = context[:1500]
+        context_lower = context.lower()
+        question_lower = question.lower()
 
-        result = qa_pipeline(
-            question=question,
-            context=context
-        )
+        # Very lightweight QA
+        sentences = re.split(r'(?<=[.!?]) +', context)
 
-        return result["answer"]
+        matching_sentences = []
+
+        for sentence in sentences:
+
+            words = question_lower.split()
+
+            for word in words:
+
+                if word in sentence.lower():
+
+                    matching_sentences.append(sentence)
+
+                    break
+
+        if matching_sentences:
+
+            return " ".join(matching_sentences[:3])
+
+        return "Answer not found in document."
 
     except Exception as e:
 
