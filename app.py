@@ -27,7 +27,20 @@ from werkzeug.security import (
 from werkzeug.utils import secure_filename
 
 from deep_translator import GoogleTranslator
-from fpdf import FPDF
+
+from reportlab.platypus import (
+    SimpleDocTemplate,
+    Paragraph,
+    Spacer
+)
+
+from reportlab.lib.styles import getSampleStyleSheet
+
+from reportlab.pdfbase import pdfmetrics
+
+from reportlab.pdfbase.cidfonts import UnicodeCIDFont
+
+from reportlab.lib.pagesizes import letter
 
 import os
 import uuid
@@ -212,45 +225,44 @@ def create_pdf(text):
             filename
         )
 
-        # Clean unsupported characters
-        clean_text = text.encode(
-            "latin-1",
-            "replace"
-        ).decode("latin-1")
-
-        pdf = FPDF()
-
-        pdf.set_auto_page_break(
-            auto=True,
-            margin=15
+        # Register Unicode font
+        pdfmetrics.registerFont(
+            UnicodeCIDFont('HYSMyeongJo-Medium')
         )
 
-        pdf.add_page()
-
-        # Heading
-        pdf.set_font(
-            "Arial",
-            "B",
-            16
+        doc = SimpleDocTemplate(
+            filepath,
+            pagesize=letter
         )
 
-        pdf.cell(
-            200,
-            10,
-            txt="AI Translator & Summarizer Output",
-            ln=True,
-            align="C"
+        styles = getSampleStyleSheet()
+
+        style = styles['BodyText']
+
+        style.fontName = 'HYSMyeongJo-Medium'
+
+        style.fontSize = 12
+
+        style.leading = 18
+
+        content = []
+
+        # Title
+        title_style = styles['Heading1']
+
+        title_style.fontName = 'HYSMyeongJo-Medium'
+
+        content.append(
+            Paragraph(
+                "AI Translator & Summarizer Output",
+                title_style
+            )
         )
 
-        pdf.ln(10)
+        content.append(Spacer(1, 20))
 
-        # Content
-        pdf.set_font(
-            "Arial",
-            size=12
-        )
-
-        lines = clean_text.split("\n")
+        # Text
+        lines = text.split("\n")
 
         for line in lines:
 
@@ -258,15 +270,15 @@ def create_pdf(text):
 
             if line:
 
-                pdf.multi_cell(
-                    0,
-                    10,
-                    txt=line
+                content.append(
+                    Paragraph(line, style)
                 )
 
-                pdf.ln(2)
+                content.append(
+                    Spacer(1, 8)
+                )
 
-        pdf.output(filepath)
+        doc.build(content)
 
         return filepath
 
