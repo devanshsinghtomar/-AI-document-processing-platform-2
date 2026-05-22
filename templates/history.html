@@ -1,16 +1,17 @@
-# templates/history.html
-
-```html
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>History</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
+
 *{
 margin:0;
 padding:0;
@@ -19,9 +20,9 @@ font-family:'Poppins',sans-serif;
 }
 
 body{
-background:linear-gradient(135deg,#0f172a,#111827,#1e293b);
+background:linear-gradient(135deg,#020617,#0f172a,#1e293b);
 min-height:100vh;
-padding:30px;
+padding:40px;
 color:white;
 }
 
@@ -30,66 +31,139 @@ max-width:1200px;
 margin:auto;
 }
 
-.header{
+.top-bar{
 display:flex;
 justify-content:space-between;
 align-items:center;
-margin-bottom:25px;
+margin-bottom:40px;
 }
 
-.header a{
-text-decoration:none;
-background:#2563eb;
-padding:12px 20px;
-border-radius:12px;
+.title{
+font-size:42px;
+font-weight:700;
+}
+
+.back-btn{
+padding:14px 24px;
+border:none;
+border-radius:14px;
+background:linear-gradient(135deg,#2563eb,#3b82f6);
 color:white;
+font-size:15px;
+font-weight:600;
+cursor:pointer;
+transition:0.3s;
+}
+
+.back-btn:hover{
+transform:translateY(-2px);
 }
 
 .history-grid{
 display:grid;
-grid-template-columns:1fr 1fr;
-gap:20px;
+grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+gap:25px;
 }
 
 .card{
 background:rgba(255,255,255,0.08);
-padding:20px;
-border-radius:20px;
-backdrop-filter:blur(10px);
+border:1px solid rgba(255,255,255,0.1);
+backdrop-filter:blur(12px);
+padding:25px;
+border-radius:24px;
+transition:0.3s;
+overflow:hidden;
 }
 
-.card h3{
-margin-bottom:10px;
+.card:hover{
+transform:translateY(-5px);
 }
 
-.card p{
-line-height:1.7;
+.action{
+display:inline-block;
+padding:8px 16px;
+border-radius:50px;
+font-size:13px;
+font-weight:600;
+margin-bottom:18px;
+}
+
+.Translate{
+background:#2563eb;
+}
+
+.Summary{
+background:#9333ea;
+}
+
+.Upload{
+background:#059669;
+}
+
+.content{
+font-size:15px;
+line-height:1.8;
+color:#e2e8f0;
+max-height:220px;
+overflow-y:auto;
 white-space:pre-wrap;
 }
 
 .date{
-margin-top:15px;
+margin-top:20px;
 font-size:13px;
+color:#94a3b8;
+}
+
+.empty{
+text-align:center;
+padding:80px 20px;
+font-size:22px;
 color:#cbd5e1;
 }
 
-@media(max-width:800px){
-.history-grid{
-grid-template-columns:1fr;
+@media(max-width:768px){
+
+body{
+padding:20px;
 }
+
+.title{
+font-size:30px;
 }
+
+.top-bar{
+flex-direction:column;
+gap:20px;
+align-items:flex-start;
+}
+
+}
+
 </style>
+
 </head>
+
 <body>
 
 <div class="container">
 
-<div class="header">
-<h1>📜 History</h1>
-<a href="/">⬅ Back</a>
+<div class="top-bar">
+
+<h1 class="title">📜 History</h1>
+
+<button class="back-btn"
+onclick="window.location.href='/'">
+
+⬅ Back
+
+</button>
+
 </div>
 
-<div class="history-grid" id="historyContainer"></div>
+<div id="historyContainer" class="history-grid">
+
+</div>
 
 </div>
 
@@ -97,29 +171,61 @@ grid-template-columns:1fr;
 
 async function loadHistory(){
 
-const response = await fetch('/history');
+    try{
 
-const data = await response.json();
+        const response = await fetch('/history');
 
-const container = document.getElementById('historyContainer');
+        const data = await response.json();
 
-container.innerHTML='';
+        const container = document.getElementById('historyContainer');
 
-if(data.length===0){
-container.innerHTML='<p>No history found</p>';
-return;
-}
+        container.innerHTML = '';
 
-for(let item of data){
+        if(data.length === 0){
 
-container.innerHTML += `
-<div class="card">
-<h3>${item.action}</h3>
-<p>${item.content}</p>
-<div class="date">${item.date}</div>
-</div>
-`;
-}
+            container.innerHTML = `
+            <div class="empty">
+            No history found
+            </div>
+            `;
+
+            return;
+        }
+
+        data.forEach(item=>{
+
+            const card = document.createElement('div');
+
+            card.className = 'card';
+
+            card.innerHTML = `
+
+            <div class="action ${item.action}">
+            ${item.action}
+            </div>
+
+            <div class="content">
+            ${item.content}
+            </div>
+
+            <div class="date">
+            ${item.date}
+            </div>
+
+            `;
+
+            container.appendChild(card);
+
+        });
+
+    }
+
+    catch(error){
+
+        console.error(error);
+
+    }
+
 }
 
 loadHistory();
@@ -127,4 +233,5 @@ loadHistory();
 </script>
 
 </body>
+
 </html>
