@@ -7,9 +7,7 @@ uvicorn
 werkzeug
 jinja2
 PyMuPDF
-transformers
-torch
-sentencepiece
+googletrans==4.0.0rc1
 fpdf
 python-docx
 deep-translator
