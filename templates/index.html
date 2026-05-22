@@ -3,245 +3,91 @@
 
 <head>
 
-    <meta charset="UTF-8">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+<title>AI Document Platform</title>
 
-    <title>AI Docs</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='style.css') }}">
-
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 </head>
 
 <body>
 
-<nav class="navbar">
+<div class="main-container">
 
-    <div class="logo">
-        <i class="fa-solid fa-file"></i>
-        AI Docs
-    </div>
+<div class="sidebar">
 
-    <div class="nav-right">
+<h2>AI Docs</h2>
 
-        <span class="username">
-            {{ current_user.username }}
-        </span>
+<button onclick="uploadFile()">Upload</button>
 
-        <a href="/logout" class="logout-btn">
-            Logout
-        </a>
+<button onclick="translateText()">Translate</button>
 
-    </div>
+<button onclick="summarizeText()">Summarize</button>
 
-</nav>
+<button onclick="downloadPDF()">Download</button>
 
-<div class="container">
+<button onclick="copyOutput()">Copy</button>
 
-    <div class="upload-section">
-
-        <input type="file" id="fileInput">
-
-        <button onclick="uploadFile()">
-            Upload
-        </button>
-
-    </div>
-
-    <textarea id="textArea"
-              placeholder="Enter document text here..."></textarea>
-
-    <div class="button-group">
-
-        <button onclick="summarizeText()">
-            Summarize
-        </button>
-
-        <button onclick="translateText()">
-            Translate
-        </button>
-
-        <button onclick="chatDoc()">
-            Chat
-        </button>
-
-        <button onclick="convertDoc()">
-            Convert
-        </button>
-
-        <button onclick="copyText()">
-            Copy
-        </button>
-
-        <button onclick="clearText()">
-            Clear
-        </button>
-
-    </div>
-
-    <div class="history">
-
-        <h3>History</h3>
-
-        <ul id="historyList"></ul>
-
-    </div>
-
-    <div class="result-box"
-         id="resultBox">
-
-    </div>
+<button onclick="clearData()">Clear</button>
 
 </div>
 
-<script>
+<div class="content">
 
-function addHistory(action){
+<div class="topbar">
 
-    let li = document.createElement("li");
+<h1>AI Translator & Summarizer</h1>
 
-    li.innerText = action;
+<select id="language">
+<option>Hindi</option>
+<option>French</option>
+<option>German</option>
+<option>Spanish</option>
+<option>Japanese</option>
+<option>Korean</option>
+<option>Arabic</option>
+</select>
 
-    document.getElementById("historyList")
-            .appendChild(li);
-}
+</div>
 
-async function uploadFile(){
+<div class="workspace">
 
-    let fileInput = document.getElementById("fileInput");
+<div class="left-panel">
 
-    let file = fileInput.files[0];
+<input type="file" id="fileInput">
 
-    let formData = new FormData();
+<textarea id="inputText" placeholder="Upload or type document here"></textarea>
 
-    formData.append("file", file);
+</div>
 
-    let response = await fetch("/upload", {
-        method: "POST",
-        body: formData
-    });
+<div class="right-panel">
 
-    let data = await response.json();
+<div id="output">
+Output appears here...
+</div>
 
-    document.getElementById("resultBox")
-            .innerText = data.filename;
+<div class="history-box">
 
-    addHistory("Uploaded File");
-}
+<h3>History</h3>
 
-async function summarizeText(){
+<ul id="historyList"></ul>
 
-    let text = document.getElementById("textArea").value;
+</div>
 
-    let response = await fetch("/summarize", {
+</div>
 
-        method: "POST",
+</div>
 
-        headers: {
-            "Content-Type": "application/json"
-        },
+</div>
 
-        body: JSON.stringify({
-            text: text
-        })
-    });
+</div>
 
-    let data = await response.json();
-
-    document.getElementById("resultBox")
-            .innerText = data.result;
-
-    addHistory("Summarized Text");
-}
-
-async function translateText(){
-
-    let text = document.getElementById("textArea").value;
-
-    let response = await fetch("/translate", {
-
-        method: "POST",
-
-        headers: {
-            "Content-Type": "application/json"
-        },
-
-        body: JSON.stringify({
-            text: text
-        })
-    });
-
-    let data = await response.json();
-
-    document.getElementById("resultBox")
-            .innerText = data.result;
-
-    addHistory("Translated Text");
-}
-
-async function chatDoc(){
-
-    let text = document.getElementById("textArea").value;
-
-    let response = await fetch("/chat", {
-
-        method: "POST",
-
-        headers: {
-            "Content-Type": "application/json"
-        },
-
-        body: JSON.stringify({
-            message: text
-        })
-    });
-
-    let data = await response.json();
-
-    document.getElementById("resultBox")
-            .innerText = data.result;
-
-    addHistory("Chat Used");
-}
-
-async function convertDoc(){
-
-    let response = await fetch("/convert", {
-        method: "POST"
-    });
-
-    let data = await response.json();
-
-    document.getElementById("resultBox")
-            .innerText = data.result;
-
-    addHistory("Converted Document");
-}
-
-function clearText(){
-
-    document.getElementById("textArea").value = "";
-
-    document.getElementById("resultBox").innerText = "";
-
-    addHistory("Cleared");
-}
-
-function copyText(){
-
-    let text = document.getElementById("resultBox").innerText;
-
-    navigator.clipboard.writeText(text);
-
-    addHistory("Copied Result");
-}
-
-</script>
+<script src="{{ url_for('static', filename='script.js') }}"></script>
 
 </body>
 </html>
