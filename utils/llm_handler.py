@@ -5,7 +5,6 @@ from sumy.summarizers.lsa import LsaSummarizer
 
 translator = Translator()
 
-
 LANGUAGE_CODES = {
     "Hindi": "hi",
     "French": "fr",
@@ -45,8 +44,27 @@ def summarize_text(text, language="English"):
 
     try:
 
+        # STEP 1:
+        # Translate FULL document first
+
+        if language != "English":
+
+            translated_full_text = translate_text(
+                text,
+                language
+            )
+
+            working_text = translated_full_text
+
+        else:
+
+            working_text = text
+
+        # STEP 2:
+        # Create summary from translated text
+
         parser = PlaintextParser.from_string(
-            text,
+            working_text,
             Tokenizer("english")
         )
 
@@ -61,23 +79,8 @@ def summarize_text(text, language="English"):
             [str(sentence) for sentence in summary_sentences]
         )
 
-        if language != "English":
-            summary = translate_text(summary, language)
-
         return summary
 
     except Exception as e:
 
         return f"Summary Error: {str(e)}"
-
-
-def answer_question(context, question):
-
-    context = context.lower()
-
-    question = question.lower()
-
-    if question in context:
-        return "Answer found in document."
-
-    return "This lightweight version supports basic document searching only."
