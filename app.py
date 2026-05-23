@@ -574,6 +574,10 @@ def download():
                 "error": "No text available"
             })
 
+        # =====================================
+        # FILE PATH
+        # =====================================
+
         filename = f"{uuid.uuid4()}.pdf"
 
         filepath = os.path.join(
@@ -581,72 +585,132 @@ def download():
             filename
         )
 
+        # =====================================
+        # REPORTLAB IMPORTS
+        # =====================================
+
         from reportlab.platypus import (
             SimpleDocTemplate,
             Paragraph,
             Spacer
         )
 
-        from reportlab.lib.styles import getSampleStyleSheet
+        from reportlab.lib.styles import (
+            getSampleStyleSheet
+        )
+
+        from reportlab.lib.pagesizes import letter
 
         from reportlab.lib.enums import TA_LEFT
 
         from reportlab.lib.styles import ParagraphStyle
 
-        # Register Hindi Unicode font
+        from reportlab.pdfbase import pdfmetrics
+
+        from reportlab.pdfbase.ttfonts import TTFont
+
+        # =====================================
+        # FONT PATH
+        # =====================================
+
         font_path = os.path.join(
+            "static",
             "fonts",
-            "NotoSansDevanagari-Regular.ttf"
+            "DejaVuSans.ttf"
         )
 
-        pdfmetrics.registerFont(
-            TTFont(
-                "HindiFont",
-                font_path
+        # Register font only once
+        try:
+            pdfmetrics.getFont("DejaVu")
+        except:
+            pdfmetrics.registerFont(
+                TTFont(
+                    "DejaVu",
+                    font_path
+                )
             )
-        )
 
-        doc = SimpleDocTemplate(filepath)
+        # =====================================
+        # CREATE PDF
+        # =====================================
+
+        doc = SimpleDocTemplate(
+            filepath,
+            pagesize=letter,
+            rightMargin=40,
+            leftMargin=40,
+            topMargin=40,
+            bottomMargin=30
+        )
 
         styles = getSampleStyleSheet()
 
-        hindi_style = ParagraphStyle(
-            "HindiStyle",
+        custom_style = ParagraphStyle(
+            "CustomStyle",
             parent=styles["BodyText"],
-            fontName="HindiFont",
+            fontName="DejaVu",
             fontSize=12,
-            leading=20,
+            leading=22,
             alignment=TA_LEFT
         )
 
         story = []
 
+        # Title
+        story.append(
+            Paragraph(
+                "<b>AI Translator & Summarizer Output</b>",
+                custom_style
+            )
+        )
+
+        story.append(
+            Spacer(1, 20)
+        )
+
+        # Content
         lines = text.split("\n")
 
         for line in lines:
 
-            if line.strip():
+            line = line.strip()
+
+            if line:
+
+                safe_line = (
+                    line.replace("&", "&amp;")
+                        .replace("<", "&lt;")
+                        .replace(">", "&gt;")
+                )
 
                 story.append(
                     Paragraph(
-                        line,
-                        hindi_style
+                        safe_line,
+                        custom_style
                     )
                 )
 
                 story.append(
-                    Spacer(1, 10)
+                    Spacer(1, 12)
                 )
 
+        # Build PDF
         doc.build(story)
+
+        # =====================================
+        # RETURN FILE
+        # =====================================
 
         return send_file(
             filepath,
             as_attachment=True,
-            download_name="translated_document.pdf"
+            download_name="translated_document.pdf",
+            mimetype="application/pdf"
         )
 
     except Exception as e:
+
+        print("DOWNLOAD ERROR:", str(e))
 
         return jsonify({
             "error": str(e)
