@@ -575,7 +575,7 @@ def download():
             })
 
         # =====================================
-        # FILE PATH
+        # FILE NAME
         # =====================================
 
         filename = f"{uuid.uuid4()}.pdf"
@@ -586,31 +586,20 @@ def download():
         )
 
         # =====================================
-        # REPORTLAB IMPORTS
+        # CREATE PDF
         # =====================================
 
-        from reportlab.platypus import (
-            SimpleDocTemplate,
-            Paragraph,
-            Spacer
+        pdf = FPDF()
+
+        pdf.set_auto_page_break(
+            auto=True,
+            margin=15
         )
 
-        from reportlab.lib.styles import (
-            getSampleStyleSheet
-        )
-
-        from reportlab.lib.pagesizes import letter
-
-        from reportlab.lib.enums import TA_LEFT
-
-        from reportlab.lib.styles import ParagraphStyle
-
-        from reportlab.pdfbase import pdfmetrics
-
-        from reportlab.pdfbase.ttfonts import TTFont
+        pdf.add_page()
 
         # =====================================
-        # FONT PATH
+        # LOAD FONT
         # =====================================
 
         font_path = os.path.join(
@@ -619,56 +608,22 @@ def download():
             "DejaVuSans.ttf"
         )
 
-        # Register font only once
-        try:
-            pdfmetrics.getFont("DejaVu")
-        except:
-            pdfmetrics.registerFont(
-                TTFont(
-                    "DejaVu",
-                    font_path
-                )
-            )
+        pdf.add_font(
+            "DejaVu",
+            "",
+            font_path,
+            uni=True
+        )
+
+        pdf.set_font(
+            "DejaVu",
+            size=12
+        )
 
         # =====================================
-        # CREATE PDF
+        # WRITE TEXT
         # =====================================
 
-        doc = SimpleDocTemplate(
-            filepath,
-            pagesize=letter,
-            rightMargin=40,
-            leftMargin=40,
-            topMargin=40,
-            bottomMargin=30
-        )
-
-        styles = getSampleStyleSheet()
-
-        custom_style = ParagraphStyle(
-            "CustomStyle",
-            parent=styles["BodyText"],
-            fontName="DejaVu",
-            fontSize=12,
-            leading=22,
-            alignment=TA_LEFT
-        )
-
-        story = []
-
-        # Title
-        story.append(
-            Paragraph(
-                "<b>AI Translator & Summarizer Output</b>",
-                custom_style
-            )
-        )
-
-        story.append(
-            Spacer(1, 20)
-        )
-
-        # Content
         lines = text.split("\n")
 
         for line in lines:
@@ -677,28 +632,25 @@ def download():
 
             if line:
 
-                safe_line = (
-                    line.replace("&", "&amp;")
-                        .replace("<", "&lt;")
-                        .replace(">", "&gt;")
-                )
+                try:
 
-                story.append(
-                    Paragraph(
-                        safe_line,
-                        custom_style
+                    pdf.multi_cell(
+                        0,
+                        10,
+                        txt=line
                     )
-                )
 
-                story.append(
-                    Spacer(1, 12)
-                )
-
-        # Build PDF
-        doc.build(story)
+                except:
+                    pass
 
         # =====================================
-        # RETURN FILE
+        # SAVE PDF
+        # =====================================
+
+        pdf.output(filepath)
+
+        # =====================================
+        # SEND FILE
         # =====================================
 
         return send_file(
@@ -710,7 +662,7 @@ def download():
 
     except Exception as e:
 
-        print("DOWNLOAD ERROR:", str(e))
+        print("PDF ERROR:", str(e))
 
         return jsonify({
             "error": str(e)
