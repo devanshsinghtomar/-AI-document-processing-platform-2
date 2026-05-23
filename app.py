@@ -598,7 +598,7 @@ def history_page():
 
 
 # =========================================
-# HISTORY API DATA
+# HISTORY DATA API
 # =========================================
 
 @app.route("/history-data")
