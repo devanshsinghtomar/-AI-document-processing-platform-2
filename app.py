@@ -42,6 +42,8 @@ from reportlab.platypus import (
 )
 
 from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 
 
 # =========================================
@@ -569,10 +571,9 @@ def download():
         if not text.strip():
 
             return jsonify({
-                "error": "No text available for download"
+                "error": "No text available"
             })
 
-        # Create unique filename
         filename = f"{uuid.uuid4()}.pdf"
 
         filepath = os.path.join(
@@ -580,7 +581,6 @@ def download():
             filename
         )
 
-        # Create PDF properly
         from reportlab.platypus import (
             SimpleDocTemplate,
             Paragraph,
@@ -589,9 +589,35 @@ def download():
 
         from reportlab.lib.styles import getSampleStyleSheet
 
+        from reportlab.lib.enums import TA_LEFT
+
+        from reportlab.lib.styles import ParagraphStyle
+
+        # Register Hindi Unicode font
+        font_path = os.path.join(
+            "fonts",
+            "NotoSansDevanagari-Regular.ttf"
+        )
+
+        pdfmetrics.registerFont(
+            TTFont(
+                "HindiFont",
+                font_path
+            )
+        )
+
         doc = SimpleDocTemplate(filepath)
 
         styles = getSampleStyleSheet()
+
+        hindi_style = ParagraphStyle(
+            "HindiStyle",
+            parent=styles["BodyText"],
+            fontName="HindiFont",
+            fontSize=12,
+            leading=20,
+            alignment=TA_LEFT
+        )
 
         story = []
 
@@ -602,7 +628,10 @@ def download():
             if line.strip():
 
                 story.append(
-                    Paragraph(line, styles["BodyText"])
+                    Paragraph(
+                        line,
+                        hindi_style
+                    )
                 )
 
                 story.append(
@@ -623,25 +652,13 @@ def download():
             "error": str(e)
         })
 
-
 # =========================================
 # HISTORY PAGE
 # =========================================
 
-@app.route("/history")
+@app.route("/history-page")
 @login_required
 def history_page():
-
-    return render_template("history.html")
-
-
-# =========================================
-# HISTORY DATA API
-# =========================================
-
-@app.route("/history-data")
-@login_required
-def history_data():
 
     records = History.query.filter_by(
         user_id=current_user.id
@@ -649,18 +666,10 @@ def history_data():
         History.created_at.desc()
     ).all()
 
-    result = []
-
-    for item in records:
-
-        result.append({
-            "action": item.action,
-            "content": item.content,
-            "date": item.created_at.strftime("%d-%m-%Y %H:%M")
-        })
-
-    return jsonify(result)
-
+    return render_template(
+        "history.html",
+        records=records
+    )
 
 # =========================================
 # CLEAR
