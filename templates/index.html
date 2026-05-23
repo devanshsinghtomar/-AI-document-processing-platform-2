@@ -1,17 +1,20 @@
-# templates/index.html
-
-```html
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>AI Document Translator</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
 <style>
+
 *{
 margin:0;
 padding:0;
@@ -159,12 +162,29 @@ button:hover{
 transform:translateY(-2px);
 }
 
-.btn-upload{background:linear-gradient(135deg,#3b82f6,#06b6d4);}
-.btn-translate{background:linear-gradient(135deg,#8b5cf6,#ec4899);}
-.btn-summary{background:linear-gradient(135deg,#10b981,#14b8a6);}
-.btn-copy{background:linear-gradient(135deg,#f59e0b,#f97316);}
-.btn-clear{background:linear-gradient(135deg,#ef4444,#dc2626);}
-.btn-download{background:linear-gradient(135deg,#06b6d4,#2563eb);}
+.btn-upload{
+background:linear-gradient(135deg,#3b82f6,#06b6d4);
+}
+
+.btn-translate{
+background:linear-gradient(135deg,#8b5cf6,#ec4899);
+}
+
+.btn-summary{
+background:linear-gradient(135deg,#10b981,#14b8a6);
+}
+
+.btn-copy{
+background:linear-gradient(135deg,#f59e0b,#f97316);
+}
+
+.btn-clear{
+background:linear-gradient(135deg,#ef4444,#dc2626);
+}
+
+.btn-download{
+background:linear-gradient(135deg,#06b6d4,#2563eb);
+}
 
 .loading{
 display:none;
@@ -173,6 +193,7 @@ margin-top:15px;
 }
 
 @media(max-width:1000px){
+
 .main-grid{
 grid-template-columns:1fr;
 }
@@ -180,9 +201,11 @@ grid-template-columns:1fr;
 .controls{
 grid-template-columns:1fr 1fr;
 }
+
 }
 
 @media(max-width:600px){
+
 .controls{
 grid-template-columns:1fr;
 }
@@ -191,297 +214,368 @@ grid-template-columns:1fr;
 flex-direction:column;
 gap:15px;
 }
+
 }
+
 </style>
+
 </head>
+
 <body>
 
 <div class="container">
 
 <div class="navbar">
-<div class="logo">🌍 AI Translator</div>
+
+<div class="logo">
+🌍 AI Translator
+</div>
 
 <div class="nav-links">
-<a href="/history-page"><i class="fa-solid fa-clock-rotate-left"></i> History</a>
-<a href="/logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+
+<a href="/history-page">
+<i class="fa-solid fa-clock-rotate-left"></i>
+History
+</a>
+
+<a href="/logout">
+<i class="fa-solid fa-right-from-bracket"></i>
+Logout
+</a>
+
 </div>
+
 </div>
 
 <div class="main-grid">
 
 <div class="card">
+
 <h2>📂 Upload Document</h2>
 
-<div class="upload-box" onclick="document.getElementById('fileInput').click()">
+<div class="upload-box"
+onclick="document.getElementById('fileInput').click()">
+
 <i class="fa-solid fa-cloud-arrow-up"></i>
+
 <h3>Choose File</h3>
+
 <p>Upload TXT, PDF or DOCX</p>
+
 </div>
 
 <input type="file" id="fileInput" hidden>
 
-<textarea id="inputText" placeholder="Uploaded text will appear here..."></textarea>
+<textarea
+id="inputText"
+placeholder="Uploaded text will appear here..."></textarea>
 
 <div class="controls">
+
 <select id="language">
+
 <option value="hi">Hindi</option>
 <option value="fr">French</option>
 <option value="de">German</option>
 <option value="es">Spanish</option>
 <option value="it">Italian</option>
 <option value="ja">Japanese</option>
+
 </select>
 
-<button class="btn-upload" onclick="uploadFile()">Upload</button>
-<button class="btn-translate" onclick="translateText()">Translate</button>
-<button class="btn-summary" onclick="summarizeText()">Summarize</button>
-<button class="btn-copy" onclick="copyText()">Copy</button>
-<button class="btn-clear" onclick="clearText()">Clear</button>
-<button class="btn-download" onclick="downloadPDF()">Download</button>
+<button class="btn-upload"
+onclick="uploadFile()">
+Upload
+</button>
+
+<button class="btn-translate"
+onclick="translateText()">
+Translate
+</button>
+
+<button class="btn-summary"
+onclick="summarizeText()">
+Summarize
+</button>
+
+<button class="btn-copy"
+onclick="copyText()">
+Copy
+</button>
+
+<button class="btn-clear"
+onclick="clearText()">
+Clear
+</button>
+
+<button class="btn-download"
+onclick="downloadPDF()">
+Download
+</button>
+
 </div>
 
 <div class="loading" id="loading">
+
 <p>Processing...</p>
+
 </div>
+
 </div>
 
 <div class="card">
+
 <h2>📄 Output</h2>
+
 <div class="output-box" id="outputText">
+
 Your translated or summarized result will appear here...
-</div>
+
 </div>
 
 </div>
+
+</div>
+
 </div>
 
 <script>
 
 async function uploadFile(){
 
-const fileInput = document.getElementById('fileInput');
+const fileInput =
+document.getElementById('fileInput');
+
 const file = fileInput.files[0];
 
 if(!file){
+
 alert('Please choose a file');
+
 return;
+
 }
 
 const formData = new FormData();
+
 formData.append('file', file);
 
 try{
 
 const response = await fetch('/upload',{
+
 method:'POST',
 body:formData
+
 });
 
 const data = await response.json();
 
 if(data.error){
+
 alert(data.error);
+
 return;
+
 }
 
-document.getElementById('inputText').value = data.text;
+document.getElementById('inputText').value =
+data.text;
 
-document.getElementById('outputText').innerText = 'File uploaded successfully';
+document.getElementById('outputText').innerText =
+'✅ File uploaded successfully';
 
 }catch(error){
+
+console.log(error);
+
 alert('Upload failed');
+
 }
+
 }
+
 
 
 async function translateText(){
 
-const text = document.getElementById('inputText').value;
-const language = document.getElementById('language').value;
+const text =
+document.getElementById('inputText').value;
+
+const language =
+document.getElementById('language').value;
 
 if(!text){
+
 alert('Please upload or enter text');
+
 return;
+
 }
 
+try{
+
 const response = await fetch('/translate',{
+
 method:'POST',
+
 headers:{
 'Content-Type':'application/json'
 },
+
 body:JSON.stringify({
 text:text,
 language:language
 })
+
 });
 
 const data = await response.json();
 
-document.getElementById('outputText').innerText = data.result;
+document.getElementById('outputText').innerText =
+data.result;
+
+}catch(error){
+
+alert('Translation Failed');
+
 }
+
+}
+
 
 
 async function summarizeText(){
 
-const text = document.getElementById('inputText').value;
-const language = document.getElementById('language').value;
+const text =
+document.getElementById('inputText').value;
+
+const language =
+document.getElementById('language').value;
 
 if(!text){
+
 alert('Please upload or enter text');
+
 return;
+
 }
 
+try{
+
 const response = await fetch('/summarize',{
+
 method:'POST',
+
 headers:{
 'Content-Type':'application/json'
 },
+
 body:JSON.stringify({
 text:text,
 language:language
 })
+
 });
 
 const data = await response.json();
 
-document.getElementById('outputText').innerText = data.result;
+document.getElementById('outputText').innerText =
+data.result;
+
+}catch(error){
+
+alert('Summary Failed');
+
 }
+
+}
+
 
 
 function copyText(){
 
-const text = document.getElementById('outputText').innerText;
+const text =
+document.getElementById('outputText').innerText;
 
 navigator.clipboard.writeText(text);
 
 alert('Copied Successfully');
+
 }
+
 
 
 function clearText(){
 
 document.getElementById('inputText').value='';
 
-document.getElementById('outputText').innerText='Output cleared';
+document.getElementById('outputText').innerText=
+'Output cleared';
+
 }
 
-<div class="container">
 
-<div class="title">
-
-<h1>📜 History</h1>
-
-<a href="/" class="back-btn">
-⬅ Back
-</a>
-
-</div>
-
-{% if records and records|length > 0 %}
-
-<div style="
-display:grid;
-grid-template-columns:
-repeat(auto-fit,minmax(320px,1fr));
-gap:25px;
-">
-
-{% for item in records %}
-
-<div class="history-card"
-style="
-background:rgba(255,255,255,0.08);
-backdrop-filter:blur(15px);
-box-shadow:0 10px 30px rgba(0,0,0,0.3);
-transition:0.3s;
-">
-
-<div style="
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin-bottom:15px;
-">
-
-<h2 style="
-color:#38bdf8;
-font-size:22px;
-">
-{{ item.action }}
-</h2>
-
-<small style="
-color:#94a3b8;
-">
-{{ item.created_at.strftime("%d-%m-%Y %H:%M") }}
-</small>
-
-</div>
-
-<div style="
-max-height:260px;
-overflow-y:auto;
-padding-right:5px;
-line-height:1.8;
-white-space:pre-wrap;
-">
-
-{{ item.content }}
-
-</div>
-
-</div>
-
-{% endfor %}
-
-</div>
-
-{% else %}
-
-<div class="no-history">
-
-📂 No History Found
-
-</div>
-
-{% endif %}
-
-</div>
 
 async function downloadPDF(){
 
-const text = document.getElementById('outputText').innerText;
+const text =
+document.getElementById('outputText').innerText;
 
 if(!text || text==='Output cleared'){
+
 alert('No content to download');
+
 return;
+
 }
 
+try{
+
 const response = await fetch('/download',{
+
 method:'POST',
+
 headers:{
 'Content-Type':'application/json'
 },
+
 body:JSON.stringify({
 text:text
 })
+
 });
 
 const blob = await response.blob();
 
-const url = window.URL.createObjectURL(blob);
+const url =
+window.URL.createObjectURL(blob);
 
-const a = document.createElement('a');
+const a =
+document.createElement('a');
+
 a.href = url;
-a.download = 'translated_document.pdf';
+
+a.download =
+'translated_document.pdf';
 
 document.body.appendChild(a);
+
 a.click();
+
 a.remove();
+
+window.URL.revokeObjectURL(url);
+
+}catch(error){
+
+alert('Download Failed');
+
+}
+
 }
 
 </script>
 
 </body>
 </html>
-```
