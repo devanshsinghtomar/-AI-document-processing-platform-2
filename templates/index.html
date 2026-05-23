@@ -365,6 +365,88 @@ document.getElementById('inputText').value='';
 document.getElementById('outputText').innerText='Output cleared';
 }
 
+<div class="container">
+
+<div class="title">
+
+<h1>📜 History</h1>
+
+<a href="/" class="back-btn">
+⬅ Back
+</a>
+
+</div>
+
+{% if records and records|length > 0 %}
+
+<div style="
+display:grid;
+grid-template-columns:
+repeat(auto-fit,minmax(320px,1fr));
+gap:25px;
+">
+
+{% for item in records %}
+
+<div class="history-card"
+style="
+background:rgba(255,255,255,0.08);
+backdrop-filter:blur(15px);
+box-shadow:0 10px 30px rgba(0,0,0,0.3);
+transition:0.3s;
+">
+
+<div style="
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:15px;
+">
+
+<h2 style="
+color:#38bdf8;
+font-size:22px;
+">
+{{ item.action }}
+</h2>
+
+<small style="
+color:#94a3b8;
+">
+{{ item.created_at.strftime("%d-%m-%Y %H:%M") }}
+</small>
+
+</div>
+
+<div style="
+max-height:260px;
+overflow-y:auto;
+padding-right:5px;
+line-height:1.8;
+white-space:pre-wrap;
+">
+
+{{ item.content }}
+
+</div>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+{% else %}
+
+<div class="no-history">
+
+📂 No History Found
+
+</div>
+
+{% endif %}
+
+</div>
 
 async function downloadPDF(){
 
