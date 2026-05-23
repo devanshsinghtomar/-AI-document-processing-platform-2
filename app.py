@@ -35,6 +35,14 @@ import datetime
 import fitz
 import docx
 
+from reportlab.platypus import (
+    SimpleDocTemplate,
+    Paragraph,
+    Spacer
+)
+
+from reportlab.lib.styles import getSampleStyleSheet
+
 
 # =========================================
 # APP CONFIG
@@ -564,19 +572,49 @@ def download():
                 "error": "No text available for download"
             })
 
-        filepath = create_pdf(text)
+        # Create unique filename
+        filename = f"{uuid.uuid4()}.pdf"
 
-        if not filepath:
+        filepath = os.path.join(
+            app.config["DOWNLOAD_FOLDER"],
+            filename
+        )
 
-            return jsonify({
-                "error": "PDF generation failed"
-            })
+        # Create PDF properly
+        from reportlab.platypus import (
+            SimpleDocTemplate,
+            Paragraph,
+            Spacer
+        )
+
+        from reportlab.lib.styles import getSampleStyleSheet
+
+        doc = SimpleDocTemplate(filepath)
+
+        styles = getSampleStyleSheet()
+
+        story = []
+
+        lines = text.split("\n")
+
+        for line in lines:
+
+            if line.strip():
+
+                story.append(
+                    Paragraph(line, styles["BodyText"])
+                )
+
+                story.append(
+                    Spacer(1, 10)
+                )
+
+        doc.build(story)
 
         return send_file(
             filepath,
             as_attachment=True,
-            download_name="translated_document.pdf",
-            mimetype="application/pdf"
+            download_name="translated_document.pdf"
         )
 
     except Exception as e:
