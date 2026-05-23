@@ -4,7 +4,9 @@
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
 
 <title>History</title>
 
@@ -20,10 +22,9 @@ font-family:'Poppins',sans-serif;
 }
 
 body{
-background:linear-gradient(135deg,#020617,#0f172a,#1e293b);
-min-height:100vh;
-padding:40px;
+background:#0f172a;
 color:white;
+padding:40px;
 }
 
 .container{
@@ -31,113 +32,58 @@ max-width:1200px;
 margin:auto;
 }
 
-.top-bar{
+.title{
 display:flex;
 justify-content:space-between;
 align-items:center;
-margin-bottom:40px;
+margin-bottom:30px;
 }
 
-.title{
-font-size:42px;
-font-weight:700;
+.title h1{
+font-size:38px;
 }
 
 .back-btn{
-padding:14px 24px;
-border:none;
-border-radius:14px;
-background:linear-gradient(135deg,#2563eb,#3b82f6);
-color:white;
-font-size:15px;
-font-weight:600;
-cursor:pointer;
-transition:0.3s;
-}
-
-.back-btn:hover{
-transform:translateY(-2px);
-}
-
-.history-grid{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
-gap:25px;
-}
-
-.card{
-background:rgba(255,255,255,0.08);
-border:1px solid rgba(255,255,255,0.1);
-backdrop-filter:blur(12px);
-padding:25px;
-border-radius:24px;
-transition:0.3s;
-overflow:hidden;
-}
-
-.card:hover{
-transform:translateY(-5px);
-}
-
-.action{
-display:inline-block;
-padding:8px 16px;
-border-radius:50px;
-font-size:13px;
-font-weight:600;
-margin-bottom:18px;
-}
-
-.Translate{
+padding:12px 20px;
 background:#2563eb;
+color:white;
+border:none;
+border-radius:10px;
+cursor:pointer;
+text-decoration:none;
 }
 
-.Summary{
-background:#9333ea;
+.history-card{
+background:#1e293b;
+padding:25px;
+border-radius:20px;
+margin-bottom:20px;
+border:1px solid rgba(255,255,255,0.1);
 }
 
-.Upload{
-background:#059669;
+.history-card h2{
+font-size:20px;
+margin-bottom:10px;
+color:#38bdf8;
 }
 
-.content{
-font-size:15px;
+.history-card p{
 line-height:1.8;
 color:#e2e8f0;
-max-height:220px;
-overflow-y:auto;
 white-space:pre-wrap;
 }
 
-.date{
-margin-top:20px;
-font-size:13px;
+.history-card small{
+display:block;
+margin-top:15px;
 color:#94a3b8;
 }
 
-.empty{
+.no-history{
 text-align:center;
-padding:80px 20px;
+padding:100px 20px;
 font-size:22px;
-color:#cbd5e1;
-}
-
-@media(max-width:768px){
-
-body{
-padding:20px;
-}
-
-.title{
-font-size:30px;
-}
-
-.top-bar{
-flex-direction:column;
-gap:20px;
-align-items:flex-start;
-}
-
+color:#94a3b8;
 }
 
 </style>
@@ -148,89 +94,45 @@ align-items:flex-start;
 
 <div class="container">
 
-<div class="top-bar">
+<div class="title">
 
-<h1 class="title">📜 History</h1>
+<h1>📜 History</h1>
 
-<button class="back-btn"
-onclick="window.location.href='/'">
-
+<a href="/" class="back-btn">
 ⬅ Back
-
-</button>
-
-</div>
-
-<div id="historyContainer" class="history-grid">
+</a>
 
 </div>
 
+{% if records %}
+
+{% for item in records %}
+
+<div class="history-card">
+
+<h2>{{ item.action }}</h2>
+
+<p>{{ item.content }}</p>
+
+<small>
+{{ item.created_at.strftime("%d-%m-%Y %H:%M") }}
+</small>
+
 </div>
 
-<script>
+{% endfor %}
 
-async function loadHistory(){
+{% else %}
 
-    try{
+<div class="no-history">
 
-        const response = await fetch('/history');
+No History Found
 
-        const data = await response.json();
+</div>
 
-        const container = document.getElementById('historyContainer');
+{% endif %}
 
-        container.innerHTML = '';
-
-        if(data.length === 0){
-
-            container.innerHTML = `
-            <div class="empty">
-            No history found
-            </div>
-            `;
-
-            return;
-        }
-
-        data.forEach(item=>{
-
-            const card = document.createElement('div');
-
-            card.className = 'card';
-
-            card.innerHTML = `
-
-            <div class="action ${item.action}">
-            ${item.action}
-            </div>
-
-            <div class="content">
-            ${item.content}
-            </div>
-
-            <div class="date">
-            ${item.date}
-            </div>
-
-            `;
-
-            container.appendChild(card);
-
-        });
-
-    }
-
-    catch(error){
-
-        console.error(error);
-
-    }
-
-}
-
-loadHistory();
-
-</script>
+</div>
 
 </body>
 
