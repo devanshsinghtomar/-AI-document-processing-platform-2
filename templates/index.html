@@ -519,10 +519,9 @@ document.getElementById('outputText').innerText=
 
 async function downloadPDF(){
 
-const text =
-document.getElementById('outputText').innerText;
+const text = document.getElementById('outputText').innerText;
 
-if(!text || text==='Output cleared'){
+if(!text || text === 'Output cleared'){
 
 alert('No content to download');
 
@@ -546,35 +545,43 @@ text:text
 
 });
 
+if(!response.ok){
+
+alert('PDF generation failed');
+
+return;
+
+}
+
 const blob = await response.blob();
 
-const url =
-window.URL.createObjectURL(blob);
+const blobUrl = window.URL.createObjectURL(
+new Blob([blob], { type: 'application/pdf' })
+);
 
-const a =
-document.createElement('a');
+const link = document.createElement('a');
 
-a.href = url;
+link.href = blobUrl;
 
-a.download =
-'translated_document.pdf';
+link.download = 'translated_document.pdf';
 
-document.body.appendChild(a);
+document.body.appendChild(link);
 
-a.click();
+link.click();
 
-a.remove();
+link.remove();
 
-window.URL.revokeObjectURL(url);
-
-}catch(error){
-
-alert('Download Failed');
+window.URL.revokeObjectURL(blobUrl);
 
 }
+catch(error){
+
+console.log(error);
+
+alert('Download failed');
 
 }
-
+}
 </script>
 
 </body>
