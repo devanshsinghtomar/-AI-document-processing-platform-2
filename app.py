@@ -555,7 +555,7 @@ def summarize():
 
 
 # =========================================
-# DOWNLOAD PDF
+# DOWNLOAD PDF FIXED
 # =========================================
 
 @app.route("/download", methods=["POST"])
@@ -574,10 +574,6 @@ def download():
                 "error": "No text available"
             })
 
-        # =====================================
-        # FILE NAME
-        # =====================================
-
         filename = f"{uuid.uuid4()}.pdf"
 
         filepath = os.path.join(
@@ -585,74 +581,72 @@ def download():
             filename
         )
 
-        # =====================================
-        # CREATE PDF
-        # =====================================
-
-        pdf = FPDF()
-
-        pdf.set_auto_page_break(
-            auto=True,
-            margin=15
+        # REPORTLAB PDF
+        from reportlab.platypus import (
+            SimpleDocTemplate,
+            Paragraph,
+            Spacer
         )
 
-        pdf.add_page()
+        from reportlab.lib.styles import getSampleStyleSheet
+        from reportlab.pdfbase import pdfmetrics
+        from reportlab.pdfbase.ttfonts import TTFont
+        from reportlab.lib.styles import ParagraphStyle
 
-        # =====================================
-        # LOAD FONT
-        # =====================================
-
+        # FONT PATH
         font_path = os.path.join(
             "static",
             "fonts",
             "DejaVuSans.ttf"
         )
 
-        pdf.add_font(
-            "DejaVu",
-            "",
-            font_path,
-            uni=True
+        # REGISTER FONT
+        pdfmetrics.registerFont(
+            TTFont(
+                "DejaVu",
+                font_path
+            )
         )
 
-        pdf.set_font(
-            "DejaVu",
-            size=12
+        # CREATE PDF
+        doc = SimpleDocTemplate(filepath)
+
+        styles = getSampleStyleSheet()
+
+        custom_style = ParagraphStyle(
+            "Custom",
+            parent=styles["BodyText"],
+            fontName="DejaVu",
+            fontSize=12,
+            leading=20
         )
 
-        # =====================================
-        # WRITE TEXT
-        # =====================================
+        story = []
 
-        lines = text.split("\n")
+        # SPLIT TEXT
+        paragraphs = text.split("\n")
 
-        for line in lines:
+        for para in paragraphs:
 
-            line = line.strip()
+            para = para.strip()
 
-            if line:
+            if para:
 
-                try:
-
-                    pdf.multi_cell(
-                        0,
-                        10,
-                        txt=line
+                story.append(
+                    Paragraph(
+                        para,
+                        custom_style
                     )
+                )
 
-                except:
-                    pass
+                story.append(
+                    Spacer(1, 10)
+                )
 
-        # =====================================
-        # SAVE PDF
-        # =====================================
+        # BUILD PDF
+        doc.build(story)
 
-        pdf.output(filepath)
-
-        # =====================================
-        # SEND FILE
-        # =====================================
-
+        # RETURN FILE
         return send_file(
             filepath,
             as_attachment=True,
@@ -662,12 +656,9 @@ def download():
 
     except Exception as e:
 
-        print("PDF ERROR:", str(e))
-
         return jsonify({
             "error": str(e)
         })
-
 # =========================================
 # HISTORY PAGE
 # =========================================
