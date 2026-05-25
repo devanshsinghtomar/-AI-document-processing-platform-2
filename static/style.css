@@ -9,7 +9,12 @@ body{
 background:#0f172a;
 color:white;
 min-height:100vh;
+overflow-x:hidden;
 }
+
+/* =========================================
+   AUTH PAGES
+========================================= */
 
 .auth-container{
 display:flex;
@@ -28,10 +33,13 @@ padding:60px;
 .auth-left h1{
 font-size:50px;
 margin-bottom:20px;
+line-height:1.2;
 }
 
 .auth-left p{
 font-size:18px;
+line-height:1.7;
+opacity:0.95;
 }
 
 .auth-right{
@@ -40,17 +48,22 @@ display:flex;
 justify-content:center;
 align-items:center;
 background:#111827;
+padding:20px;
 }
 
 .auth-box{
-width:400px;
+width:100%;
+max-width:400px;
 background:#1e293b;
 padding:40px;
 border-radius:20px;
+box-shadow:0 10px 30px rgba(0,0,0,0.4);
 }
 
 .auth-box h2{
 margin-bottom:25px;
+font-size:30px;
+text-align:center;
 }
 
 .auth-box input{
@@ -59,68 +72,145 @@ padding:15px;
 margin-bottom:20px;
 border:none;
 border-radius:10px;
+background:#0f172a;
+color:white;
+outline:none;
+font-size:15px;
+}
+
+.auth-box input::placeholder{
+color:#94a3b8;
 }
 
 .auth-box button{
 width:100%;
 padding:15px;
 border:none;
-background:#2563eb;
+background:linear-gradient(135deg,#2563eb,#3b82f6);
 color:white;
 font-size:16px;
+font-weight:600;
 border-radius:10px;
 cursor:pointer;
+transition:0.3s;
+}
+
+.auth-box button:hover{
+transform:translateY(-2px);
+opacity:0.95;
 }
 
 .auth-box p{
 margin-top:20px;
+text-align:center;
+color:#cbd5e1;
 }
+
+.auth-box a{
+color:#38bdf8;
+text-decoration:none;
+}
+
+/* =========================================
+   MAIN DASHBOARD
+========================================= */
 
 .main-container{
 display:flex;
-height:100vh;
+min-height:100vh;
 }
 
+/* =========================================
+   SIDEBAR
+========================================= */
+
 .sidebar{
-width:250px;
+width:260px;
 background:#111827;
-padding:30px;
+padding:30px 20px;
 display:flex;
 flex-direction:column;
 gap:20px;
+border-right:1px solid rgba(255,255,255,0.05);
+}
+
+.sidebar h2{
+font-size:24px;
+margin-bottom:10px;
+text-align:center;
 }
 
 .sidebar button{
 padding:15px;
 border:none;
-background:#2563eb;
+background:linear-gradient(135deg,#2563eb,#3b82f6);
 color:white;
 border-radius:12px;
 cursor:pointer;
 font-size:15px;
+font-weight:600;
+transition:0.3s;
 }
+
+.sidebar button:hover{
+transform:translateY(-2px);
+opacity:0.95;
+}
+
+/* =========================================
+   MAIN CONTENT
+========================================= */
 
 .content{
 flex:1;
 padding:30px;
 }
 
+/* =========================================
+   TOPBAR
+========================================= */
+
 .topbar{
 display:flex;
 justify-content:space-between;
 align-items:center;
 margin-bottom:25px;
+gap:15px;
+flex-wrap:wrap;
+}
+
+.topbar h1{
+font-size:30px;
 }
 
 .topbar select{
-padding:12px;
+padding:12px 15px;
 border-radius:10px;
+border:none;
+background:#1e293b;
+color:white;
+font-size:15px;
+outline:none;
 }
+
+/* =========================================
+   WORKSPACE
+========================================= */
 
 .workspace{
 display:grid;
 grid-template-columns:1fr 1fr;
 gap:25px;
+}
+
+/* =========================================
+   LEFT PANEL
+========================================= */
+
+.left-panel{
+display:flex;
+flex-direction:column;
+gap:20px;
 }
 
 .left-panel textarea{
@@ -132,7 +222,96 @@ border-radius:15px;
 background:#1e293b;
 color:white;
 margin-top:15px;
+resize:none;
+outline:none;
+font-size:15px;
+line-height:1.7;
+box-shadow:0 5px 20px rgba(0,0,0,0.25);
 }
+
+.left-panel textarea::placeholder{
+color:#94a3b8;
+}
+
+/* =========================================
+   CONTROL BUTTONS
+========================================= */
+
+.controls{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:15px;
+margin-top:10px;
+}
+
+.controls button,
+.controls select{
+padding:14px;
+border:none;
+border-radius:12px;
+font-size:15px;
+font-weight:600;
+outline:none;
+}
+
+.controls select{
+background:#1e293b;
+color:white;
+}
+
+.controls button{
+cursor:pointer;
+color:white;
+transition:0.3s;
+}
+
+.controls button:hover{
+transform:translateY(-2px);
+}
+
+/* =========================================
+   BUTTON COLORS
+========================================= */
+
+.btn-upload{
+background:linear-gradient(135deg,#3b82f6,#06b6d4);
+}
+
+.btn-translate{
+background:linear-gradient(135deg,#8b5cf6,#ec4899);
+}
+
+.btn-summary{
+background:linear-gradient(135deg,#10b981,#14b8a6);
+}
+
+.btn-copy{
+background:linear-gradient(135deg,#f59e0b,#f97316);
+}
+
+.btn-clear{
+background:linear-gradient(135deg,#ef4444,#dc2626);
+}
+
+.btn-download{
+background:linear-gradient(135deg,#06b6d4,#2563eb);
+}
+
+/* =========================================
+   NEW SPEECH BUTTONS
+========================================= */
+
+.btn-speech{
+background:linear-gradient(135deg,#14b8a6,#0f766e);
+}
+
+.btn-tts{
+background:linear-gradient(135deg,#6366f1,#4338ca);
+}
+
+/* =========================================
+   RIGHT PANEL
+========================================= */
 
 .right-panel{
 display:flex;
@@ -140,13 +319,24 @@ flex-direction:column;
 gap:20px;
 }
 
+/* =========================================
+   OUTPUT BOX
+========================================= */
+
 #output{
 background:#1e293b;
 padding:20px;
 border-radius:15px;
 height:350px;
 overflow:auto;
+line-height:1.8;
+white-space:pre-wrap;
+box-shadow:0 5px 20px rgba(0,0,0,0.25);
 }
+
+/* =========================================
+   HISTORY BOX
+========================================= */
 
 .history-box{
 background:#1e293b;
@@ -154,20 +344,141 @@ padding:20px;
 border-radius:15px;
 height:130px;
 overflow:auto;
+box-shadow:0 5px 20px rgba(0,0,0,0.25);
 }
 
-@media(max-width:900px){
+.history-box h3{
+margin-bottom:15px;
+}
+
+.history-box ul{
+list-style:none;
+}
+
+.history-box li{
+padding:8px 0;
+border-bottom:1px solid rgba(255,255,255,0.08);
+font-size:14px;
+}
+
+/* =========================================
+   SCROLLBAR
+========================================= */
+
+::-webkit-scrollbar{
+width:8px;
+}
+
+::-webkit-scrollbar-track{
+background:#0f172a;
+}
+
+::-webkit-scrollbar-thumb{
+background:#334155;
+border-radius:10px;
+}
+
+/* =========================================
+   RESPONSIVE DESIGN
+========================================= */
+
+@media(max-width:1100px){
 
 .workspace{
 grid-template-columns:1fr;
 }
 
+#output{
+height:300px;
+}
+
+}
+
+/* =========================================
+   TABLET
+========================================= */
+
+@media(max-width:900px){
+
 .sidebar{
 display:none;
 }
 
+.main-container{
+flex-direction:column;
+}
+
 .auth-container{
 flex-direction:column;
+height:auto;
+}
+
+.auth-left{
+padding:40px 30px;
+text-align:center;
+}
+
+.auth-left h1{
+font-size:38px;
+}
+
+.auth-right{
+padding:40px 20px;
+}
+
+.controls{
+grid-template-columns:1fr 1fr;
+}
+
+}
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media(max-width:600px){
+
+.content{
+padding:20px;
+}
+
+.topbar{
+flex-direction:column;
+align-items:flex-start;
+}
+
+.topbar h1{
+font-size:24px;
+}
+
+.controls{
+grid-template-columns:1fr;
+}
+
+.left-panel textarea{
+height:350px;
+padding:15px;
+}
+
+#output{
+height:250px;
+padding:15px;
+}
+
+.history-box{
+height:150px;
+}
+
+.auth-left h1{
+font-size:30px;
+}
+
+.auth-left p{
+font-size:16px;
+}
+
+.auth-box{
+padding:30px 20px;
 }
 
 }
