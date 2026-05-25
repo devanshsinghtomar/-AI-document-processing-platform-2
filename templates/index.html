@@ -69,6 +69,24 @@ transition:0.3s;
 background:#2563eb;
 }
 
+.status-bar{
+margin-bottom:20px;
+padding:14px 18px;
+border-radius:14px;
+background:rgba(255,255,255,0.08);
+font-size:14px;
+font-weight:600;
+color:#38bdf8;
+backdrop-filter:blur(10px);
+}
+
+.file-name{
+margin-top:10px;
+margin-bottom:10px;
+font-size:14px;
+color:#cbd5e1;
+}
+
 .main-grid{
 display:grid;
 grid-template-columns:1fr 1fr;
@@ -130,26 +148,6 @@ padding:20px;
 border-radius:20px;
 line-height:1.8;
 white-space:pre-wrap;
-}
-
-/* STATUS BAR */
-
-.status-bar{
-margin-bottom:20px;
-padding:14px 18px;
-border-radius:14px;
-background:rgba(255,255,255,0.08);
-font-size:14px;
-font-weight:600;
-color:#38bdf8;
-backdrop-filter:blur(10px);
-}
-
-.file-name{
-margin-top:10px;
-margin-bottom:10px;
-font-size:14px;
-color:#cbd5e1;
 }
 
 .controls{
@@ -275,8 +273,6 @@ Logout
 
 </div>
 
-<!-- STATUS BAR -->
-
 <div id="statusBar" class="status-bar">
 ✅ Ready
 </div>
@@ -353,12 +349,32 @@ Download
 
 <button class="btn-speech"
 id="speechBtn">
-🎤 Speech Input
+🎤 Start Input
+</button>
+
+<button class="btn-clear"
+id="stopSpeechBtn">
+⏹ Stop Input
 </button>
 
 <button class="btn-tts"
 onclick="speakOutput()">
-🔊 Read Output
+🔊 Start Output
+</button>
+
+<button class="btn-summary"
+onclick="pauseSpeech()">
+⏸ Pause Output
+</button>
+
+<button class="btn-upload"
+onclick="resumeSpeech()">
+▶ Resume Output
+</button>
+
+<button class="btn-clear"
+onclick="stopSpeechOutput()">
+⏹ Stop Output
 </button>
 
 </div>
@@ -389,16 +405,12 @@ Your translated or summarized result will appear here...
 
 <script>
 
-/* STATUS UPDATE FUNCTION */
-
 function updateStatus(message){
 
 document.getElementById('statusBar').innerText =
 message;
 
 }
-
-/* FILE NAME DISPLAY */
 
 document.getElementById('fileInput')
 .addEventListener('change',function(){
@@ -408,7 +420,8 @@ const file = this.files[0];
 if(file){
 
 document.getElementById('selectedFileName')
-.innerText = '📂 Selected File: ' + file.name;
+.innerText =
+'📂 Selected File: ' + file.name;
 
 updateStatus('📂 File selected');
 
@@ -608,7 +621,8 @@ updateStatus('🧹 Cleared');
 
 async function downloadPDF(){
 
-const text = document.getElementById('outputText').innerText;
+const text =
+document.getElementById('outputText').innerText;
 
 if(!text || text === 'Output cleared'){
 
@@ -685,6 +699,11 @@ updateStatus('❌ Download failed');
 const speechBtn =
 document.getElementById('speechBtn');
 
+const stopSpeechBtn =
+document.getElementById('stopSpeechBtn');
+
+let recognition;
+
 if('webkitSpeechRecognition' in window ||
    'SpeechRecognition' in window){
 
@@ -692,10 +711,10 @@ const SpeechRecognition =
 window.SpeechRecognition ||
 window.webkitSpeechRecognition;
 
-const recognition =
+recognition =
 new SpeechRecognition();
 
-recognition.continuous = false;
+recognition.continuous = true;
 
 recognition.interimResults = false;
 
@@ -705,42 +724,54 @@ speechBtn.addEventListener('click',()=>{
 
 recognition.start();
 
-speechBtn.innerText = '🎙 Listening...';
+updateStatus('🎤 Listening started...');
 
-updateStatus('🎤 Listening...');
+speechBtn.innerText =
+'🎙 Listening...';
+
+});
+
+stopSpeechBtn.addEventListener('click',()=>{
+
+recognition.stop();
+
+speechBtn.innerText =
+'🎤 Start Input';
+
+updateStatus('⏹ Speech input stopped');
 
 });
 
 recognition.onresult = (event)=>{
 
-const transcript =
-event.results[0][0].transcript;
+let transcript = '';
+
+for(let i=event.resultIndex;
+i<event.results.length;i++){
+
+transcript +=
+event.results[i][0].transcript + ' ';
+
+}
 
 document.getElementById('inputText').value +=
-' ' + transcript;
-
-speechBtn.innerText =
-'🎤 Speech Input';
-
-updateStatus('✅ Speech converted to text');
+transcript;
 
 };
 
 recognition.onerror = ()=>{
 
-speechBtn.innerText =
-'🎤 Speech Input';
-
-alert('Speech recognition failed');
-
 updateStatus('❌ Speech recognition failed');
+
+speechBtn.innerText =
+'🎤 Start Input';
 
 };
 
 recognition.onend = ()=>{
 
 speechBtn.innerText =
-'🎤 Speech Input';
+'🎤 Start Input';
 
 };
 
@@ -748,12 +779,16 @@ speechBtn.innerText =
 
 speechBtn.disabled = true;
 
+stopSpeechBtn.disabled = true;
+
 speechBtn.innerText =
 'Speech Not Supported';
 
 }
 
 /* TEXT TO SPEECH */
+
+let speechInstance;
 
 function speakOutput(){
 
@@ -769,31 +804,29 @@ return;
 
 }
 
-updateStatus('🔊 Reading output...');
-
 window.speechSynthesis.cancel();
 
-const speech =
+speechInstance =
 new SpeechSynthesisUtterance();
 
-speech.text = text;
+speechInstance.text = text;
 
-speech.volume = 1;
+speechInstance.volume = 1;
 
-speech.rate = 1;
+speechInstance.rate = 1;
 
-speech.pitch = 1;
+speechInstance.pitch = 1;
 
 const hindiRegex =
 /[\u0900-\u097F]/;
 
 if(hindiRegex.test(text)){
 
-speech.lang = 'hi-IN';
+speechInstance.lang = 'hi-IN';
 
 }else{
 
-speech.lang = 'en-US';
+speechInstance.lang = 'en-US';
 
 }
 
@@ -802,22 +835,48 @@ window.speechSynthesis.getVoices();
 
 const matchedVoice =
 voices.find(voice =>
-voice.lang === speech.lang
+voice.lang === speechInstance.lang
 );
 
 if(matchedVoice){
 
-speech.voice = matchedVoice;
+speechInstance.voice = matchedVoice;
 
 }
 
-window.speechSynthesis.speak(speech);
+window.speechSynthesis.speak(speechInstance);
 
-speech.onend = ()=>{
+updateStatus('🔊 Reading started...');
+
+speechInstance.onend = ()=>{
 
 updateStatus('✅ Reading completed');
 
 };
+
+}
+
+function pauseSpeech(){
+
+window.speechSynthesis.pause();
+
+updateStatus('⏸ Output paused');
+
+}
+
+function resumeSpeech(){
+
+window.speechSynthesis.resume();
+
+updateStatus('▶ Output resumed');
+
+}
+
+function stopSpeechOutput(){
+
+window.speechSynthesis.cancel();
+
+updateStatus('⏹ Output stopped');
 
 }
 
