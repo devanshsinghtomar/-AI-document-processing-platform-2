@@ -27,7 +27,6 @@ from werkzeug.security import (
 from werkzeug.utils import secure_filename
 
 from deep_translator import GoogleTranslator
-from fpdf import FPDF
 
 import os
 import uuid
@@ -41,7 +40,13 @@ from reportlab.platypus import (
     Spacer
 )
 
+from reportlab.lib.styles import getSampleStyleSheet
 
+from reportlab.pdfbase import pdfmetrics
+
+from reportlab.pdfbase.ttfonts import TTFont
+
+from reportlab.lib.pagesizes import letter
 
 
 # =========================================
@@ -220,17 +225,34 @@ def create_pdf(text):
             filename
         )
 
-        from reportlab.platypus import (
-            SimpleDocTemplate,
-            Paragraph,
-            Spacer
+        # REGISTER UNICODE FONT
+        font_path = "DejaVuSans.ttf"
+
+        if os.path.exists(font_path):
+
+            pdfmetrics.registerFont(
+                TTFont("DejaVu", font_path)
+            )
+
+            font_name = "DejaVu"
+
+        else:
+
+            font_name = "Helvetica"
+
+        # CREATE PDF
+        doc = SimpleDocTemplate(
+            filepath,
+            pagesize=letter
         )
 
-        from reportlab.lib.styles import getSampleStyleSheet
-
-        doc = SimpleDocTemplate(filepath)
-
         styles = getSampleStyleSheet()
+
+        style = styles["BodyText"]
+
+        style.fontName = font_name
+
+        style.leading = 22
 
         story = []
 
@@ -240,12 +262,16 @@ def create_pdf(text):
 
             if line.strip():
 
+                safe_line = (
+                    line.replace("&", "&amp;")
+                        .replace("<", "&lt;")
+                        .replace(">", "&gt;")
+                )
+
                 story.append(
                     Paragraph(
-                        line.replace("&", "&amp;")
-                            .replace("<", "&lt;")
-                            .replace(">", "&gt;"),
-                        styles["BodyText"]
+                        safe_line,
+                        style
                     )
                 )
 
@@ -564,6 +590,8 @@ def download():
         return jsonify({
             "error": str(e)
         })
+
+
 # =========================================
 # HISTORY PAGE
 # =========================================
@@ -582,6 +610,7 @@ def history_page():
         "history.html",
         records=records
     )
+
 
 # =========================================
 # CLEAR
