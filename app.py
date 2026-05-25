@@ -237,23 +237,13 @@ def create_pdf(text):
             filename
         )
 
-        # ======================================
         # FONT PATH
-        # ======================================
-
         font_path = os.path.join(
             app.root_path,
             "static",
             "fonts",
             "NotoSansDevanagari-Regular.ttf"
         )
-
-        # CHECK FONT EXISTS
-        if not os.path.exists(font_path):
-
-            print("Font file not found:", font_path)
-
-            return None
 
         # REGISTER FONT
         pdfmetrics.registerFont(
@@ -263,10 +253,7 @@ def create_pdf(text):
             )
         )
 
-        # ======================================
         # CREATE PDF
-        # ======================================
-
         doc = SimpleDocTemplate(
             filepath,
             pagesize=letter
@@ -280,7 +267,7 @@ def create_pdf(text):
 
         style.fontSize = 12
 
-        style.leading = 22
+        style.leading = 20
 
         story = []
 
