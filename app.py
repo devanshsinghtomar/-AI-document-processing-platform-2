@@ -41,9 +41,7 @@ from reportlab.platypus import (
     Spacer
 )
 
-from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import TTFont
+
 
 
 # =========================================
@@ -222,86 +220,40 @@ def create_pdf(text):
             filename
         )
 
-        pdf = FPDF()
-
-        pdf.set_auto_page_break(
-            auto=True,
-            margin=15
+        from reportlab.platypus import (
+            SimpleDocTemplate,
+            Paragraph,
+            Spacer
         )
 
-        pdf.add_page()
+        from reportlab.lib.styles import getSampleStyleSheet
 
-        # ======================================
-        # FONT PATH
-        # ======================================
+        doc = SimpleDocTemplate(filepath)
 
-        font_path = os.path.join(
-            app.root_path,
-            "static",
-            "fonts",
-            "DejaVuSans.ttf"
-        )
+        styles = getSampleStyleSheet()
 
-        # Check if font exists
-        if not os.path.exists(font_path):
-
-            print("Font file not found:", font_path)
-
-            return None
-
-        # Add Unicode Font
-        pdf.add_font(
-            "DejaVu",
-            "",
-            font_path,
-            uni=True
-        )
-
-        # ======================================
-        # TITLE
-        # ======================================
-
-        pdf.set_font(
-            "DejaVu",
-            size=16
-        )
-
-        pdf.cell(
-            200,
-            10,
-            txt="AI Translator & Summarizer Output",
-            ln=True,
-            align="C"
-        )
-
-        pdf.ln(10)
-
-        # ======================================
-        # CONTENT
-        # ======================================
-
-        pdf.set_font(
-            "DejaVu",
-            size=12
-        )
+        story = []
 
         lines = text.split("\n")
 
         for line in lines:
 
-            line = line.strip()
+            if line.strip():
 
-            if line:
-
-                pdf.multi_cell(
-                    0,
-                    10,
-                    txt=line
+                story.append(
+                    Paragraph(
+                        line.replace("&", "&amp;")
+                            .replace("<", "&lt;")
+                            .replace(">", "&gt;"),
+                        styles["BodyText"]
+                    )
                 )
 
-                pdf.ln(2)
+                story.append(
+                    Spacer(1, 10)
+                )
 
-        pdf.output(filepath)
+        doc.build(story)
 
         return filepath
 
