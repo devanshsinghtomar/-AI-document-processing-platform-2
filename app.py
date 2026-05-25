@@ -231,30 +231,36 @@ def create_pdf(text):
 
         pdf.add_page()
 
-       # Unicode Font Path
+        # ======================================
+        # FONT PATH
+        # ======================================
 
-font_path = os.path.join(
-    app.root_path,
-    "static",
-    "fonts",
-    "DejaVuSans.ttf"
-)
+        font_path = os.path.join(
+            app.root_path,
+            "static",
+            "fonts",
+            "DejaVuSans.ttf"
+        )
 
-# Check font exists
-if not os.path.exists(font_path):
+        # Check if font exists
+        if not os.path.exists(font_path):
 
-    print("Font file not found:", font_path)
+            print("Font file not found:", font_path)
 
-    return None
+            return None
 
-pdf.add_font(
-    "DejaVu",
-    "",
-    font_path,
-    uni=True
-)
+        # Add Unicode Font
+        pdf.add_font(
+            "DejaVu",
+            "",
+            font_path,
+            uni=True
+        )
 
-        # Heading
+        # ======================================
+        # TITLE
+        # ======================================
+
         pdf.set_font(
             "DejaVu",
             size=16
@@ -270,7 +276,10 @@ pdf.add_font(
 
         pdf.ln(10)
 
-        # Content
+        # ======================================
+        # CONTENT
+        # ======================================
+
         pdf.set_font(
             "DejaVu",
             size=12
