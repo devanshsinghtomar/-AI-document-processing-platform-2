@@ -214,6 +214,18 @@ def translate_text(text, target_language):
 # PDF CREATOR
 # =========================================
 
+from reportlab.platypus import (
+    SimpleDocTemplate,
+    Paragraph,
+    Spacer
+)
+
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.lib.pagesizes import letter
+
+
 def create_pdf(text):
 
     try:
@@ -225,22 +237,36 @@ def create_pdf(text):
             filename
         )
 
-        # REGISTER UNICODE FONT
-        font_path = "DejaVuSans.ttf"
+        # ======================================
+        # FONT PATH
+        # ======================================
 
-        if os.path.exists(font_path):
+        font_path = os.path.join(
+            app.root_path,
+            "static",
+            "fonts",
+            "NotoSansDevanagari-Regular.ttf"
+        )
 
-            pdfmetrics.registerFont(
-                TTFont("DejaVu", font_path)
+        # CHECK FONT EXISTS
+        if not os.path.exists(font_path):
+
+            print("Font file not found:", font_path)
+
+            return None
+
+        # REGISTER FONT
+        pdfmetrics.registerFont(
+            TTFont(
+                "HindiFont",
+                font_path
             )
+        )
 
-            font_name = "DejaVu"
-
-        else:
-
-            font_name = "Helvetica"
-
+        # ======================================
         # CREATE PDF
+        # ======================================
+
         doc = SimpleDocTemplate(
             filepath,
             pagesize=letter
@@ -250,7 +276,9 @@ def create_pdf(text):
 
         style = styles["BodyText"]
 
-        style.fontName = font_name
+        style.fontName = "HindiFont"
+
+        style.fontSize = 12
 
         style.leading = 22
 
