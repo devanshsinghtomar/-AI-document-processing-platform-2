@@ -278,13 +278,87 @@ window.webkitSpeechRecognition;
 const recognition =
 new SpeechRecognition();
 
+/* =========================================
+   SETTINGS
+========================================= */
+
 recognition.continuous = false;
 
 recognition.interimResults = false;
 
-recognition.lang = "en-US";
+recognition.maxAlternatives = 1;
+
+/* =========================================
+   DETECT LANGUAGE FROM DROPDOWN
+========================================= */
+
+function getSpeechLanguage(){
+
+const selectedLanguage =
+document.getElementById("language").value;
+
+/* Hindi */
+
+if(selectedLanguage === "hi"){
+
+return "hi-IN";
+
+}
+
+/* French */
+
+if(selectedLanguage === "fr"){
+
+return "fr-FR";
+
+}
+
+/* German */
+
+if(selectedLanguage === "de"){
+
+return "de-DE";
+
+}
+
+/* Spanish */
+
+if(selectedLanguage === "es"){
+
+return "es-ES";
+
+}
+
+/* Italian */
+
+if(selectedLanguage === "it"){
+
+return "it-IT";
+
+}
+
+/* Japanese */
+
+if(selectedLanguage === "ja"){
+
+return "ja-JP";
+
+}
+
+/* Default English */
+
+return "en-US";
+
+}
+
+/* =========================================
+   START RECORDING
+========================================= */
 
 speechBtn.addEventListener("click",()=>{
+
+recognition.lang =
+getSpeechLanguage();
 
 recognition.start();
 
@@ -293,27 +367,45 @@ speechBtn.innerText =
 
 });
 
+/* =========================================
+   SPEECH RESULT
+========================================= */
+
 recognition.onresult = (event)=>{
 
 const transcript =
 event.results[0][0].transcript;
 
-document.getElementById("inputText").value +=
-" " + transcript;
+const inputBox =
+document.getElementById("inputText");
+
+inputBox.value += " " + transcript;
 
 speechBtn.innerText =
 "🎤 Speech Input";
 
 };
 
-recognition.onerror = ()=>{
+/* =========================================
+   SPEECH ERROR
+========================================= */
+
+recognition.onerror = (event)=>{
 
 speechBtn.innerText =
 "🎤 Speech Input";
 
-alert("Speech recognition failed");
+console.log(event.error);
+
+alert(
+"Speech recognition failed. Please use Google Chrome."
+);
 
 };
+
+/* =========================================
+   SPEECH END
+========================================= */
 
 recognition.onend = ()=>{
 
@@ -350,6 +442,8 @@ return;
 
 }
 
+/* STOP PREVIOUS SPEECH */
+
 window.speechSynthesis.cancel();
 
 const speech =
@@ -370,9 +464,16 @@ speech.pitch = 1;
 const hindiRegex =
 /[\u0900-\u097F]/;
 
+const japaneseRegex =
+/[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff]/;
+
 if(hindiRegex.test(text)){
 
 speech.lang = "hi-IN";
+
+}else if(japaneseRegex.test(text)){
+
+speech.lang = "ja-JP";
 
 }else{
 
@@ -381,22 +482,39 @@ speech.lang = "en-US";
 }
 
 /* =========================================
-   BETTER VOICE SUPPORT
+   LOAD BEST AVAILABLE VOICE
 ========================================= */
 
 const voices =
 window.speechSynthesis.getVoices();
 
-const matchedVoice =
+let matchedVoice =
 voices.find(voice =>
 voice.lang === speech.lang
 );
+
+/* FALLBACK MATCH */
+
+if(!matchedVoice){
+
+matchedVoice =
+voices.find(voice =>
+voice.lang.startsWith(
+speech.lang.split("-")[0]
+)
+);
+
+}
 
 if(matchedVoice){
 
 speech.voice = matchedVoice;
 
 }
+
+/* =========================================
+   SPEAK
+========================================= */
 
 window.speechSynthesis.speak(speech);
 
