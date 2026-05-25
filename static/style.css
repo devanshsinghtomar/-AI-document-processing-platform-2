@@ -194,6 +194,68 @@ outline:none;
 }
 
 /* =========================================
+   STATUS BAR
+========================================= */
+
+.status-bar{
+
+width:100%;
+
+padding:14px 18px;
+
+margin-bottom:20px;
+
+border-radius:14px;
+
+background:rgba(37,99,235,0.15);
+
+border:1px solid rgba(59,130,246,0.3);
+
+color:#e2e8f0;
+
+font-size:14px;
+
+font-weight:500;
+
+backdrop-filter:blur(10px);
+
+box-shadow:0 4px 15px rgba(0,0,0,0.15);
+
+transition:0.3s;
+
+}
+
+/* =========================================
+   FILE NAME DISPLAY
+========================================= */
+
+.file-name{
+
+margin-top:12px;
+
+margin-bottom:10px;
+
+font-size:14px;
+
+color:#cbd5e1;
+
+background:rgba(255,255,255,0.05);
+
+padding:10px 14px;
+
+border-radius:10px;
+
+border:1px solid rgba(255,255,255,0.08);
+
+overflow:hidden;
+
+text-overflow:ellipsis;
+
+white-space:nowrap;
+
+}
+
+/* =========================================
    WORKSPACE
 ========================================= */
 
@@ -298,7 +360,7 @@ background:linear-gradient(135deg,#06b6d4,#2563eb);
 }
 
 /* =========================================
-   NEW SPEECH BUTTONS
+   SPEECH BUTTONS
 ========================================= */
 
 .btn-speech{
