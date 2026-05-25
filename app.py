@@ -214,13 +214,7 @@ def translate_text(text, target_language):
 # PDF CREATOR
 # =========================================
 
-from reportlab.platypus import (
-    SimpleDocTemplate,
-    Paragraph,
-    Spacer
-)
-
-from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.pdfgen import canvas
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib.pagesizes import letter
@@ -245,6 +239,13 @@ def create_pdf(text):
             "NotoSansDevanagari-Regular.ttf"
         )
 
+        # CHECK FONT EXISTS
+        if not os.path.exists(font_path):
+
+            print("Font file not found")
+
+            return None
+
         # REGISTER FONT
         pdfmetrics.registerFont(
             TTFont(
@@ -254,47 +255,44 @@ def create_pdf(text):
         )
 
         # CREATE PDF
-        doc = SimpleDocTemplate(
+        c = canvas.Canvas(
             filepath,
             pagesize=letter
         )
 
-        styles = getSampleStyleSheet()
+        width, height = letter
 
-        style = styles["BodyText"]
+        c.setFont(
+            "HindiFont",
+            14
+        )
 
-        style.fontName = "HindiFont"
-
-        style.fontSize = 12
-
-        style.leading = 20
-
-        story = []
+        y = height - 50
 
         lines = text.split("\n")
 
         for line in lines:
 
-            if line.strip():
+            if y < 50:
 
-                safe_line = (
-                    line.replace("&", "&amp;")
-                        .replace("<", "&lt;")
-                        .replace(">", "&gt;")
+                c.showPage()
+
+                c.setFont(
+                    "HindiFont",
+                    14
                 )
 
-                story.append(
-                    Paragraph(
-                        safe_line,
-                        style
-                    )
-                )
+                y = height - 50
 
-                story.append(
-                    Spacer(1, 10)
-                )
+            c.drawString(
+                40,
+                y,
+                line
+            )
 
-        doc.build(story)
+            y -= 25
+
+        c.save()
 
         return filepath
 
