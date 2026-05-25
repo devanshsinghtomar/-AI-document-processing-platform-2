@@ -186,6 +186,16 @@ background:linear-gradient(135deg,#ef4444,#dc2626);
 background:linear-gradient(135deg,#06b6d4,#2563eb);
 }
 
+/* NEW SPEECH BUTTONS */
+
+.btn-speech{
+background:linear-gradient(135deg,#14b8a6,#0f766e);
+}
+
+.btn-tts{
+background:linear-gradient(135deg,#6366f1,#4338ca);
+}
+
 .loading{
 display:none;
 text-align:center;
@@ -311,6 +321,20 @@ Clear
 <button class="btn-download"
 onclick="downloadPDF()">
 Download
+</button>
+
+<!-- NEW SPEECH TO TEXT BUTTON -->
+
+<button class="btn-speech"
+id="speechBtn">
+🎤 Speech Input
+</button>
+
+<!-- NEW TEXT TO SPEECH BUTTON -->
+
+<button class="btn-tts"
+onclick="speakOutput()">
+🔊 Read Output
 </button>
 
 </div>
@@ -582,6 +606,111 @@ alert('Download failed');
 
 }
 }
+
+/* =========================================
+   SPEECH TO TEXT FEATURE
+========================================= */
+
+const speechBtn =
+document.getElementById('speechBtn');
+
+if('webkitSpeechRecognition' in window ||
+   'SpeechRecognition' in window){
+
+const SpeechRecognition =
+window.SpeechRecognition ||
+window.webkitSpeechRecognition;
+
+const recognition =
+new SpeechRecognition();
+
+recognition.continuous = false;
+
+recognition.interimResults = false;
+
+recognition.lang = 'en-US';
+
+speechBtn.addEventListener('click',()=>{
+
+recognition.start();
+
+speechBtn.innerText = '🎙 Listening...';
+
+});
+
+recognition.onresult = (event)=>{
+
+const transcript =
+event.results[0][0].transcript;
+
+document.getElementById('inputText').value +=
+' ' + transcript;
+
+speechBtn.innerText =
+'🎤 Speech Input';
+
+};
+
+recognition.onerror = ()=>{
+
+speechBtn.innerText =
+'🎤 Speech Input';
+
+alert('Speech recognition failed');
+
+};
+
+recognition.onend = ()=>{
+
+speechBtn.innerText =
+'🎤 Speech Input';
+
+};
+
+}else{
+
+speechBtn.disabled = true;
+
+speechBtn.innerText =
+'Speech Not Supported';
+
+}
+
+/* =========================================
+   TEXT TO SPEECH FEATURE
+========================================= */
+
+function speakOutput(){
+
+const text =
+document.getElementById('outputText').innerText;
+
+if(!text ||
+text === 'Output cleared'){
+
+alert('No output available');
+
+return;
+
+}
+
+const speech =
+new SpeechSynthesisUtterance();
+
+speech.text = text;
+
+speech.volume = 1;
+
+speech.rate = 1;
+
+speech.pitch = 1;
+
+speech.lang = 'en-US';
+
+window.speechSynthesis.speak(speech);
+
+}
+
 </script>
 
 </body>
