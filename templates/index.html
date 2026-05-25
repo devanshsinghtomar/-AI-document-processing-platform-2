@@ -132,6 +132,26 @@ line-height:1.8;
 white-space:pre-wrap;
 }
 
+/* STATUS BAR */
+
+.status-bar{
+margin-bottom:20px;
+padding:14px 18px;
+border-radius:14px;
+background:rgba(255,255,255,0.08);
+font-size:14px;
+font-weight:600;
+color:#38bdf8;
+backdrop-filter:blur(10px);
+}
+
+.file-name{
+margin-top:10px;
+margin-bottom:10px;
+font-size:14px;
+color:#cbd5e1;
+}
+
 .controls{
 display:grid;
 grid-template-columns:repeat(3,1fr);
@@ -185,8 +205,6 @@ background:linear-gradient(135deg,#ef4444,#dc2626);
 .btn-download{
 background:linear-gradient(135deg,#06b6d4,#2563eb);
 }
-
-/* NEW SPEECH BUTTONS */
 
 .btn-speech{
 background:linear-gradient(135deg,#14b8a6,#0f766e);
@@ -257,6 +275,12 @@ Logout
 
 </div>
 
+<!-- STATUS BAR -->
+
+<div id="statusBar" class="status-bar">
+✅ Ready
+</div>
+
 <div class="main-grid">
 
 <div class="card">
@@ -275,6 +299,10 @@ onclick="document.getElementById('fileInput').click()">
 </div>
 
 <input type="file" id="fileInput" hidden>
+
+<p id="selectedFileName" class="file-name">
+No file selected
+</p>
 
 <textarea
 id="inputText"
@@ -323,14 +351,10 @@ onclick="downloadPDF()">
 Download
 </button>
 
-<!-- NEW SPEECH TO TEXT BUTTON -->
-
 <button class="btn-speech"
 id="speechBtn">
 🎤 Speech Input
 </button>
-
-<!-- NEW TEXT TO SPEECH BUTTON -->
 
 <button class="btn-tts"
 onclick="speakOutput()">
@@ -365,6 +389,33 @@ Your translated or summarized result will appear here...
 
 <script>
 
+/* STATUS UPDATE FUNCTION */
+
+function updateStatus(message){
+
+document.getElementById('statusBar').innerText =
+message;
+
+}
+
+/* FILE NAME DISPLAY */
+
+document.getElementById('fileInput')
+.addEventListener('change',function(){
+
+const file = this.files[0];
+
+if(file){
+
+document.getElementById('selectedFileName')
+.innerText = '📂 Selected File: ' + file.name;
+
+updateStatus('📂 File selected');
+
+}
+
+});
+
 async function uploadFile(){
 
 const fileInput =
@@ -379,6 +430,8 @@ alert('Please choose a file');
 return;
 
 }
+
+updateStatus('📤 Uploading file...');
 
 const formData = new FormData();
 
@@ -399,6 +452,8 @@ if(data.error){
 
 alert(data.error);
 
+updateStatus('❌ Upload failed');
+
 return;
 
 }
@@ -409,17 +464,19 @@ data.text;
 document.getElementById('outputText').innerText =
 '✅ File uploaded successfully';
 
+updateStatus('✅ File uploaded successfully');
+
 }catch(error){
 
 console.log(error);
 
 alert('Upload failed');
 
-}
+updateStatus('❌ Upload failed');
 
 }
 
-
+}
 
 async function translateText(){
 
@@ -436,6 +493,8 @@ alert('Please upload or enter text');
 return;
 
 }
+
+updateStatus('🌍 Translating text...');
 
 try{
 
@@ -459,15 +518,17 @@ const data = await response.json();
 document.getElementById('outputText').innerText =
 data.result;
 
+updateStatus('✅ Translation completed');
+
 }catch(error){
 
 alert('Translation Failed');
 
-}
+updateStatus('❌ Translation failed');
 
 }
 
-
+}
 
 async function summarizeText(){
 
@@ -484,6 +545,8 @@ alert('Please upload or enter text');
 return;
 
 }
+
+updateStatus('📝 Generating summary...');
 
 try{
 
@@ -507,15 +570,17 @@ const data = await response.json();
 document.getElementById('outputText').innerText =
 data.result;
 
+updateStatus('✅ Summary completed');
+
 }catch(error){
 
 alert('Summary Failed');
 
-}
+updateStatus('❌ Summary failed');
 
 }
 
-
+}
 
 function copyText(){
 
@@ -526,9 +591,9 @@ navigator.clipboard.writeText(text);
 
 alert('Copied Successfully');
 
+updateStatus('📋 Text copied');
+
 }
-
-
 
 function clearText(){
 
@@ -537,9 +602,9 @@ document.getElementById('inputText').value='';
 document.getElementById('outputText').innerText=
 'Output cleared';
 
+updateStatus('🧹 Cleared');
+
 }
-
-
 
 async function downloadPDF(){
 
@@ -552,6 +617,8 @@ alert('No content to download');
 return;
 
 }
+
+updateStatus('📄 Downloading PDF...');
 
 try{
 
@@ -572,6 +639,8 @@ text:text
 if(!response.ok){
 
 alert('PDF generation failed');
+
+updateStatus('❌ PDF generation failed');
 
 return;
 
@@ -597,6 +666,8 @@ link.remove();
 
 window.URL.revokeObjectURL(blobUrl);
 
+updateStatus('✅ PDF downloaded');
+
 }
 catch(error){
 
@@ -604,12 +675,12 @@ console.log(error);
 
 alert('Download failed');
 
+updateStatus('❌ Download failed');
+
 }
 }
 
-/* =========================================
-   SPEECH TO TEXT FEATURE
-========================================= */
+/* SPEECH TO TEXT */
 
 const speechBtn =
 document.getElementById('speechBtn');
@@ -636,6 +707,8 @@ recognition.start();
 
 speechBtn.innerText = '🎙 Listening...';
 
+updateStatus('🎤 Listening...');
+
 });
 
 recognition.onresult = (event)=>{
@@ -649,6 +722,8 @@ document.getElementById('inputText').value +=
 speechBtn.innerText =
 '🎤 Speech Input';
 
+updateStatus('✅ Speech converted to text');
+
 };
 
 recognition.onerror = ()=>{
@@ -657,6 +732,8 @@ speechBtn.innerText =
 '🎤 Speech Input';
 
 alert('Speech recognition failed');
+
+updateStatus('❌ Speech recognition failed');
 
 };
 
@@ -676,9 +753,7 @@ speechBtn.innerText =
 
 }
 
-/* =========================================
-   TEXT TO SPEECH FEATURE
-========================================= */
+/* TEXT TO SPEECH */
 
 function speakOutput(){
 
@@ -694,6 +769,10 @@ return;
 
 }
 
+updateStatus('🔊 Reading output...');
+
+window.speechSynthesis.cancel();
+
 const speech =
 new SpeechSynthesisUtterance();
 
@@ -705,11 +784,49 @@ speech.rate = 1;
 
 speech.pitch = 1;
 
+const hindiRegex =
+/[\u0900-\u097F]/;
+
+if(hindiRegex.test(text)){
+
+speech.lang = 'hi-IN';
+
+}else{
+
 speech.lang = 'en-US';
+
+}
+
+const voices =
+window.speechSynthesis.getVoices();
+
+const matchedVoice =
+voices.find(voice =>
+voice.lang === speech.lang
+);
+
+if(matchedVoice){
+
+speech.voice = matchedVoice;
+
+}
 
 window.speechSynthesis.speak(speech);
 
+speech.onend = ()=>{
+
+updateStatus('✅ Reading completed');
+
+};
+
 }
+
+window.speechSynthesis.onvoiceschanged =
+()=>{
+
+window.speechSynthesis.getVoices();
+
+};
 
 </script>
 
