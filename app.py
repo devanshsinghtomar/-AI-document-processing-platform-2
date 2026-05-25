@@ -555,7 +555,7 @@ def summarize():
 
 
 # =========================================
-# DOWNLOAD PDF FIXED
+# DOWNLOAD PDF
 # =========================================
 
 @app.route("/download", methods=["POST"])
@@ -574,79 +574,14 @@ def download():
                 "error": "No text available"
             })
 
-        filename = f"{uuid.uuid4()}.pdf"
+        filepath = create_pdf(text)
 
-        filepath = os.path.join(
-            app.config["DOWNLOAD_FOLDER"],
-            filename
-        )
+        if not filepath:
 
-        # REPORTLAB PDF
-        from reportlab.platypus import (
-            SimpleDocTemplate,
-            Paragraph,
-            Spacer
-        )
+            return jsonify({
+                "error": "PDF creation failed"
+            })
 
-        from reportlab.lib.styles import getSampleStyleSheet
-        from reportlab.pdfbase import pdfmetrics
-        from reportlab.pdfbase.ttfonts import TTFont
-        from reportlab.lib.styles import ParagraphStyle
-
-        # FONT PATH
-        font_path = os.path.join(
-            "static",
-            "fonts",
-            "DejaVuSans.ttf"
-        )
-
-        # REGISTER FONT
-        pdfmetrics.registerFont(
-            TTFont(
-                "DejaVu",
-                font_path
-            )
-        )
-
-        # CREATE PDF
-        doc = SimpleDocTemplate(filepath)
-
-        styles = getSampleStyleSheet()
-
-        custom_style = ParagraphStyle(
-            "Custom",
-            parent=styles["BodyText"],
-            fontName="DejaVu",
-            fontSize=12,
-            leading=20
-        )
-
-        story = []
-
-        # SPLIT TEXT
-        paragraphs = text.split("\n")
-
-        for para in paragraphs:
-
-            para = para.strip()
-
-            if para:
-
-                story.append(
-                    Paragraph(
-                        para,
-                        custom_style
-                    )
-                )
-
-                story.append(
-                    Spacer(1, 10)
-                )
-
-        # BUILD PDF
-        doc.build(story)
-
-        # RETURN FILE
         return send_file(
             filepath,
             as_attachment=True,
