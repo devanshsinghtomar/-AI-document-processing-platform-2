@@ -187,7 +187,7 @@ historyList.appendChild(li);
    DOWNLOAD PDF
 ========================================= */
 
-function downloadPDF(){
+async function downloadPDF(){
 
 const text =
 document.getElementById("output").innerText;
@@ -200,7 +200,62 @@ return;
 
 }
 
-window.print();
+try{
+
+const response = await fetch("/download",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+text:text
+})
+
+});
+
+if(!response.ok){
+
+alert("PDF generation failed");
+
+return;
+
+}
+
+const blob = await response.blob();
+
+const blobUrl =
+window.URL.createObjectURL(
+new Blob([blob],{
+type:"application/pdf"
+})
+);
+
+const link =
+document.createElement("a");
+
+link.href = blobUrl;
+
+link.download =
+"translated_document.pdf";
+
+document.body.appendChild(link);
+
+link.click();
+
+link.remove();
+
+window.URL.revokeObjectURL(blobUrl);
+
+}catch(error){
+
+console.log(error);
+
+alert("Download failed");
+
+}
 
 }
 
@@ -233,7 +288,8 @@ speechBtn.addEventListener("click",()=>{
 
 recognition.start();
 
-speechBtn.innerText = "🎙 Listening...";
+speechBtn.innerText =
+"🎙 Listening...";
 
 });
 
@@ -294,6 +350,8 @@ return;
 
 }
 
+window.speechSynthesis.cancel();
+
 const speech =
 new SpeechSynthesisUtterance();
 
@@ -305,8 +363,52 @@ speech.rate = 1;
 
 speech.pitch = 1;
 
+/* =========================================
+   AUTO LANGUAGE DETECTION
+========================================= */
+
+const hindiRegex =
+/[\u0900-\u097F]/;
+
+if(hindiRegex.test(text)){
+
+speech.lang = "hi-IN";
+
+}else{
+
 speech.lang = "en-US";
+
+}
+
+/* =========================================
+   BETTER VOICE SUPPORT
+========================================= */
+
+const voices =
+window.speechSynthesis.getVoices();
+
+const matchedVoice =
+voices.find(voice =>
+voice.lang === speech.lang
+);
+
+if(matchedVoice){
+
+speech.voice = matchedVoice;
+
+}
 
 window.speechSynthesis.speak(speech);
 
 }
+
+/* =========================================
+   LOAD VOICES FOR CHROME
+========================================= */
+
+window.speechSynthesis.onvoiceschanged =
+()=>{
+
+window.speechSynthesis.getVoices();
+
+};
