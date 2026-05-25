@@ -236,7 +236,7 @@ def create_pdf(text):
             os.getcwd(),
             "static",
             "fonts",
-            "NotoSansDevanagari-Regular.ttf"
+            "NotoSansDevanagari-VariableFont_wdth,wght.ttf"
         )
 
         print("FONT PATH:", font_path)
