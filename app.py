@@ -232,18 +232,23 @@ def create_pdf(text):
         )
 
         # FONT PATH
-        font_path = "static/fonts/NotoSansDevanagari-Regular.ttf"
+        font_path = os.path.join(
+            os.getcwd(),
+            "static",
+            "fonts",
+            "NotoSansDevanagari-Regular.ttf"
+        )
 
-        print("USING FONT PATH:", font_path)
+        print("FONT PATH:", font_path)
 
-        # CHECK FONT EXISTS
-        if not os.path.exists(font_path):
+        # CHECK FONT
+        if not os.path.isfile(font_path):
 
-            print("FONT FILE NOT FOUND")
+            print("FONT NOT FOUND")
 
             return None
 
-        print("FONT FOUND SUCCESSFULLY")
+        print("FONT FOUND")
 
         # REGISTER FONT
         pdfmetrics.registerFont(
@@ -253,7 +258,7 @@ def create_pdf(text):
             )
         )
 
-        # CREATE CANVAS
+        # CREATE PDF
         c = canvas.Canvas(
             filepath,
             pagesize=letter
@@ -286,14 +291,14 @@ def create_pdf(text):
             c.drawString(
                 40,
                 y,
-                str(line)
+                line
             )
 
             y -= 25
 
         c.save()
 
-        print("PDF SAVED:", filepath)
+        print("PDF CREATED SUCCESSFULLY")
 
         return filepath
 
