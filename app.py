@@ -239,10 +239,12 @@ def create_pdf(text):
             "NotoSansDevanagari-Regular.ttf"
         )
 
+        print("FONT PATH:", font_path)
+
         # CHECK FONT EXISTS
         if not os.path.exists(font_path):
 
-            print("Font file not found")
+            print("FONT FILE NOT FOUND")
 
             return None
 
@@ -254,7 +256,7 @@ def create_pdf(text):
             )
         )
 
-        # CREATE PDF
+        # CREATE CANVAS
         c = canvas.Canvas(
             filepath,
             pagesize=letter
@@ -287,18 +289,20 @@ def create_pdf(text):
             c.drawString(
                 40,
                 y,
-                line
+                str(line)
             )
 
             y -= 25
 
         c.save()
 
+        print("PDF SAVED:", filepath)
+
         return filepath
 
     except Exception as e:
 
-        print("PDF Error:", str(e))
+        print("PDF ERROR:", str(e))
 
         return None
 
@@ -581,29 +585,38 @@ def download():
 
             return jsonify({
                 "error": "No text available"
-            })
+            }), 400
 
         filepath = create_pdf(text)
 
+        # CHECK PDF CREATED
         if not filepath:
 
             return jsonify({
                 "error": "PDF creation failed"
-            })
+            }), 500
+
+        # CHECK FILE EXISTS
+        if not os.path.exists(filepath):
+
+            return jsonify({
+                "error": "PDF file not found"
+            }), 500
 
         return send_file(
             filepath,
+            mimetype="application/pdf",
             as_attachment=True,
-            download_name="translated_document.pdf",
-            mimetype="application/pdf"
+            download_name="translated_document.pdf"
         )
 
     except Exception as e:
 
+        print("DOWNLOAD ERROR:", str(e))
+
         return jsonify({
             "error": str(e)
-        })
-
+        }), 500
 
 # =========================================
 # HISTORY PAGE
