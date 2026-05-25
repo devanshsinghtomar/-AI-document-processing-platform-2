@@ -231,28 +231,28 @@ def create_pdf(text):
             filename
         )
 
-     
         # FONT PATH
-font_path = "static/fonts/NotoSansDevanagari-Regular.ttf"
+        font_path = "static/fonts/NotoSansDevanagari-Regular.ttf"
 
-print("USING FONT PATH:", font_path)
+        print("USING FONT PATH:", font_path)
 
-# CHECK FONT EXISTS
-if not os.path.exists(font_path):
+        # CHECK FONT EXISTS
+        if not os.path.exists(font_path):
 
-    print("FONT FILE NOT FOUND")
+            print("FONT FILE NOT FOUND")
 
-    return None
+            return None
 
-print("FONT FOUND SUCCESSFULLY")
+        print("FONT FOUND SUCCESSFULLY")
 
-# REGISTER FONT
-pdfmetrics.registerFont(
-    TTFont(
-        "HindiFont",
-        font_path
-    )
-)
+        # REGISTER FONT
+        pdfmetrics.registerFont(
+            TTFont(
+                "HindiFont",
+                font_path
+            )
+        )
+
         # CREATE CANVAS
         c = canvas.Canvas(
             filepath,
@@ -302,7 +302,6 @@ pdfmetrics.registerFont(
         print("PDF ERROR:", str(e))
 
         return None
-
 
 # =========================================
 # HOME
