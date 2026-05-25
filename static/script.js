@@ -1,6 +1,60 @@
 let historyData = [];
 
 /* =========================================
+   STATUS BAR
+========================================= */
+
+function updateStatus(message){
+
+const statusBar =
+document.getElementById("statusBar");
+
+if(statusBar){
+
+statusBar.innerText = message;
+
+}
+
+}
+
+/* =========================================
+   SHOW SELECTED FILE NAME
+========================================= */
+
+const fileInput =
+document.getElementById("fileInput");
+
+if(fileInput){
+
+fileInput.addEventListener("change",()=>{
+
+const fileNameBox =
+document.getElementById("selectedFileName");
+
+if(fileInput.files.length > 0){
+
+const fileName =
+fileInput.files[0].name;
+
+fileNameBox.innerText =
+"📂 Selected File: " + fileName;
+
+updateStatus(
+"📤 File selected: " + fileName
+);
+
+}else{
+
+fileNameBox.innerText =
+"No file selected";
+
+}
+
+});
+
+}
+
+/* =========================================
    FILE UPLOAD
 ========================================= */
 
@@ -26,11 +80,19 @@ if(!text){
 
 alert("Please enter or upload text");
 
+updateStatus(
+"⚠ Please enter or upload text"
+);
+
 return;
 
 }
 
 try{
+
+updateStatus(
+"🌍 Translating text..."
+);
 
 const response = await fetch("/translate",{
 
@@ -52,13 +114,23 @@ const data = await response.json();
 document.getElementById("output").innerText =
 data.translation || data.result;
 
-saveHistory("✅ Translation completed");
+updateStatus(
+"✅ Translation completed"
+);
+
+saveHistory(
+"✅ Translation completed"
+);
 
 }catch(error){
 
 console.log(error);
 
 alert("Translation failed");
+
+updateStatus(
+"❌ Translation failed"
+);
 
 }
 
@@ -80,11 +152,19 @@ if(!text){
 
 alert("Please enter or upload text");
 
+updateStatus(
+"⚠ Please enter or upload text"
+);
+
 return;
 
 }
 
 try{
+
+updateStatus(
+"📝 Generating summary..."
+);
 
 const response = await fetch("/summarize",{
 
@@ -106,13 +186,23 @@ const data = await response.json();
 document.getElementById("output").innerText =
 data.summary || data.result;
 
-saveHistory("✅ Summary completed");
+updateStatus(
+"✅ Summary completed"
+);
+
+saveHistory(
+"✅ Summary completed"
+);
 
 }catch(error){
 
 console.log(error);
 
 alert("Summary failed");
+
+updateStatus(
+"❌ Summary failed"
+);
 
 }
 
@@ -131,6 +221,10 @@ if(!text){
 
 alert("No text available");
 
+updateStatus(
+"⚠ No text available"
+);
+
 return;
 
 }
@@ -138,6 +232,10 @@ return;
 navigator.clipboard.writeText(text);
 
 alert("Copied Successfully");
+
+updateStatus(
+"✅ Output copied"
+);
 
 }
 
@@ -150,6 +248,10 @@ function clearData(){
 document.getElementById("inputText").value = "";
 
 document.getElementById("output").innerText = "";
+
+updateStatus(
+"🗑 Data cleared"
+);
 
 }
 
@@ -196,11 +298,19 @@ if(!text){
 
 alert("No output available");
 
+updateStatus(
+"⚠ No output available"
+);
+
 return;
 
 }
 
 try{
+
+updateStatus(
+"📄 Downloading PDF..."
+);
 
 const response = await fetch("/download",{
 
@@ -219,6 +329,10 @@ text:text
 if(!response.ok){
 
 alert("PDF generation failed");
+
+updateStatus(
+"❌ PDF generation failed"
+);
 
 return;
 
@@ -249,11 +363,19 @@ link.remove();
 
 window.URL.revokeObjectURL(blobUrl);
 
+updateStatus(
+"✅ PDF downloaded"
+);
+
 }catch(error){
 
 console.log(error);
 
 alert("Download failed");
+
+updateStatus(
+"❌ Download failed"
+);
 
 }
 
@@ -365,6 +487,10 @@ recognition.start();
 speechBtn.innerText =
 "🎙 Listening...";
 
+updateStatus(
+"🎙 Listening..."
+);
+
 });
 
 /* =========================================
@@ -384,6 +510,10 @@ inputBox.value += " " + transcript;
 speechBtn.innerText =
 "🎤 Speech Input";
 
+updateStatus(
+"✅ Speech converted to text"
+);
+
 };
 
 /* =========================================
@@ -399,6 +529,10 @@ console.log(event.error);
 
 alert(
 "Speech recognition failed. Please use Google Chrome."
+);
+
+updateStatus(
+"❌ Speech recognition failed"
 );
 
 };
@@ -437,6 +571,10 @@ document.getElementById("output").innerText;
 if(!text){
 
 alert("No output available");
+
+updateStatus(
+"⚠ No output available"
+);
 
 return;
 
@@ -516,7 +654,19 @@ speech.voice = matchedVoice;
    SPEAK
 ========================================= */
 
+updateStatus(
+"🔊 Reading output..."
+);
+
 window.speechSynthesis.speak(speech);
+
+speech.onend = ()=>{
+
+updateStatus(
+"✅ Audio playback completed"
+);
+
+};
 
 }
 
@@ -528,5 +678,17 @@ window.speechSynthesis.onvoiceschanged =
 ()=>{
 
 window.speechSynthesis.getVoices();
+
+};
+
+/* =========================================
+   INITIAL STATUS
+========================================= */
+
+window.onload = ()=>{
+
+updateStatus(
+"✅ Ready"
+);
 
 };
