@@ -776,3 +776,27 @@ if __name__ == "__main__":
         host="0.0.0.0",
         port=5000
     )
+# =========================================
+# SPEECH TO TEXT PAGE
+# =========================================
+
+@app.route("/speech-to-text")
+@login_required
+def speech_to_text():
+
+    return render_template(
+        "speech_to_text.html"
+    )
+
+
+# =========================================
+# TEXT TO SPEECH PAGE
+# =========================================
+
+@app.route("/text-to-speech")
+@login_required
+def text_to_speech():
+
+    return render_template(
+        "text_to_speech.html"
+    )
