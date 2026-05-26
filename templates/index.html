@@ -37,7 +37,7 @@ margin:auto;
 }
 
 /* =========================================
-   NAVBAR
+NAVBAR
 ========================================= */
 
 .navbar{
@@ -84,7 +84,7 @@ transform:translateY(-2px);
 }
 
 /* =========================================
-   STATUS BAR
+STATUS BAR
 ========================================= */
 
 .status-bar{
@@ -101,7 +101,7 @@ box-shadow:0 8px 25px rgba(0,0,0,0.25);
 }
 
 /* =========================================
-   GRID
+GRID
 ========================================= */
 
 .main-grid{
@@ -111,7 +111,7 @@ gap:25px;
 }
 
 /* =========================================
-   CARD
+CARD
 ========================================= */
 
 .card{
@@ -130,7 +130,7 @@ font-weight:700;
 }
 
 /* =========================================
-   UPLOAD BOX
+UPLOAD BOX
 ========================================= */
 
 .upload-box{
@@ -165,7 +165,7 @@ color:#cbd5e1;
 }
 
 /* =========================================
-   FILE NAME
+FILE NAME
 ========================================= */
 
 .file-name{
@@ -179,7 +179,7 @@ border-radius:14px;
 }
 
 /* =========================================
-   TEXTAREA
+TEXTAREA
 ========================================= */
 
 textarea{
@@ -203,7 +203,7 @@ color:#94a3b8;
 }
 
 /* =========================================
-   OUTPUT BOX
+OUTPUT BOX
 ========================================= */
 
 .output-box{
@@ -219,7 +219,7 @@ box-shadow:inset 0 0 20px rgba(0,0,0,0.2);
 }
 
 /* =========================================
-   CONTROL SECTIONS
+CONTROL SECTIONS
 ========================================= */
 
 .control-section{
@@ -235,7 +235,7 @@ letter-spacing:0.5px;
 }
 
 /* =========================================
-   BUTTON GRID
+BUTTON GRID
 ========================================= */
 
 .controls-grid{
@@ -245,14 +245,8 @@ gap:14px;
 margin-bottom:18px;
 }
 
-.audio-grid{
-display:grid;
-grid-template-columns:repeat(2,1fr);
-gap:14px;
-}
-
 /* =========================================
-   BUTTONS
+BUTTONS
 ========================================= */
 
 button,
@@ -284,7 +278,7 @@ opacity:0.96;
 }
 
 /* =========================================
-   BUTTON COLORS
+BUTTON COLORS
 ========================================= */
 
 .btn-upload{
@@ -316,23 +310,15 @@ background:linear-gradient(135deg,#0ea5e9,#2563eb);
 }
 
 .btn-speech{
-background:linear-gradient(135deg,#14b8a6,#0f766e);
+background:linear-gradient(135deg,#06b6d4,#0f766e);
 }
 
 .btn-tts{
-background:linear-gradient(135deg,#6366f1,#4338ca);
-}
-
-.btn-stop{
-background:linear-gradient(135deg,#ef4444,#dc2626);
-}
-
-.btn-pause{
-background:linear-gradient(135deg,#22c55e,#14b8a6);
+background:linear-gradient(135deg,#6366f1,#8b5cf6);
 }
 
 /* =========================================
-   LOADING
+LOADING
 ========================================= */
 
 .loading{
@@ -344,7 +330,7 @@ color:#38bdf8;
 }
 
 /* =========================================
-   SCROLLBAR
+SCROLLBAR
 ========================================= */
 
 ::-webkit-scrollbar{
@@ -357,7 +343,7 @@ border-radius:10px;
 }
 
 /* =========================================
-   RESPONSIVE
+RESPONSIVE
 ========================================= */
 
 @media(max-width:1200px){
@@ -374,8 +360,7 @@ height:450px;
 
 @media(max-width:700px){
 
-.controls-grid,
-.audio-grid{
+.controls-grid{
 grid-template-columns:1fr;
 }
 
@@ -536,61 +521,61 @@ onclick="downloadPDF()">
 
 </div>
 
-<!-- INPUT AUDIO -->
+<!-- SPEECH TO TEXT -->
 
 <div class="control-section">
 
 <div class="section-title">
-🎤 Speech To Text Controls
+🎤 Speech To Text
 </div>
 
-<div class="audio-grid">
+<a href="/speech-to-text"
+style="text-decoration:none;">
 
-<button class="btn-speech"
-id="speechBtn">
-🎤 Start Input
+<button
+class="btn-speech"
+style="
+width:100%;
+padding:18px;
+font-size:17px;
+border-radius:18px;
+margin-top:10px;
+">
+
+🎤 Open Speech To Text Page
+
 </button>
 
-<button class="btn-stop"
-id="stopSpeechBtn">
-⏹ Stop Input
-</button>
+</a>
 
 </div>
 
-</div>
-
-<!-- OUTPUT AUDIO -->
+<!-- TEXT TO SPEECH -->
 
 <div class="control-section">
 
 <div class="section-title">
-🔊 Text To Speech Controls
+🔊 Text To Speech
 </div>
 
-<div class="audio-grid">
+<a href="/text-to-speech"
+style="text-decoration:none;">
 
-<button class="btn-tts"
-onclick="speakOutput()">
-🔊 Start Output
+<button
+class="btn-tts"
+style="
+width:100%;
+padding:18px;
+font-size:17px;
+border-radius:18px;
+margin-top:10px;
+">
+
+🔊 Open Text To Speech Page
+
 </button>
 
-<button class="btn-pause"
-onclick="pauseSpeech()">
-⏸ Pause Output
-</button>
-
-<button class="btn-upload"
-onclick="resumeSpeech()">
-▶ Resume Output
-</button>
-
-<button class="btn-stop"
-onclick="stopSpeechOutput()">
-⏹ Stop Output
-</button>
-
-</div>
+</a>
 
 </div>
 
@@ -990,200 +975,6 @@ updateStatus('❌ Download failed');
 
 }
 }
-
-/* =========================================
-SPEECH TO TEXT
-========================================= */
-
-const speechBtn =
-document.getElementById('speechBtn');
-
-const stopSpeechBtn =
-document.getElementById('stopSpeechBtn');
-
-let recognition;
-
-if('webkitSpeechRecognition' in window ||
-'SpeechRecognition' in window){
-
-const SpeechRecognition =
-window.SpeechRecognition ||
-window.webkitSpeechRecognition;
-
-recognition =
-new SpeechRecognition();
-
-recognition.continuous = true;
-
-recognition.interimResults = false;
-
-recognition.lang = 'en-US';
-
-speechBtn.addEventListener('click',()=>{
-
-recognition.start();
-
-updateStatus('🎤 Listening started...');
-
-speechBtn.innerText =
-'🎙 Listening...';
-
-});
-
-stopSpeechBtn.addEventListener('click',()=>{
-
-recognition.stop();
-
-speechBtn.innerText =
-'🎤 Start Input';
-
-updateStatus('⏹ Speech input stopped');
-
-});
-
-recognition.onresult = (event)=>{
-
-let transcript = '';
-
-for(let i=event.resultIndex;
-i<event.results.length;i++){
-
-transcript +=
-event.results[i][0].transcript + ' ';
-
-}
-
-document.getElementById('inputText').value +=
-transcript;
-
-};
-
-recognition.onerror = ()=>{
-
-updateStatus('❌ Speech recognition failed');
-
-speechBtn.innerText =
-'🎤 Start Input';
-
-};
-
-recognition.onend = ()=>{
-
-speechBtn.innerText =
-'🎤 Start Input';
-
-};
-
-}else{
-
-speechBtn.disabled = true;
-
-stopSpeechBtn.disabled = true;
-
-}
-
-/* =========================================
-TEXT TO SPEECH
-========================================= */
-
-let speechInstance;
-
-function speakOutput(){
-
-const text =
-document.getElementById('outputText').innerText;
-
-if(!text ||
-text === 'Output cleared'){
-
-alert('No output available');
-
-return;
-
-}
-
-window.speechSynthesis.cancel();
-
-speechInstance =
-new SpeechSynthesisUtterance();
-
-speechInstance.text = text;
-
-speechInstance.volume = 1;
-
-speechInstance.rate = 1;
-
-speechInstance.pitch = 1;
-
-const hindiRegex =
-/[\u0900-\u097F]/;
-
-if(hindiRegex.test(text)){
-
-speechInstance.lang = 'hi-IN';
-
-}else{
-
-speechInstance.lang = 'en-US';
-
-}
-
-const voices =
-window.speechSynthesis.getVoices();
-
-const matchedVoice =
-voices.find(voice =>
-voice.lang === speechInstance.lang
-);
-
-if(matchedVoice){
-
-speechInstance.voice = matchedVoice;
-
-}
-
-window.speechSynthesis.speak(speechInstance);
-
-updateStatus('🔊 Reading started...');
-
-speechInstance.onend = ()=>{
-
-updateStatus('✅ Reading completed');
-
-};
-
-}
-
-function pauseSpeech(){
-
-window.speechSynthesis.pause();
-
-updateStatus('⏸ Output paused');
-
-}
-
-function resumeSpeech(){
-
-window.speechSynthesis.resume();
-
-updateStatus('▶ Output resumed');
-
-}
-
-function stopSpeechOutput(){
-
-window.speechSynthesis.cancel();
-
-updateStatus('⏹ Output stopped');
-
-}
-
-window.speechSynthesis.onvoiceschanged =
-()=>{
-
-window.speechSynthesis.getVoices();
-
-};
 
 </script>
 
