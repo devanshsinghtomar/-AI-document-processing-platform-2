@@ -28,24 +28,18 @@ from werkzeug.utils import secure_filename
 
 from deep_translator import GoogleTranslator
 
+from transformers import pipeline
+
 import os
 import uuid
 import datetime
 import fitz
 import docx
+import re
 
-from reportlab.platypus import (
-    SimpleDocTemplate,
-    Paragraph,
-    Spacer
-)
-
-from reportlab.lib.styles import getSampleStyleSheet
-
+from reportlab.pdfgen import canvas
 from reportlab.pdfbase import pdfmetrics
-
 from reportlab.pdfbase.ttfonts import TTFont
-
 from reportlab.lib.pagesizes import letter
 
 
@@ -81,6 +75,16 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 login_manager.login_view = "login"
+
+
+# =========================================
+# HUMANIZER MODEL
+# =========================================
+
+humanizer_pipeline = pipeline(
+    "text2text-generation",
+    model="google/flan-t5-small"
+)
 
 
 # =========================================
@@ -211,14 +215,89 @@ def translate_text(text, target_language):
 
 
 # =========================================
-# PDF CREATOR
+# HUMANIZE TEXT
 # =========================================
 
-from reportlab.pdfgen import canvas
-from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.lib.pagesizes import letter
+PROMPT = """
+Rewrite the following text in a natural, human-like, engaging, and readable style.
+Keep the original meaning exactly same.
+Do not add extra information.
+Do not remove important information.
+Make the writing feel less robotic and more human.
 
+Text:
+"""
+
+
+def clean_text(text):
+
+    text = re.sub(r'\s+', ' ', text)
+
+    return text.strip()
+
+
+def split_text(text, max_words=200):
+
+    words = text.split()
+
+    chunks = []
+
+    for i in range(0, len(words), max_words):
+
+        chunk = " ".join(words[i:i + max_words])
+
+        chunks.append(chunk)
+
+    return chunks
+
+
+def humanize_chunk(chunk):
+
+    prompt = PROMPT + chunk
+
+    result = humanizer_pipeline(
+        prompt,
+        max_new_tokens=256,
+        do_sample=True,
+        temperature=0.8,
+        top_p=0.95
+    )
+
+    return result[0]["generated_text"]
+
+
+def humanize_text(text):
+
+    try:
+
+        text = clean_text(text)
+
+        if not text:
+
+            return "Please enter some text."
+
+        chunks = split_text(text)
+
+        humanized_chunks = []
+
+        for chunk in chunks:
+
+            humanized = humanize_chunk(chunk)
+
+            humanized_chunks.append(humanized)
+
+        final_output = "\n\n".join(humanized_chunks)
+
+        return final_output
+
+    except Exception as e:
+
+        return f"Error while humanizing text: {str(e)}"
+
+
+# =========================================
+# PDF CREATOR
+# =========================================
 
 def create_pdf(text):
 
@@ -231,7 +310,6 @@ def create_pdf(text):
             filename
         )
 
-        # FONT PATH
         font_path = os.path.join(
             os.getcwd(),
             "static",
@@ -239,18 +317,10 @@ def create_pdf(text):
             "NotoSansDevanagari-VariableFont_wdth,wght.ttf"
         )
 
-        print("FONT PATH:", font_path)
-
-        # CHECK FONT
         if not os.path.isfile(font_path):
-
-            print("FONT NOT FOUND")
 
             return None
 
-        print("FONT FOUND")
-
-        # REGISTER FONT
         pdfmetrics.registerFont(
             TTFont(
                 "HindiFont",
@@ -258,7 +328,6 @@ def create_pdf(text):
             )
         )
 
-        # CREATE PDF
         c = canvas.Canvas(
             filepath,
             pagesize=letter
@@ -298,8 +367,6 @@ def create_pdf(text):
 
         c.save()
 
-        print("PDF CREATED SUCCESSFULLY")
-
         return filepath
 
     except Exception as e:
@@ -307,6 +374,7 @@ def create_pdf(text):
         print("PDF ERROR:", str(e))
 
         return None
+
 
 # =========================================
 # HOME
@@ -318,6 +386,20 @@ def home():
 
     return render_template(
         "index.html",
+        username=current_user.username
+    )
+
+
+# =========================================
+# HUMANIZE PAGE
+# =========================================
+
+@app.route("/humanize-page")
+@login_required
+def humanize_page():
+
+    return render_template(
+        "humanize.html",
         username=current_user.username
     )
 
@@ -457,7 +539,6 @@ def upload():
 
         extracted_text = extract_text(filepath)
 
-        # SAVE HISTORY
         history = History(
             user_id=current_user.id,
             action=f"Uploaded File: {filename}",
@@ -569,6 +650,43 @@ def summarize():
 
 
 # =========================================
+# HUMANIZE API
+# =========================================
+
+@app.route("/humanize", methods=["POST"])
+@login_required
+def humanize():
+
+    try:
+
+        data = request.json
+
+        text = data.get("text")
+
+        result = humanize_text(text)
+
+        history = History(
+            user_id=current_user.id,
+            action="Humanized Text",
+            content=result[:1000]
+        )
+
+        db.session.add(history)
+
+        db.session.commit()
+
+        return jsonify({
+            "result": result
+        })
+
+    except Exception as e:
+
+        return jsonify({
+            "error": str(e)
+        })
+
+
+# =========================================
 # DOWNLOAD PDF
 # =========================================
 
@@ -590,14 +708,12 @@ def download():
 
         filepath = create_pdf(text)
 
-        # CHECK PDF CREATED
         if not filepath:
 
             return jsonify({
                 "error": "PDF creation failed"
             }), 500
 
-        # CHECK FILE EXISTS
         if not os.path.exists(filepath):
 
             return jsonify({
@@ -613,11 +729,10 @@ def download():
 
     except Exception as e:
 
-        print("DOWNLOAD ERROR:", str(e))
-
         return jsonify({
             "error": str(e)
         }), 500
+
 
 # =========================================
 # HISTORY PAGE
