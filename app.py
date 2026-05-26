@@ -28,8 +28,6 @@ from werkzeug.utils import secure_filename
 
 from deep_translator import GoogleTranslator
 
-from transformers import pipeline
-
 import os
 import uuid
 import datetime
@@ -75,16 +73,6 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 login_manager.login_view = "login"
-
-
-# =========================================
-# HUMANIZER MODEL
-# =========================================
-
-humanizer_pipeline = pipeline(
-    "text2text-generation",
-    model="google/flan-t5-small"
-)
 
 
 # =========================================
@@ -215,80 +203,81 @@ def translate_text(text, target_language):
 
 
 # =========================================
-# HUMANIZE TEXT
+# HUMANIZE TEXT (LIGHTWEIGHT VERSION)
 # =========================================
-
-PROMPT = """
-Rewrite the following text in a natural, human-like, engaging, and readable style.
-Keep the original meaning exactly same.
-Do not add extra information.
-Do not remove important information.
-Make the writing feel less robotic and more human.
-
-Text:
-"""
-
-
-def clean_text(text):
-
-    text = re.sub(r'\s+', ' ', text)
-
-    return text.strip()
-
-
-def split_text(text, max_words=200):
-
-    words = text.split()
-
-    chunks = []
-
-    for i in range(0, len(words), max_words):
-
-        chunk = " ".join(words[i:i + max_words])
-
-        chunks.append(chunk)
-
-    return chunks
-
-
-def humanize_chunk(chunk):
-
-    prompt = PROMPT + chunk
-
-    result = humanizer_pipeline(
-        prompt,
-        max_new_tokens=256,
-        do_sample=True,
-        temperature=0.8,
-        top_p=0.95
-    )
-
-    return result[0]["generated_text"]
-
 
 def humanize_text(text):
 
     try:
 
-        text = clean_text(text)
-
         if not text:
 
             return "Please enter some text."
 
-        chunks = split_text(text)
+        text = text.strip()
 
-        humanized_chunks = []
+        replacements = {
 
-        for chunk in chunks:
+            "In conclusion": "To sum it up",
 
-            humanized = humanize_chunk(chunk)
+            "Furthermore": "Also",
 
-            humanized_chunks.append(humanized)
+            "Moreover": "On top of that",
 
-        final_output = "\n\n".join(humanized_chunks)
+            "However": "But",
 
-        return final_output
+            "Therefore": "So",
+
+            "Thus": "As a result",
+
+            "It is important to note that":
+            "Keep in mind that",
+
+            "This demonstrates that":
+            "This shows that",
+
+            "Utilize": "Use",
+
+            "Commence": "Start",
+
+            "Terminate": "Stop",
+
+            "Purchase": "Buy",
+
+            "Assistance": "Help"
+
+        }
+
+        for old, new in replacements.items():
+
+            text = text.replace(old, new)
+
+        # Clean spacing
+        text = re.sub(r'\s+', ' ', text)
+
+        # Improve readability
+        sentences = text.split('. ')
+
+        improved = []
+
+        for sentence in sentences:
+
+            sentence = sentence.strip()
+
+            if sentence:
+
+                if len(sentence) > 1:
+
+                    sentence = (
+                        sentence[0].upper() +
+                        sentence[1:]
+                    )
+
+                improved.append(sentence)
+
+        final_text = '. '.join(improved)
+
+        return final_text
 
     except Exception as e:
 
@@ -650,7 +639,7 @@ def summarize():
 
 
 # =========================================
-# HUMANIZE API
+# HUMANIZE
 # =========================================
 
 @app.route("/humanize", methods=["POST"])
