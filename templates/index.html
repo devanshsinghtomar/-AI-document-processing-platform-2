@@ -65,6 +65,7 @@ gap:10px;
 display:flex;
 gap:15px;
 align-items:center;
+flex-wrap:wrap;
 }
 
 .nav-links a{
@@ -298,6 +299,10 @@ background:linear-gradient(135deg,#8b5cf6,#ec4899);
 background:linear-gradient(135deg,#10b981,#14b8a6);
 }
 
+.btn-humanize{
+background:linear-gradient(135deg,#f43f5e,#ec4899);
+}
+
 .btn-copy{
 background:linear-gradient(135deg,#f59e0b,#f97316);
 }
@@ -420,6 +425,11 @@ height:350px;
 History
 </a>
 
+<a href="/humanize-page">
+<i class="fa-solid fa-pen-nib"></i>
+Humanize
+</a>
+
 <a href="/logout">
 <i class="fa-solid fa-right-from-bracket"></i>
 Logout
@@ -500,6 +510,11 @@ onclick="translateText()">
 <button class="btn-summary"
 onclick="summarizeText()">
 📝 Summarize
+</button>
+
+<button class="btn-humanize"
+onclick="humanizeText()">
+✨ Humanize
 </button>
 
 <button class="btn-copy"
@@ -595,7 +610,7 @@ onclick="stopSpeechOutput()">
 
 <div class="output-box" id="outputText">
 
-Your translated or summarized result will appear here...
+Your translated, summarized, or humanized result will appear here...
 
 </div>
 
@@ -608,7 +623,7 @@ Your translated or summarized result will appear here...
 <script>
 
 /* =========================================
-   STATUS
+STATUS
 ========================================= */
 
 function updateStatus(message){
@@ -619,7 +634,7 @@ message;
 }
 
 /* =========================================
-   FILE NAME
+FILE NAME
 ========================================= */
 
 document.getElementById('fileInput')
@@ -640,7 +655,7 @@ updateStatus('📂 File selected');
 });
 
 /* =========================================
-   UPLOAD
+UPLOAD
 ========================================= */
 
 async function uploadFile(){
@@ -704,7 +719,7 @@ updateStatus('❌ Upload failed');
 }
 
 /* =========================================
-   TRANSLATE
+TRANSLATE
 ========================================= */
 
 async function translateText(){
@@ -760,7 +775,7 @@ updateStatus('❌ Translation failed');
 }
 
 /* =========================================
-   SUMMARIZE
+SUMMARIZE
 ========================================= */
 
 async function summarizeText(){
@@ -816,7 +831,59 @@ updateStatus('❌ Summary failed');
 }
 
 /* =========================================
-   COPY
+HUMANIZE
+========================================= */
+
+async function humanizeText(){
+
+const text =
+document.getElementById('inputText').value;
+
+if(!text){
+
+alert('Please upload or enter text');
+
+return;
+
+}
+
+updateStatus('✨ Humanizing text...');
+
+try{
+
+const response = await fetch('/humanize',{
+
+method:'POST',
+
+headers:{
+'Content-Type':'application/json'
+},
+
+body:JSON.stringify({
+text:text
+})
+
+});
+
+const data = await response.json();
+
+document.getElementById('outputText').innerText =
+data.result;
+
+updateStatus('✅ Humanization completed');
+
+}catch(error){
+
+alert('Humanization Failed');
+
+updateStatus('❌ Humanization failed');
+
+}
+
+}
+
+/* =========================================
+COPY
 ========================================= */
 
 function copyText(){
@@ -833,7 +900,7 @@ updateStatus('📋 Text copied');
 }
 
 /* =========================================
-   CLEAR
+CLEAR
 ========================================= */
 
 function clearText(){
@@ -848,7 +915,7 @@ updateStatus('🧹 Cleared');
 }
 
 /* =========================================
-   DOWNLOAD
+DOWNLOAD
 ========================================= */
 
 async function downloadPDF(){
@@ -925,7 +992,7 @@ updateStatus('❌ Download failed');
 }
 
 /* =========================================
-   SPEECH TO TEXT
+SPEECH TO TEXT
 ========================================= */
 
 const speechBtn =
@@ -937,7 +1004,7 @@ document.getElementById('stopSpeechBtn');
 let recognition;
 
 if('webkitSpeechRecognition' in window ||
-   'SpeechRecognition' in window){
+'SpeechRecognition' in window){
 
 const SpeechRecognition =
 window.SpeechRecognition ||
@@ -1016,7 +1083,7 @@ stopSpeechBtn.disabled = true;
 }
 
 /* =========================================
-   TEXT TO SPEECH
+TEXT TO SPEECH
 ========================================= */
 
 let speechInstance;
