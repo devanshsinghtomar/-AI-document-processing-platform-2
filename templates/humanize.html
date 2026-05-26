@@ -1,500 +1,535 @@
-# Humanize Document Feature Integration Guide
-
-This implementation adds a completely new page called **Humanize Document** to your existing AI Document Processing Platform without changing any existing UI or feature behavior.
-
-The feature will:
-
-* Convert robotic or AI-generated text into natural human-like content
-* Preserve original meaning
-* Keep formatting readable
-* Work as a separate standalone feature/page
-* Match your existing UI automatically
-* Not affect current features
-
----
-
-# STEP 1 — Install Required Package
-
-Open terminal in your project root and run:
-
-```bash
-pip install transformers torch sentencepiece
-```
-
-If already installed, no problem.
-
----
-
-# STEP 2 — Create New Backend File
-
-Create a new file:
-
-```text
-backend/humanizer.py
-```
-
-Paste this code:
-
-```python
-from transformers import pipeline
-import re
-
-# Load paraphrasing model only once
-humanizer_pipeline = pipeline(
-    "text2text-generation",
-    model="google/flan-t5-base",
-    max_length=512
-)
-
-
-def clean_text(text):
-    text = re.sub(r'\s+', ' ', text)
-    return text.strip()
-
-
-PROMPT = """
-Rewrite the following text in a natural, human-like, engaging, and readable style.
-Keep the meaning exactly same.
-Do not shorten too much.
-Do not add extra information.
-
-Text:
-"""
-
-
-def humanize_text(text):
-    try:
-        text = clean_text(text)
-
-        prompt = PROMPT + text
-
-        result = humanizer_pipeline(
-            prompt,
-            max_new_tokens=300,
-            do_sample=True,
-            temperature=0.8,
-            top_p=0.95
-        )
-
-        generated = result[0]['generated_text']
-
-        return generated
-
-    except Exception as e:
-        return f"Error: {str(e)}"
-```
-
----
-
-# STEP 3 — Update app.py
-
-Open your existing:
-
-```text
-app.py
-```
-
-Add this import near other imports:
-
-```python
-from backend.humanizer import humanize_text
-```
-
----
-
-Now add this NEW ROUTE anywhere below your existing routes:
-
-```python
-@app.route('/humanize', methods=['GET', 'POST'])
-def humanize_document():
-    humanized_output = ""
-    original_text = ""
-
-    if request.method == 'POST':
-        original_text = request.form.get('text', '')
-
-        if original_text.strip():
-            humanized_output = humanize_text(original_text)
-
-    return render_template(
-        'humanize.html',
-        output=humanized_output,
-        original_text=original_text
-    )
-```
-
-IMPORTANT:
-
-* Do NOT remove or edit any existing route
-* Only add this new route
-
----
-
-# STEP 4 — Add Navigation Button
-
-Open your main navigation template.
-
-Usually one of these:
-
-```text
-templates/index.html
-```
-
-or
-
-```text
-templates/base.html
-```
-
-Find navigation/menu section.
-
-Add this button/link WITHOUT removing anything:
-
-```html
-<a href="/humanize" class="nav-link">
-    <i class="fas fa-pen-fancy"></i>
-    Humanize Document
-</a>
-```
-
-If your project uses buttons instead:
-
-```html
-<button onclick="window.location.href='/humanize'">
-    Humanize Document
-</button>
-```
-
----
-
-# STEP 5 — Create New HTML Page
-
-Create file:
-
-```text
-templates/humanize.html
-```
-
-Paste this FULL CODE:
-
-```html
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Humanize Document</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<title>Humanize Document</title>
 
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
-        }
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-        body {
-            background: #0f172a;
-            color: white;
-            min-height: 100vh;
-            padding: 40px 20px;
-        }
+<style>
 
-        .container {
-            max-width: 1200px;
-            margin: auto;
-        }
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
+}
 
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
+body{
+background:
+linear-gradient(135deg,#020617,#0f172a,#111827);
+min-height:100vh;
+color:white;
+padding:20px;
+overflow-x:hidden;
+}
 
-        .title {
-            font-size: 32px;
-            font-weight: 700;
-        }
+.container{
+max-width:1600px;
+margin:auto;
+}
 
-        .back-btn {
-            text-decoration: none;
-            background: #2563eb;
-            color: white;
-            padding: 12px 20px;
-            border-radius: 10px;
-            transition: 0.3s;
-        }
+/* =========================================
+NAVBAR
+========================================= */
 
-        .back-btn:hover {
-            background: #1d4ed8;
-        }
+.navbar{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:22px 30px;
+background:rgba(255,255,255,0.06);
+border:1px solid rgba(255,255,255,0.08);
+border-radius:24px;
+backdrop-filter:blur(18px);
+margin-bottom:20px;
+box-shadow:0 10px 30px rgba(0,0,0,0.3);
+}
 
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 25px;
-        }
+.logo{
+font-size:30px;
+font-weight:700;
+display:flex;
+align-items:center;
+gap:10px;
+}
 
-        .card {
-            background: #1e293b;
-            padding: 25px;
-            border-radius: 18px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-        }
+.nav-links{
+display:flex;
+gap:15px;
+align-items:center;
+flex-wrap:wrap;
+}
 
-        .card h2 {
-            margin-bottom: 20px;
-            font-size: 22px;
-        }
+.nav-links a{
+text-decoration:none;
+color:white;
+padding:12px 20px;
+border-radius:14px;
+background:rgba(255,255,255,0.08);
+transition:0.3s;
+font-weight:600;
+}
 
-        textarea {
-            width: 100%;
-            height: 420px;
-            resize: none;
-            border: none;
-            outline: none;
-            border-radius: 12px;
-            padding: 20px;
-            background: #334155;
-            color: white;
-            font-size: 15px;
-            line-height: 1.6;
-        }
+.nav-links a:hover{
+background:#ec4899;
+transform:translateY(-2px);
+}
 
-        .output-box {
-            width: 100%;
-            height: 420px;
-            overflow-y: auto;
-            border-radius: 12px;
-            padding: 20px;
-            background: #334155;
-            color: white;
-            line-height: 1.8;
-            white-space: pre-wrap;
-        }
+/* =========================================
+STATUS BAR
+========================================= */
 
-        .buttons {
-            margin-top: 20px;
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
+.status-bar{
+margin-bottom:20px;
+padding:16px 22px;
+border-radius:18px;
+background:rgba(255,255,255,0.06);
+border:1px solid rgba(255,255,255,0.08);
+font-size:15px;
+font-weight:600;
+color:#f472b6;
+backdrop-filter:blur(15px);
+box-shadow:0 8px 25px rgba(0,0,0,0.25);
+}
 
-        button {
-            border: none;
-            outline: none;
-            cursor: pointer;
-            padding: 12px 20px;
-            border-radius: 12px;
-            font-size: 15px;
-            font-weight: 600;
-            transition: 0.3s;
-        }
+/* =========================================
+GRID
+========================================= */
 
-        .humanize-btn {
-            background: #22c55e;
-            color: white;
-        }
+.main-grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:25px;
+}
 
-        .humanize-btn:hover {
-            background: #16a34a;
-        }
+/* =========================================
+CARD
+========================================= */
 
-        .copy-btn {
-            background: #2563eb;
-            color: white;
-        }
+.card{
+background:rgba(255,255,255,0.06);
+padding:28px;
+border-radius:28px;
+backdrop-filter:blur(18px);
+border:1px solid rgba(255,255,255,0.08);
+box-shadow:0 12px 35px rgba(0,0,0,0.35);
+}
 
-        .copy-btn:hover {
-            background: #1d4ed8;
-        }
+.card h2{
+margin-bottom:22px;
+font-size:26px;
+font-weight:700;
+}
 
-        .clear-btn {
-            background: #ef4444;
-            color: white;
-        }
+/* =========================================
+TEXTAREA
+========================================= */
 
-        .clear-btn:hover {
-            background: #dc2626;
-        }
+textarea{
+width:100%;
+height:720px;
+background:rgba(255,255,255,0.05);
+border:none;
+outline:none;
+resize:none;
+border-radius:20px;
+padding:22px;
+color:white;
+font-size:15px;
+margin-top:10px;
+line-height:1.8;
+box-shadow:inset 0 0 20px rgba(0,0,0,0.2);
+}
 
-        @media(max-width: 900px) {
-            .grid {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+textarea::placeholder{
+color:#94a3b8;
+}
+
+/* =========================================
+OUTPUT BOX
+========================================= */
+
+.output-box{
+height:720px;
+overflow-y:auto;
+background:rgba(255,255,255,0.05);
+padding:25px;
+border-radius:22px;
+line-height:1.9;
+white-space:pre-wrap;
+font-size:15px;
+box-shadow:inset 0 0 20px rgba(0,0,0,0.2);
+}
+
+/* =========================================
+BUTTON GRID
+========================================= */
+
+.controls-grid{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:14px;
+margin-top:20px;
+}
+
+/* =========================================
+BUTTONS
+========================================= */
+
+button{
+padding:15px;
+border:none;
+border-radius:16px;
+font-size:15px;
+font-weight:600;
+cursor:pointer;
+color:white;
+transition:0.3s;
+box-shadow:0 8px 18px rgba(0,0,0,0.25);
+}
+
+button:hover{
+transform:translateY(-2px) scale(1.01);
+opacity:0.96;
+}
+
+/* =========================================
+BUTTON COLORS
+========================================= */
+
+.btn-humanize{
+background:linear-gradient(135deg,#ec4899,#db2777);
+}
+
+.btn-copy{
+background:linear-gradient(135deg,#f59e0b,#f97316);
+}
+
+.btn-clear{
+background:linear-gradient(135deg,#ef4444,#dc2626);
+}
+
+.btn-back{
+background:linear-gradient(135deg,#2563eb,#1d4ed8);
+}
+
+/* =========================================
+LOADING
+========================================= */
+
+.loading{
+display:none;
+text-align:center;
+margin-top:20px;
+font-size:16px;
+font-weight:600;
+color:#f472b6;
+}
+
+/* =========================================
+SCROLLBAR
+========================================= */
+
+::-webkit-scrollbar{
+width:8px;
+}
+
+::-webkit-scrollbar-thumb{
+background:#334155;
+border-radius:10px;
+}
+
+/* =========================================
+RESPONSIVE
+========================================= */
+
+@media(max-width:1200px){
+
+.main-grid{
+grid-template-columns:1fr;
+}
+
+textarea,
+.output-box{
+height:450px;
+}
+
+}
+
+@media(max-width:700px){
+
+.controls-grid{
+grid-template-columns:1fr;
+}
+
+.navbar{
+flex-direction:column;
+gap:15px;
+}
+
+.logo{
+font-size:24px;
+}
+
+.card{
+padding:20px;
+}
+
+textarea,
+.output-box{
+height:350px;
+}
+
+}
+
+</style>
+
 </head>
+
 <body>
 
 <div class="container">
 
-    <div class="top-bar">
-        <h1 class="title">
-            <i class="fas fa-pen-fancy"></i>
-            Humanize Document
-        </h1>
+<!-- NAVBAR -->
 
-        <a href="/" class="back-btn">
-            <i class="fas fa-arrow-left"></i>
-            Back To Home
-        </a>
-    </div>
+<div class="navbar">
 
-    <form method="POST">
+<div class="logo">
+✨ Humanize AI Text
+</div>
 
-        <div class="grid">
+<div class="nav-links">
 
-            <div class="card">
-                <h2>
-                    <i class="fas fa-file-alt"></i>
-                    Original Text
-                </h2>
+<a href="/">
+<i class="fa-solid fa-house"></i>
+Home
+</a>
 
-                <textarea
-                    name="text"
-                    placeholder="Paste AI-generated or robotic text here..."
-                >{{ original_text }}</textarea>
+<a href="/history-page">
+<i class="fa-solid fa-clock-rotate-left"></i>
+History
+</a>
 
-                <div class="buttons">
-                    <button type="submit" class="humanize-btn">
-                        <i class="fas fa-magic"></i>
-                        Humanize Text
-                    </button>
+<a href="/logout">
+<i class="fa-solid fa-right-from-bracket"></i>
+Logout
+</a>
 
-                    <button
-                        type="button"
-                        class="clear-btn"
-                        onclick="clearText()"
-                    >
-                        <i class="fas fa-trash"></i>
-                        Clear
-                    </button>
-                </div>
-            </div>
+</div>
 
-            <div class="card">
-                <h2>
-                    <i class="fas fa-user-edit"></i>
-                    Humanized Output
-                </h2>
+</div>
 
-                <div class="output-box" id="outputText">
-                    {{ output }}
-                </div>
+<!-- STATUS BAR -->
 
-                <div class="buttons">
-                    <button
-                        type="button"
-                        class="copy-btn"
-                        onclick="copyOutput()"
-                    >
-                        <i class="fas fa-copy"></i>
-                        Copy Output
-                    </button>
-                </div>
-            </div>
+<div id="statusBar" class="status-bar">
+✅ Ready To Humanize Text
+</div>
 
-        </div>
+<!-- MAIN GRID -->
 
-    </form>
+<div class="main-grid">
+
+<!-- LEFT CARD -->
+
+<div class="card">
+
+<h2>📝 Input Text</h2>
+
+<textarea
+id="inputText"
+placeholder="Paste AI-generated or robotic text here..."></textarea>
+
+<div class="controls-grid">
+
+<button class="btn-humanize"
+onclick="humanizeText()">
+✨ Humanize Text
+</button>
+
+<button class="btn-clear"
+onclick="clearText()">
+🗑 Clear
+</button>
+
+</div>
+
+<div class="loading" id="loading">
+
+<p>✨ Humanizing text...</p>
+
+</div>
+
+</div>
+
+<!-- RIGHT CARD -->
+
+<div class="card">
+
+<h2>📄 Humanized Output</h2>
+
+<div class="output-box" id="outputText">
+
+Your humanized content will appear here...
+
+</div>
+
+<div class="controls-grid">
+
+<button class="btn-copy"
+onclick="copyText()">
+📋 Copy Output
+</button>
+
+<button class="btn-back"
+onclick="goHome()">
+🏠 Back To Home
+</button>
+
+</div>
+
+</div>
+
+</div>
 
 </div>
 
 <script>
-    function copyOutput() {
-        const text = document.getElementById('outputText').innerText;
 
-        navigator.clipboard.writeText(text)
-            .then(() => {
-                alert('Output copied successfully!');
-            });
-    }
+/* =========================================
+STATUS
+========================================= */
 
-    function clearText() {
-        document.querySelector('textarea').value = '';
-        document.getElementById('outputText').innerHTML = '';
-    }
+function updateStatus(message){
+
+document.getElementById('statusBar').innerText =
+message;
+
+}
+
+/* =========================================
+HUMANIZE TEXT
+========================================= */
+
+async function humanizeText(){
+
+const text =
+document.getElementById('inputText').value;
+
+if(!text){
+
+alert('Please enter text');
+
+return;
+
+}
+
+document.getElementById('loading').style.display =
+'block';
+
+updateStatus('✨ Humanizing text...');
+
+try{
+
+const response = await fetch('/humanize',{
+
+method:'POST',
+
+headers:{
+'Content-Type':'application/json'
+},
+
+body:JSON.stringify({
+text:text
+})
+
+});
+
+const data = await response.json();
+
+document.getElementById('outputText').innerText =
+data.result;
+
+updateStatus('✅ Humanization completed');
+
+}
+catch(error){
+
+alert('Humanization Failed');
+
+updateStatus('❌ Humanization failed');
+
+}
+
+finally{
+
+document.getElementById('loading').style.display =
+'none';
+
+}
+
+}
+
+/* =========================================
+COPY TEXT
+========================================= */
+
+function copyText(){
+
+const text =
+document.getElementById('outputText').innerText;
+
+if(!text ||
+text === 'Your humanized content will appear here...'){
+
+alert('No output available');
+
+return;
+
+}
+
+navigator.clipboard.writeText(text);
+
+alert('Copied Successfully');
+
+updateStatus('📋 Output copied');
+
+}
+
+/* =========================================
+CLEAR
+========================================= */
+
+function clearText(){
+
+document.getElementById('inputText').value='';
+
+document.getElementById('outputText').innerText =
+'Your humanized content will appear here...';
+
+updateStatus('🧹 Cleared');
+
+}
+
+/* =========================================
+GO HOME
+========================================= */
+
+function goHome(){
+
+window.location.href = '/';
+
+}
+
 </script>
 
 </body>
+
 </html>
-```
-
----
-
-# STEP 6 — Restart Server
-
-Run:
-
-```bash
-python app.py
-```
-
-or
-
-```bash
-flask run
-```
-
----
-
-# FINAL RESULT
-
-Your website will now have:
-
-✅ New Humanize Document page
-✅ AI-to-human text rewriting
-✅ Modern responsive UI
-✅ Copy feature
-✅ Clear feature
-✅ Separate route
-✅ No changes to existing features
-✅ Existing UI untouched
-✅ Existing translator/summarizer/chat features remain same
-
----
-
-# OPTIONAL IMPROVEMENT (Recommended)
-
-If Railway RAM becomes high due to model loading, use this lighter model instead:
-
-Replace:
-
-```python
-model="google/flan-t5-base"
-```
-
-with:
-
-```python
-model="google/flan-t5-small"
-```
-
-This reduces memory usage significantly.
-
----
-
-# NEW ROUTE
-
-Your feature URL will be:
-
-```text
-https://your-domain/humanize
-```
-
-For your project:
-
-```text
-https://ai-document-processing-platform-2-production.up.railway.app/humanize
-```
-
