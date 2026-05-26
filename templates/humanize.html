@@ -1,1 +1,500 @@
+# Humanize Document Feature Integration Guide
+
+This implementation adds a completely new page called **Humanize Document** to your existing AI Document Processing Platform without changing any existing UI or feature behavior.
+
+The feature will:
+
+* Convert robotic or AI-generated text into natural human-like content
+* Preserve original meaning
+* Keep formatting readable
+* Work as a separate standalone feature/page
+* Match your existing UI automatically
+* Not affect current features
+
+---
+
+# STEP 1 — Install Required Package
+
+Open terminal in your project root and run:
+
+```bash
+pip install transformers torch sentencepiece
+```
+
+If already installed, no problem.
+
+---
+
+# STEP 2 — Create New Backend File
+
+Create a new file:
+
+```text
+backend/humanizer.py
+```
+
+Paste this code:
+
+```python
+from transformers import pipeline
+import re
+
+# Load paraphrasing model only once
+humanizer_pipeline = pipeline(
+    "text2text-generation",
+    model="google/flan-t5-base",
+    max_length=512
+)
+
+
+def clean_text(text):
+    text = re.sub(r'\s+', ' ', text)
+    return text.strip()
+
+
+PROMPT = """
+Rewrite the following text in a natural, human-like, engaging, and readable style.
+Keep the meaning exactly same.
+Do not shorten too much.
+Do not add extra information.
+
+Text:
+"""
+
+
+def humanize_text(text):
+    try:
+        text = clean_text(text)
+
+        prompt = PROMPT + text
+
+        result = humanizer_pipeline(
+            prompt,
+            max_new_tokens=300,
+            do_sample=True,
+            temperature=0.8,
+            top_p=0.95
+        )
+
+        generated = result[0]['generated_text']
+
+        return generated
+
+    except Exception as e:
+        return f"Error: {str(e)}"
+```
+
+---
+
+# STEP 3 — Update app.py
+
+Open your existing:
+
+```text
+app.py
+```
+
+Add this import near other imports:
+
+```python
+from backend.humanizer import humanize_text
+```
+
+---
+
+Now add this NEW ROUTE anywhere below your existing routes:
+
+```python
+@app.route('/humanize', methods=['GET', 'POST'])
+def humanize_document():
+    humanized_output = ""
+    original_text = ""
+
+    if request.method == 'POST':
+        original_text = request.form.get('text', '')
+
+        if original_text.strip():
+            humanized_output = humanize_text(original_text)
+
+    return render_template(
+        'humanize.html',
+        output=humanized_output,
+        original_text=original_text
+    )
+```
+
+IMPORTANT:
+
+* Do NOT remove or edit any existing route
+* Only add this new route
+
+---
+
+# STEP 4 — Add Navigation Button
+
+Open your main navigation template.
+
+Usually one of these:
+
+```text
+templates/index.html
+```
+
+or
+
+```text
+templates/base.html
+```
+
+Find navigation/menu section.
+
+Add this button/link WITHOUT removing anything:
+
+```html
+<a href="/humanize" class="nav-link">
+    <i class="fas fa-pen-fancy"></i>
+    Humanize Document
+</a>
+```
+
+If your project uses buttons instead:
+
+```html
+<button onclick="window.location.href='/humanize'">
+    Humanize Document
+</button>
+```
+
+---
+
+# STEP 5 — Create New HTML Page
+
+Create file:
+
+```text
+templates/humanize.html
+```
+
+Paste this FULL CODE:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Humanize Document</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: #0f172a;
+            color: white;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .title {
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        .back-btn {
+            text-decoration: none;
+            background: #2563eb;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 10px;
+            transition: 0.3s;
+        }
+
+        .back-btn:hover {
+            background: #1d4ed8;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        .card {
+            background: #1e293b;
+            padding: 25px;
+            border-radius: 18px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+        }
+
+        .card h2 {
+            margin-bottom: 20px;
+            font-size: 22px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 420px;
+            resize: none;
+            border: none;
+            outline: none;
+            border-radius: 12px;
+            padding: 20px;
+            background: #334155;
+            color: white;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .output-box {
+            width: 100%;
+            height: 420px;
+            overflow-y: auto;
+            border-radius: 12px;
+            padding: 20px;
+            background: #334155;
+            color: white;
+            line-height: 1.8;
+            white-space: pre-wrap;
+        }
+
+        .buttons {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+
+        .humanize-btn {
+            background: #22c55e;
+            color: white;
+        }
+
+        .humanize-btn:hover {
+            background: #16a34a;
+        }
+
+        .copy-btn {
+            background: #2563eb;
+            color: white;
+        }
+
+        .copy-btn:hover {
+            background: #1d4ed8;
+        }
+
+        .clear-btn {
+            background: #ef4444;
+            color: white;
+        }
+
+        .clear-btn:hover {
+            background: #dc2626;
+        }
+
+        @media(max-width: 900px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="top-bar">
+        <h1 class="title">
+            <i class="fas fa-pen-fancy"></i>
+            Humanize Document
+        </h1>
+
+        <a href="/" class="back-btn">
+            <i class="fas fa-arrow-left"></i>
+            Back To Home
+        </a>
+    </div>
+
+    <form method="POST">
+
+        <div class="grid">
+
+            <div class="card">
+                <h2>
+                    <i class="fas fa-file-alt"></i>
+                    Original Text
+                </h2>
+
+                <textarea
+                    name="text"
+                    placeholder="Paste AI-generated or robotic text here..."
+                >{{ original_text }}</textarea>
+
+                <div class="buttons">
+                    <button type="submit" class="humanize-btn">
+                        <i class="fas fa-magic"></i>
+                        Humanize Text
+                    </button>
+
+                    <button
+                        type="button"
+                        class="clear-btn"
+                        onclick="clearText()"
+                    >
+                        <i class="fas fa-trash"></i>
+                        Clear
+                    </button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>
+                    <i class="fas fa-user-edit"></i>
+                    Humanized Output
+                </h2>
+
+                <div class="output-box" id="outputText">
+                    {{ output }}
+                </div>
+
+                <div class="buttons">
+                    <button
+                        type="button"
+                        class="copy-btn"
+                        onclick="copyOutput()"
+                    >
+                        <i class="fas fa-copy"></i>
+                        Copy Output
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+    </form>
+
+</div>
+
+<script>
+    function copyOutput() {
+        const text = document.getElementById('outputText').innerText;
+
+        navigator.clipboard.writeText(text)
+            .then(() => {
+                alert('Output copied successfully!');
+            });
+    }
+
+    function clearText() {
+        document.querySelector('textarea').value = '';
+        document.getElementById('outputText').innerHTML = '';
+    }
+</script>
+
+</body>
+</html>
+```
+
+---
+
+# STEP 6 — Restart Server
+
+Run:
+
+```bash
+python app.py
+```
+
+or
+
+```bash
+flask run
+```
+
+---
+
+# FINAL RESULT
+
+Your website will now have:
+
+✅ New Humanize Document page
+✅ AI-to-human text rewriting
+✅ Modern responsive UI
+✅ Copy feature
+✅ Clear feature
+✅ Separate route
+✅ No changes to existing features
+✅ Existing UI untouched
+✅ Existing translator/summarizer/chat features remain same
+
+---
+
+# OPTIONAL IMPROVEMENT (Recommended)
+
+If Railway RAM becomes high due to model loading, use this lighter model instead:
+
+Replace:
+
+```python
+model="google/flan-t5-base"
+```
+
+with:
+
+```python
+model="google/flan-t5-small"
+```
+
+This reduces memory usage significantly.
+
+---
+
+# NEW ROUTE
+
+Your feature URL will be:
+
+```text
+https://your-domain/humanize
+```
+
+For your project:
+
+```text
+https://ai-document-processing-platform-2-production.up.railway.app/humanize
+```
 
