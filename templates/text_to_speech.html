@@ -4,246 +4,538 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Text to Speech - DocuAI</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+    <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
     <style>
+
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        
-        * {
-            font-family: 'Inter', system-ui, sans-serif;
+
+        *{
+            font-family:'Inter',system-ui,sans-serif;
         }
-        
-        body {
-            background: linear-gradient(135deg, #0f172a 0%, #1e2937 100%);
-            min-height: 100vh;
+
+        body{
+            background:
+            linear-gradient(135deg,#020617 0%,#0f172a 50%,#111827 100%);
+            min-height:100vh;
+            overflow-x:hidden;
         }
-        
-        .glass {
-            background: rgba(255, 255, 255, 0.09);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
+
+        .glass{
+            background:rgba(255,255,255,0.07);
+            backdrop-filter:blur(20px);
+            border:1px solid rgba(255,255,255,0.1);
+            box-shadow:0 10px 40px rgba(0,0,0,0.3);
         }
-        
-        .speaking {
-            animation: speakPulse 1.2s infinite;
+
+        .speaking{
+            animation:speakPulse 1.2s infinite;
         }
-        
-        @keyframes speakPulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.08); }
+
+        @keyframes speakPulse{
+
+            0%,100%{
+                transform:scale(1);
+            }
+
+            50%{
+                transform:scale(1.08);
+            }
+
         }
+
+        textarea::-webkit-scrollbar{
+            width:8px;
+        }
+
+        textarea::-webkit-scrollbar-thumb{
+            background:#334155;
+            border-radius:10px;
+        }
+
     </style>
+
 </head>
+
 <body class="text-white">
-    <div class="max-w-4xl mx-auto p-6">
-        <!-- Navbar -->
-        <nav class="glass rounded-3xl px-8 py-5 flex items-center justify-between mb-10">
+
+    <div class="max-w-5xl mx-auto p-6">
+
+        <!-- NAVBAR -->
+
+        <nav class="glass rounded-3xl px-8 py-5 flex flex-col md:flex-row items-center justify-between gap-5 mb-10">
+
             <div class="flex items-center gap-4">
-                <div class="w-11 h-11 bg-gradient-to-br from-indigo-500 to-cyan-400 rounded-2xl flex items-center justify-center">
-                    <span class="text-white text-3xl font-bold">AI</span>
+
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg">
+                    <i class="fa-solid fa-volume-high text-2xl"></i>
                 </div>
+
                 <div>
-                    <h1 class="text-3xl font-bold tracking-tight">DocuAI</h1>
+                    <h1 class="text-3xl font-bold">
+                        AI Translator
+                    </h1>
+
+                    <p class="text-gray-400 text-sm">
+                        Intelligent Text To Speech System
+                    </p>
                 </div>
+
             </div>
-            
-            <div class="flex items-center gap-3">
-                <a href="/" class="flex items-center gap-2 px-6 py-3 hover:bg-white/10 rounded-2xl transition">
+
+            <div class="flex flex-wrap items-center gap-3">
+
+                <a href="/"
+                class="px-5 py-3 rounded-2xl bg-white/5 hover:bg-blue-600 transition-all duration-300">
+
                     <i class="fa-solid fa-house"></i>
                     Home
+
                 </a>
-                <a href="/history" class="flex items-center gap-2 px-6 py-3 hover:bg-white/10 rounded-2xl transition">
+
+                <a href="/history-page"
+                class="px-5 py-3 rounded-2xl bg-white/5 hover:bg-purple-600 transition-all duration-300">
+
                     <i class="fa-solid fa-clock-rotate-left"></i>
                     History
+
                 </a>
-                <a href="/logout" class="flex items-center gap-2 px-6 py-3 hover:bg-red-500/10 hover:text-red-400 rounded-2xl transition">
+
+                <a href="/logout"
+                class="px-5 py-3 rounded-2xl bg-red-500/10 hover:bg-red-500 transition-all duration-300">
+
                     <i class="fa-solid fa-right-from-bracket"></i>
                     Logout
+
                 </a>
+
             </div>
+
         </nav>
 
-        <!-- Header -->
-        <div class="text-center mb-12">
-            <div class="inline-flex items-center gap-4 bg-white/10 px-6 py-3 rounded-3xl mb-6">
-                <i class="fa-solid fa-volume-high text-4xl text-emerald-400"></i>
-                <h1 class="text-5xl font-bold tracking-tight">Text to Speech</h1>
+        <!-- HEADER -->
+
+        <div class="text-center mb-10">
+
+            <div class="inline-flex items-center gap-4 px-8 py-4 rounded-3xl bg-white/5 border border-white/10 mb-6">
+
+                <i class="fa-solid fa-wave-square text-5xl text-cyan-400"></i>
+
+                <h1 class="text-5xl font-bold tracking-tight">
+                    Text To Speech
+                </h1>
+
             </div>
-            <p class="text-gray-400 text-xl max-w-lg mx-auto">
-                Convert your text into natural-sounding speech
+
+            <p class="text-gray-400 text-lg max-w-2xl mx-auto leading-relaxed">
+                Convert translated or summarized text into realistic speech with advanced voice controls
             </p>
+
         </div>
 
-        <div class="glass rounded-3xl p-10">
-            <!-- Status -->
-            <div id="statusBar" class="flex items-center justify-center gap-3 bg-white/5 border border-white/10 rounded-2xl py-4 mb-8 text-lg font-medium">
+        <!-- MAIN CARD -->
+
+        <div class="glass rounded-[32px] p-8 md:p-10">
+
+            <!-- STATUS -->
+
+            <div id="statusBar"
+            class="flex items-center justify-center gap-3 bg-white/5 border border-white/10 rounded-2xl py-4 mb-8 text-lg font-medium">
+
                 <i class="fa-solid fa-circle-check text-emerald-400"></i>
-                <span id="statusText">Ready to speak • Enter text below</span>
+
+                <span id="statusText">
+                    Ready to speak
+                </span>
+
             </div>
 
-            <!-- Speaker Visual -->
-            <div id="speakerContainer" 
-                 class="w-40 h-40 mx-auto mb-10 rounded-full border-8 border-white/10 flex items-center justify-center">
-                <i id="speakerIcon" class="fa-solid fa-volume-high text-7xl text-emerald-400"></i>
+            <!-- SPEAKER -->
+
+            <div class="flex justify-center mb-10">
+
+                <div id="speakerContainer"
+                class="w-44 h-44 rounded-full border-[10px] border-white/10 flex items-center justify-center bg-gradient-to-br from-cyan-500/10 to-blue-600/10 shadow-2xl">
+
+                    <i id="speakerIcon"
+                    class="fa-solid fa-volume-high text-7xl text-cyan-400"></i>
+
+                </div>
+
             </div>
 
-            <!-- Text Input -->
-            <textarea id="textInput" rows="10"
-                class="w-full bg-white/5 border border-white/10 focus:border-emerald-500 rounded-3xl p-8 text-white placeholder-gray-400 focus:outline-none text-base leading-relaxed resize-none"
-                placeholder="Type or paste your text here..."></textarea>
+            <!-- TEXT AREA -->
 
-            <!-- Voice Settings -->
+            <div>
+
+                <label class="block text-gray-300 mb-3 text-lg font-semibold">
+                    Enter Text
+                </label>
+
+                <textarea
+                id="textInput"
+                rows="11"
+                class="w-full bg-white/5 border border-white/10 focus:border-cyan-500 rounded-3xl p-7 text-white placeholder-gray-400 focus:outline-none text-base leading-relaxed resize-none"
+                placeholder="Translated or summarized text will automatically appear here..."></textarea>
+
+            </div>
+
+            <!-- SETTINGS -->
+
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+
+                <!-- VOICE -->
+
                 <div>
-                    <label class="block text-sm font-medium text-gray-400 mb-2">Voice</label>
-                    <select id="voiceSelect" 
-                            class="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 focus:outline-none focus:border-emerald-500">
-                        <option value="en-US">English (US) - Default</option>
+
+                    <label class="block text-sm font-medium text-gray-400 mb-2">
+                        Voice Language
+                    </label>
+
+                    <select id="voiceSelect"
+                    class="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 focus:outline-none focus:border-cyan-500">
+
+                        <option value="en-US">
+                            English (US)
+                        </option>
+
+                        <option value="hi-IN">
+                            Hindi
+                        </option>
+
+                        <option value="fr-FR">
+                            French
+                        </option>
+
+                        <option value="de-DE">
+                            German
+                        </option>
+
+                        <option value="es-ES">
+                            Spanish
+                        </option>
+
                     </select>
+
                 </div>
+
+                <!-- SPEED -->
+
                 <div>
-                    <label class="block text-sm font-medium text-gray-400 mb-2">Speed: <span id="rateValue">1.0</span>x</label>
-                    <input type="range" id="rate" min="0.5" max="2" step="0.1" value="1" 
-                           class="w-full accent-emerald-500">
+
+                    <label class="block text-sm font-medium text-gray-400 mb-2">
+                        Speed :
+                        <span id="rateValue">1.0</span>x
+                    </label>
+
+                    <input
+                    type="range"
+                    id="rate"
+                    min="0.5"
+                    max="2"
+                    step="0.1"
+                    value="1"
+                    class="w-full accent-cyan-500">
+
                 </div>
+
+                <!-- PITCH -->
+
                 <div>
-                    <label class="block text-sm font-medium text-gray-400 mb-2">Pitch: <span id="pitchValue">1.0</span></label>
-                    <input type="range" id="pitch" min="0.5" max="2" step="0.1" value="1" 
-                           class="w-full accent-emerald-500">
+
+                    <label class="block text-sm font-medium text-gray-400 mb-2">
+                        Pitch :
+                        <span id="pitchValue">1.0</span>
+                    </label>
+
+                    <input
+                    type="range"
+                    id="pitch"
+                    min="0.5"
+                    max="2"
+                    step="0.1"
+                    value="1"
+                    class="w-full accent-cyan-500">
+
                 </div>
+
             </div>
 
-            <!-- Action Buttons -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-10">
-                <button onclick="startSpeech()" id="startBtn"
-                        class="flex items-center justify-center gap-3 bg-gradient-to-r from-emerald-500 to-teal-500 py-5 rounded-2xl font-semibold text-lg transition hover:scale-105">
+            <!-- BUTTONS -->
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-5 mt-10">
+
+                <button
+                onclick="startSpeech()"
+                class="flex items-center justify-center gap-3 bg-gradient-to-r from-emerald-500 to-teal-500 py-5 rounded-2xl font-semibold text-lg hover:scale-105 transition-all duration-300 shadow-xl">
+
                     <i class="fa-solid fa-play"></i>
-                    <span>Start Speaking</span>
+                    Start
+
                 </button>
-                
-                <button onclick="pauseSpeech()" 
-                        class="flex items-center justify-center gap-3 bg-gradient-to-r from-amber-500 to-yellow-500 py-5 rounded-2xl font-semibold text-lg transition hover:scale-105">
+
+                <button
+                onclick="pauseSpeech()"
+                class="flex items-center justify-center gap-3 bg-gradient-to-r from-yellow-500 to-orange-500 py-5 rounded-2xl font-semibold text-lg hover:scale-105 transition-all duration-300 shadow-xl">
+
                     <i class="fa-solid fa-pause"></i>
                     Pause
+
                 </button>
-                
-                <button onclick="stopSpeech()" 
-                        class="flex items-center justify-center gap-3 bg-gradient-to-r from-red-500 to-rose-500 py-5 rounded-2xl font-semibold text-lg transition hover:scale-105">
+
+                <button
+                onclick="stopSpeech()"
+                class="flex items-center justify-center gap-3 bg-gradient-to-r from-red-500 to-pink-600 py-5 rounded-2xl font-semibold text-lg hover:scale-105 transition-all duration-300 shadow-xl">
+
                     <i class="fa-solid fa-stop"></i>
                     Stop
+
                 </button>
-                
-                <button onclick="goHome()" 
-                        class="flex items-center justify-center gap-3 bg-gradient-to-r from-blue-600 to-indigo-600 py-5 rounded-2xl font-semibold text-lg transition hover:scale-105">
+
+                <button
+                onclick="goHome()"
+                class="flex items-center justify-center gap-3 bg-gradient-to-r from-blue-600 to-indigo-600 py-5 rounded-2xl font-semibold text-lg hover:scale-105 transition-all duration-300 shadow-xl">
+
                     <i class="fa-solid fa-house"></i>
-                    Back to Home
+                    Home
+
                 </button>
+
             </div>
+
         </div>
+
     </div>
 
-    <!-- Toast -->
-    <div id="toast" class="fixed bottom-6 right-6 hidden bg-gray-800 border border-gray-700 rounded-2xl px-6 py-4 shadow-2xl"></div>
+    <!-- TOAST -->
 
-    <script>
-        let utterance = new SpeechSynthesisUtterance();
-        let isSpeaking = false;
-        let isPaused = false;
+    <div id="toast"
+    class="fixed bottom-6 right-6 hidden bg-slate-900 border border-slate-700 rounded-2xl px-6 py-4 shadow-2xl z-50">
+    </div>
 
-        function showToast(message, type = "success") {
-            const toast = document.getElementById('toast');
-            toast.innerHTML = `
-                <div class="flex items-center gap-3">
-                    <i class="fa-solid ${type === 'success' ? 'fa-check-circle text-green-400' : 'fa-exclamation-circle text-red-400'}"></i>
-                    <span>${message}</span>
-                </div>
-            `;
-            toast.classList.remove('hidden');
-            setTimeout(() => toast.classList.add('hidden'), 3000);
-        }
+<script>
 
-        function updateStatus(text) {
-            document.getElementById('statusText').innerHTML = text;
-        }
+/* =========================================
+AUTO LOAD OUTPUT TEXT
+========================================= */
 
-        function updateSpeakerVisual(isActive) {
-            const container = document.getElementById('speakerContainer');
-            if (isActive) {
-                container.classList.add('speaking');
-            } else {
-                container.classList.remove('speaking');
-            }
-        }
+window.onload = function(){
 
-        function startSpeech() {
-            const text = document.getElementById("textInput").value.trim();
-            if (!text) {
-                showToast("Please enter some text", "error");
-                return;
-            }
+    const savedText =
+    localStorage.getItem("ttsText");
 
-            utterance.text = text;
-            utterance.lang = "en-US";
-            utterance.rate = parseFloat(document.getElementById("rate").value);
-            utterance.pitch = parseFloat(document.getElementById("pitch").value);
+    if(savedText){
 
-            window.speechSynthesis.cancel(); // Clear previous
-            window.speechSynthesis.speak(utterance);
+        document.getElementById("textInput").value =
+        savedText;
 
-            isSpeaking = true;
-            isPaused = false;
-            updateSpeakerVisual(true);
-            updateStatus("🔊 Speaking...");
-            showToast("Speech started");
-        }
+    }
 
-        function pauseSpeech() {
-            if (window.speechSynthesis.speaking) {
-                window.speechSynthesis.pause();
-                isPaused = true;
-                updateStatus("⏸️ Paused");
-                showToast("Speech paused");
-            }
-        }
+};
 
-        function stopSpeech() {
-            window.speechSynthesis.cancel();
-            isSpeaking = false;
-            isPaused = false;
-            updateSpeakerVisual(false);
-            updateStatus("✅ Stopped");
-            showToast("Speech stopped");
-        }
+/* =========================================
+VARIABLES
+========================================= */
 
-        function goHome() {
-            window.location.href = "/";
-        }
+let utterance =
+new SpeechSynthesisUtterance();
 
-        // Range value display
-        document.getElementById("rate").addEventListener("input", function() {
-            document.getElementById("rateValue").textContent = this.value;
-        });
+/* =========================================
+TOAST
+========================================= */
 
-        document.getElementById("pitch").addEventListener("input", function() {
-            document.getElementById("pitchValue").textContent = this.value;
-        });
+function showToast(message,type="success"){
 
-        // Auto-stop visual when speech ends
-        utterance.onend = function() {
-            isSpeaking = false;
-            updateSpeakerVisual(false);
-            updateStatus("✅ Speech finished");
-        };
+    const toast =
+    document.getElementById('toast');
 
-        // Keyboard shortcuts
-        document.addEventListener('keydown', function(e) {
-            if (e.key === "Enter" && document.getElementById("textInput") === document.activeElement) {
-                if (e.ctrlKey) {
-                    e.preventDefault();
-                    startSpeech();
-                }
-            }
-        });
-    </script>
+    toast.innerHTML = `
+        <div class="flex items-center gap-3">
+            <i class="fa-solid ${
+                type === "success"
+                ?
+                "fa-circle-check text-green-400"
+                :
+                "fa-circle-xmark text-red-400"
+            }"></i>
+
+            <span>${message}</span>
+        </div>
+    `;
+
+    toast.classList.remove('hidden');
+
+    setTimeout(()=>{
+
+        toast.classList.add('hidden');
+
+    },3000);
+
+}
+
+/* =========================================
+STATUS
+========================================= */
+
+function updateStatus(message){
+
+    document.getElementById("statusText").innerText =
+    message;
+
+}
+
+/* =========================================
+SPEAKER VISUAL
+========================================= */
+
+function updateSpeakerVisual(active){
+
+    const speaker =
+    document.getElementById("speakerContainer");
+
+    if(active){
+
+        speaker.classList.add("speaking");
+
+    }else{
+
+        speaker.classList.remove("speaking");
+
+    }
+
+}
+
+/* =========================================
+START SPEECH
+========================================= */
+
+function startSpeech(){
+
+    const text =
+    document.getElementById("textInput")
+    .value
+    .trim();
+
+    if(!text){
+
+        showToast(
+            "Please enter some text",
+            "error"
+        );
+
+        return;
+
+    }
+
+    utterance =
+    new SpeechSynthesisUtterance();
+
+    utterance.text = text;
+
+    utterance.lang =
+    document.getElementById("voiceSelect").value;
+
+    utterance.rate =
+    parseFloat(
+        document.getElementById("rate").value
+    );
+
+    utterance.pitch =
+    parseFloat(
+        document.getElementById("pitch").value
+    );
+
+    window.speechSynthesis.cancel();
+
+    window.speechSynthesis.speak(utterance);
+
+    updateSpeakerVisual(true);
+
+    updateStatus("🔊 Speaking...");
+
+    showToast("Speech started");
+
+    utterance.onend = function(){
+
+        updateSpeakerVisual(false);
+
+        updateStatus("✅ Speech completed");
+
+    };
+
+}
+
+/* =========================================
+PAUSE
+========================================= */
+
+function pauseSpeech(){
+
+    window.speechSynthesis.pause();
+
+    updateStatus("⏸ Speech paused");
+
+    showToast("Speech paused");
+
+}
+
+/* =========================================
+STOP
+========================================= */
+
+function stopSpeech(){
+
+    window.speechSynthesis.cancel();
+
+    updateSpeakerVisual(false);
+
+    updateStatus("⏹ Speech stopped");
+
+    showToast("Speech stopped");
+
+}
+
+/* =========================================
+HOME
+========================================= */
+
+function goHome(){
+
+    window.location.href = "/";
+
+}
+
+/* =========================================
+RATE VALUE
+========================================= */
+
+document.getElementById("rate")
+.addEventListener("input",function(){
+
+    document.getElementById("rateValue")
+    .innerText =
+    this.value;
+
+});
+
+/* =========================================
+PITCH VALUE
+========================================= */
+
+document.getElementById("pitch")
+.addEventListener("input",function(){
+
+    document.getElementById("pitchValue")
+    .innerText =
+    this.value;
+
+});
+
+</script>
+
 </body>
 </html>
