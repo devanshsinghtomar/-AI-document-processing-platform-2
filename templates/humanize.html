@@ -1,535 +1,232 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Humanize Document</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-<link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
-<style>
-
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:'Poppins',sans-serif;
-}
-
-body{
-background:
-linear-gradient(135deg,#020617,#0f172a,#111827);
-min-height:100vh;
-color:white;
-padding:20px;
-overflow-x:hidden;
-}
-
-.container{
-max-width:1600px;
-margin:auto;
-}
-
-/* =========================================
-NAVBAR
-========================================= */
-
-.navbar{
-display:flex;
-justify-content:space-between;
-align-items:center;
-padding:22px 30px;
-background:rgba(255,255,255,0.06);
-border:1px solid rgba(255,255,255,0.08);
-border-radius:24px;
-backdrop-filter:blur(18px);
-margin-bottom:20px;
-box-shadow:0 10px 30px rgba(0,0,0,0.3);
-}
-
-.logo{
-font-size:30px;
-font-weight:700;
-display:flex;
-align-items:center;
-gap:10px;
-}
-
-.nav-links{
-display:flex;
-gap:15px;
-align-items:center;
-flex-wrap:wrap;
-}
-
-.nav-links a{
-text-decoration:none;
-color:white;
-padding:12px 20px;
-border-radius:14px;
-background:rgba(255,255,255,0.08);
-transition:0.3s;
-font-weight:600;
-}
-
-.nav-links a:hover{
-background:#ec4899;
-transform:translateY(-2px);
-}
-
-/* =========================================
-STATUS BAR
-========================================= */
-
-.status-bar{
-margin-bottom:20px;
-padding:16px 22px;
-border-radius:18px;
-background:rgba(255,255,255,0.06);
-border:1px solid rgba(255,255,255,0.08);
-font-size:15px;
-font-weight:600;
-color:#f472b6;
-backdrop-filter:blur(15px);
-box-shadow:0 8px 25px rgba(0,0,0,0.25);
-}
-
-/* =========================================
-GRID
-========================================= */
-
-.main-grid{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:25px;
-}
-
-/* =========================================
-CARD
-========================================= */
-
-.card{
-background:rgba(255,255,255,0.06);
-padding:28px;
-border-radius:28px;
-backdrop-filter:blur(18px);
-border:1px solid rgba(255,255,255,0.08);
-box-shadow:0 12px 35px rgba(0,0,0,0.35);
-}
-
-.card h2{
-margin-bottom:22px;
-font-size:26px;
-font-weight:700;
-}
-
-/* =========================================
-TEXTAREA
-========================================= */
-
-textarea{
-width:100%;
-height:720px;
-background:rgba(255,255,255,0.05);
-border:none;
-outline:none;
-resize:none;
-border-radius:20px;
-padding:22px;
-color:white;
-font-size:15px;
-margin-top:10px;
-line-height:1.8;
-box-shadow:inset 0 0 20px rgba(0,0,0,0.2);
-}
-
-textarea::placeholder{
-color:#94a3b8;
-}
-
-/* =========================================
-OUTPUT BOX
-========================================= */
-
-.output-box{
-height:720px;
-overflow-y:auto;
-background:rgba(255,255,255,0.05);
-padding:25px;
-border-radius:22px;
-line-height:1.9;
-white-space:pre-wrap;
-font-size:15px;
-box-shadow:inset 0 0 20px rgba(0,0,0,0.2);
-}
-
-/* =========================================
-BUTTON GRID
-========================================= */
-
-.controls-grid{
-display:grid;
-grid-template-columns:repeat(2,1fr);
-gap:14px;
-margin-top:20px;
-}
-
-/* =========================================
-BUTTONS
-========================================= */
-
-button{
-padding:15px;
-border:none;
-border-radius:16px;
-font-size:15px;
-font-weight:600;
-cursor:pointer;
-color:white;
-transition:0.3s;
-box-shadow:0 8px 18px rgba(0,0,0,0.25);
-}
-
-button:hover{
-transform:translateY(-2px) scale(1.01);
-opacity:0.96;
-}
-
-/* =========================================
-BUTTON COLORS
-========================================= */
-
-.btn-humanize{
-background:linear-gradient(135deg,#ec4899,#db2777);
-}
-
-.btn-copy{
-background:linear-gradient(135deg,#f59e0b,#f97316);
-}
-
-.btn-clear{
-background:linear-gradient(135deg,#ef4444,#dc2626);
-}
-
-.btn-back{
-background:linear-gradient(135deg,#2563eb,#1d4ed8);
-}
-
-/* =========================================
-LOADING
-========================================= */
-
-.loading{
-display:none;
-text-align:center;
-margin-top:20px;
-font-size:16px;
-font-weight:600;
-color:#f472b6;
-}
-
-/* =========================================
-SCROLLBAR
-========================================= */
-
-::-webkit-scrollbar{
-width:8px;
-}
-
-::-webkit-scrollbar-thumb{
-background:#334155;
-border-radius:10px;
-}
-
-/* =========================================
-RESPONSIVE
-========================================= */
-
-@media(max-width:1200px){
-
-.main-grid{
-grid-template-columns:1fr;
-}
-
-textarea,
-.output-box{
-height:450px;
-}
-
-}
-
-@media(max-width:700px){
-
-.controls-grid{
-grid-template-columns:1fr;
-}
-
-.navbar{
-flex-direction:column;
-gap:15px;
-}
-
-.logo{
-font-size:24px;
-}
-
-.card{
-padding:20px;
-}
-
-textarea,
-.output-box{
-height:350px;
-}
-
-}
-
-</style>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Humanize Text - DocuAI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        * {
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e2937 100%);
+            min-height: 100vh;
+        }
+        
+        .glass {
+            background: rgba(255, 255, 255, 0.09);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        
+        .card {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .card:hover {
+            transform: translateY(-6px);
+        }
+        
+        textarea, .output-box {
+            resize: none;
+            scrollbar-width: thin;
+        }
+        
+        .btn {
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+    </style>
 </head>
-
-<body>
-
-<div class="container">
-
-<!-- NAVBAR -->
-
-<div class="navbar">
-
-<div class="logo">
-✨ Humanize AI Text
-</div>
-
-<div class="nav-links">
-
-<a href="/">
-<i class="fa-solid fa-house"></i>
-Home
-</a>
-
-<a href="/history-page">
-<i class="fa-solid fa-clock-rotate-left"></i>
-History
-</a>
-
-<a href="/logout">
-<i class="fa-solid fa-right-from-bracket"></i>
-Logout
-</a>
-
-</div>
-
-</div>
-
-<!-- STATUS BAR -->
-
-<div id="statusBar" class="status-bar">
-✅ Ready To Humanize Text
-</div>
-
-<!-- MAIN GRID -->
-
-<div class="main-grid">
-
-<!-- LEFT CARD -->
-
-<div class="card">
-
-<h2>📝 Input Text</h2>
-
-<textarea
-id="inputText"
-placeholder="Paste AI-generated or robotic text here..."></textarea>
-
-<div class="controls-grid">
-
-<button class="btn-humanize"
-onclick="humanizeText()">
-✨ Humanize Text
-</button>
-
-<button class="btn-clear"
-onclick="clearText()">
-🗑 Clear
-</button>
-
-</div>
-
-<div class="loading" id="loading">
-
-<p>✨ Humanizing text...</p>
-
-</div>
-
-</div>
-
-<!-- RIGHT CARD -->
-
-<div class="card">
-
-<h2>📄 Humanized Output</h2>
-
-<div class="output-box" id="outputText">
-
-Your humanized content will appear here...
-
-</div>
-
-<div class="controls-grid">
-
-<button class="btn-copy"
-onclick="copyText()">
-📋 Copy Output
-</button>
-
-<button class="btn-back"
-onclick="goHome()">
-🏠 Back To Home
-</button>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-<script>
-
-/* =========================================
-STATUS
-========================================= */
-
-function updateStatus(message){
-
-document.getElementById('statusBar').innerText =
-message;
-
-}
-
-/* =========================================
-HUMANIZE TEXT
-========================================= */
-
-async function humanizeText(){
-
-const text =
-document.getElementById('inputText').value;
-
-if(!text){
-
-alert('Please enter text');
-
-return;
-
-}
-
-document.getElementById('loading').style.display =
-'block';
-
-updateStatus('✨ Humanizing text...');
-
-try{
-
-const response = await fetch('/humanize',{
-
-method:'POST',
-
-headers:{
-'Content-Type':'application/json'
-},
-
-body:JSON.stringify({
-text:text
-})
-
-});
-
-const data = await response.json();
-
-document.getElementById('outputText').innerText =
-data.result;
-
-updateStatus('✅ Humanization completed');
-
-}
-catch(error){
-
-alert('Humanization Failed');
-
-updateStatus('❌ Humanization failed');
-
-}
-
-finally{
-
-document.getElementById('loading').style.display =
-'none';
-
-}
-
-}
-
-/* =========================================
-COPY TEXT
-========================================= */
-
-function copyText(){
-
-const text =
-document.getElementById('outputText').innerText;
-
-if(!text ||
-text === 'Your humanized content will appear here...'){
-
-alert('No output available');
-
-return;
-
-}
-
-navigator.clipboard.writeText(text);
-
-alert('Copied Successfully');
-
-updateStatus('📋 Output copied');
-
-}
-
-/* =========================================
-CLEAR
-========================================= */
-
-function clearText(){
-
-document.getElementById('inputText').value='';
-
-document.getElementById('outputText').innerText =
-'Your humanized content will appear here...';
-
-updateStatus('🧹 Cleared');
-
-}
-
-/* =========================================
-GO HOME
-========================================= */
-
-function goHome(){
-
-window.location.href = '/';
-
-}
-
-</script>
-
+<body class="text-white">
+    <div class="max-w-7xl mx-auto p-6">
+        <!-- Navbar -->
+        <nav class="glass rounded-3xl px-8 py-5 flex items-center justify-between mb-10">
+            <div class="flex items-center gap-4">
+                <div class="w-11 h-11 bg-gradient-to-br from-indigo-500 to-cyan-400 rounded-2xl flex items-center justify-center">
+                    <span class="text-white text-3xl font-bold">AI</span>
+                </div>
+                <div>
+                    <h1 class="text-3xl font-bold tracking-tight">DocuAI</h1>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <a href="/" class="flex items-center gap-2 px-6 py-3 hover:bg-white/10 rounded-2xl transition">
+                    <i class="fa-solid fa-house"></i>
+                    Home
+                </a>
+                <a href="/history" class="flex items-center gap-2 px-6 py-3 hover:bg-white/10 rounded-2xl transition">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    History
+                </a>
+                <a href="/logout" class="flex items-center gap-2 px-6 py-3 hover:bg-red-500/10 hover:text-red-400 rounded-2xl transition">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    Logout
+                </a>
+            </div>
+        </nav>
+
+        <!-- Header -->
+        <div class="mb-10">
+            <h1 class="text-5xl font-bold tracking-tight flex items-center gap-4">
+                ✨ Humanize Text
+            </h1>
+            <p class="text-gray-400 text-xl mt-2">Transform robotic AI text into natural, human-like writing</p>
+        </div>
+
+        <!-- Status -->
+        <div id="statusBar" class="glass rounded-2xl px-6 py-4 mb-8 flex items-center gap-3 text-pink-400 font-medium">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+            <span>Ready to make your text sound more human</span>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- INPUT CARD -->
+            <div class="glass rounded-3xl p-8 card">
+                <h2 class="text-2xl font-semibold mb-6 flex items-center gap-3">
+                    <i class="fa-solid fa-pen-nib text-pink-400"></i>
+                    Input Text
+                </h2>
+                
+                <textarea id="inputText" rows="16"
+                    class="w-full bg-white/5 border border-white/10 focus:border-pink-500 rounded-3xl p-7 text-white placeholder-gray-400 focus:outline-none text-base leading-relaxed"
+                    placeholder="Paste your AI-generated or robotic text here..."></textarea>
+
+                <div class="mt-8 grid grid-cols-2 gap-4">
+                    <button onclick="humanizeText()" 
+                            class="btn bg-gradient-to-r from-pink-500 to-rose-500 py-5 rounded-2xl font-semibold flex items-center justify-center gap-3 text-lg">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        Humanize Text
+                    </button>
+                    <button onclick="clearText()" 
+                            class="btn bg-gradient-to-r from-red-500 to-rose-600 py-5 rounded-2xl font-semibold flex items-center justify-center gap-3">
+                        <i class="fa-solid fa-trash"></i>
+                        Clear
+                    </button>
+                </div>
+
+                <div id="loading" class="hidden mt-6 text-center text-pink-400 font-medium">
+                    <i class="fa-solid fa-spinner fa-spin mr-2"></i>
+                    Humanizing your text...
+                </div>
+            </div>
+
+            <!-- OUTPUT CARD -->
+            <div class="glass rounded-3xl p-8 card flex flex-col">
+                <h2 class="text-2xl font-semibold mb-6 flex items-center gap-3">
+                    <i class="fa-solid fa-file-lines text-cyan-400"></i>
+                    Humanized Output
+                </h2>
+                
+                <div id="outputText" 
+                     class="flex-1 bg-white/5 border border-white/10 rounded-3xl p-8 overflow-auto text-gray-100 leading-relaxed text-[15.5px] whitespace-pre-wrap min-h-[420px]">
+                    Your natural, human-like version will appear here...
+                </div>
+
+                <div class="flex gap-4 mt-8">
+                    <button onclick="copyText()" 
+                            class="flex-1 btn bg-white/10 hover:bg-white/20 py-5 rounded-2xl font-semibold flex items-center justify-center gap-3">
+                        <i class="fa-solid fa-copy"></i>
+                        Copy Output
+                    </button>
+                    <button onclick="goHome()" 
+                            class="flex-1 btn bg-gradient-to-r from-blue-600 to-indigo-600 py-5 rounded-2xl font-semibold flex items-center justify-center gap-3">
+                        <i class="fa-solid fa-house"></i>
+                        Back to Home
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="fixed bottom-6 right-6 hidden bg-gray-800 border border-gray-700 rounded-2xl px-6 py-4 shadow-2xl"></div>
+
+    <script>
+        function showToast(message, type = "success") {
+            const toast = document.getElementById('toast');
+            toast.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid ${type === 'success' ? 'fa-check-circle text-green-400' : 'fa-exclamation-circle text-red-400'}"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 3000);
+        }
+
+        function updateStatus(message) {
+            document.getElementById('statusBar').innerHTML = `
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                <span>${message}</span>
+            `;
+        }
+
+        async function humanizeText() {
+            const text = document.getElementById('inputText').value.trim();
+            if (!text) {
+                showToast("Please enter some text", "error");
+                return;
+            }
+
+            document.getElementById('loading').classList.remove('hidden');
+            updateStatus("Humanizing your text...");
+
+            try {
+                const response = await fetch('/humanize', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: text })
+                });
+                
+                const data = await response.json();
+                document.getElementById('outputText').innerText = data.result || "No result returned";
+                updateStatus("✅ Humanization completed");
+                showToast("Text humanized successfully!");
+            } catch (error) {
+                showToast("Humanization failed. Please try again.", "error");
+                updateStatus("❌ Humanization failed");
+            } finally {
+                document.getElementById('loading').classList.add('hidden');
+            }
+        }
+
+        function copyText() {
+            const text = document.getElementById('outputText').innerText;
+            if (!text || text.includes("will appear here")) {
+                showToast("No content to copy", "error");
+                return;
+            }
+            navigator.clipboard.writeText(text);
+            showToast("✅ Copied to clipboard!");
+        }
+
+        function clearText() {
+            document.getElementById('inputText').value = '';
+            document.getElementById('outputText').innerText = 'Your natural, human-like version will appear here...';
+            updateStatus("Ready to humanize text");
+            showToast("Cleared");
+        }
+
+        function goHome() {
+            window.location.href = '/';
+        }
+
+        // Keyboard shortcut: Ctrl + Enter to humanize
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+                humanizeText();
+            }
+        });
+    </script>
 </body>
-
 </html>
