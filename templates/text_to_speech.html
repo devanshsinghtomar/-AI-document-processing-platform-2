@@ -323,17 +323,17 @@
 AUTO LOAD OUTPUT TEXT
 ========================================= */
 
-window.onload = function(){
+window.onload = () => {
 
-    const savedText =
-    localStorage.getItem("ttsText");
+const savedText =
+localStorage.getItem('translatedText');
 
-    if(savedText){
+if(savedText){
 
-        document.getElementById("textInput").value =
-        savedText;
+document.getElementById('textInput').value =
+savedText;
 
-    }
+}
 
 };
 
