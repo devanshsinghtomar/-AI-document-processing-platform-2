@@ -533,6 +533,7 @@ margin-top:10px;
 </div>
 
 <a href="/text-to-speech"
+onclick="sendToTTS()"
 style="text-decoration:none;">
 
 <button
@@ -916,6 +917,29 @@ localStorage.removeItem('translatedText');
 localStorage.removeItem('speechText');
 
 updateStatus('🧹 Cleared');
+
+}
+/* =========================================
+SEND OUTPUT TO TEXT TO SPEECH
+========================================= */
+
+function sendToTTS(){
+
+const output =
+document.getElementById('outputText').innerText;
+
+if(
+output &&
+output !== 'Output cleared' &&
+!output.includes('Your translated')
+){
+
+localStorage.setItem(
+'translatedText',
+output
+);
+
+}
 
 }
 
