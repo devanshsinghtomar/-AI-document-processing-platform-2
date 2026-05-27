@@ -1,19 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>AI Document Translator</title>
+
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
 <link rel="stylesheet"
 href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
 <style>
+
 *{
 margin:0;
 padding:0;
 box-sizing:border-box;
 font-family:'Poppins',sans-serif;
 }
+
 body{
 background:
 linear-gradient(135deg,#020617,#0f172a,#111827);
@@ -22,13 +29,16 @@ color:white;
 padding:20px;
 overflow-x:hidden;
 }
+
 .container{
 max-width:1600px;
 margin:auto;
 }
+
 /* =========================================
 NAVBAR
 ========================================= */
+
 .navbar{
 display:flex;
 justify-content:space-between;
@@ -41,6 +51,7 @@ backdrop-filter:blur(18px);
 margin-bottom:20px;
 box-shadow:0 10px 30px rgba(0,0,0,0.3);
 }
+
 .logo{
 font-size:30px;
 font-weight:700;
@@ -48,12 +59,14 @@ display:flex;
 align-items:center;
 gap:10px;
 }
+
 .nav-links{
 display:flex;
 gap:15px;
 align-items:center;
 flex-wrap:wrap;
 }
+
 .nav-links a{
 text-decoration:none;
 color:white;
@@ -63,13 +76,16 @@ background:rgba(255,255,255,0.08);
 transition:0.3s;
 font-weight:600;
 }
+
 .nav-links a:hover{
 background:#2563eb;
 transform:translateY(-2px);
 }
+
 /* =========================================
 STATUS BAR
 ========================================= */
+
 .status-bar{
 margin-bottom:20px;
 padding:16px 22px;
@@ -82,17 +98,21 @@ color:#38bdf8;
 backdrop-filter:blur(15px);
 box-shadow:0 8px 25px rgba(0,0,0,0.25);
 }
+
 /* =========================================
 GRID
 ========================================= */
+
 .main-grid{
 display:grid;
 grid-template-columns:1fr 1fr;
 gap:25px;
 }
+
 /* =========================================
 CARD
 ========================================= */
+
 .card{
 background:rgba(255,255,255,0.06);
 padding:28px;
@@ -101,14 +121,17 @@ backdrop-filter:blur(18px);
 border:1px solid rgba(255,255,255,0.08);
 box-shadow:0 12px 35px rgba(0,0,0,0.35);
 }
+
 .card h2{
 margin-bottom:22px;
 font-size:26px;
 font-weight:700;
 }
+
 /* =========================================
 UPLOAD BOX
 ========================================= */
+
 .upload-box{
 border:2px dashed rgba(255,255,255,0.18);
 padding:35px;
@@ -119,25 +142,31 @@ transition:0.3s;
 margin-bottom:18px;
 background:rgba(255,255,255,0.03);
 }
+
 .upload-box:hover{
 background:rgba(255,255,255,0.06);
 transform:translateY(-2px);
 }
+
 .upload-box i{
 font-size:55px;
 margin-bottom:15px;
 color:#38bdf8;
 }
+
 .upload-box h3{
 font-size:24px;
 margin-bottom:10px;
 }
+
 .upload-box p{
 color:#cbd5e1;
 }
+
 /* =========================================
 FILE NAME
 ========================================= */
+
 .file-name{
 margin-top:10px;
 margin-bottom:15px;
@@ -147,9 +176,11 @@ padding:12px 16px;
 background:rgba(255,255,255,0.04);
 border-radius:14px;
 }
+
 /* =========================================
 TEXTAREA
 ========================================= */
+
 textarea{
 width:100%;
 height:380px;
@@ -165,12 +196,15 @@ margin-top:10px;
 line-height:1.8;
 box-shadow:inset 0 0 20px rgba(0,0,0,0.2);
 }
+
 textarea::placeholder{
 color:#94a3b8;
 }
+
 /* =========================================
 OUTPUT BOX
 ========================================= */
+
 .output-box{
 height:720px;
 overflow-y:auto;
@@ -182,12 +216,15 @@ white-space:pre-wrap;
 font-size:15px;
 box-shadow:inset 0 0 20px rgba(0,0,0,0.2);
 }
+
 /* =========================================
 CONTROL SECTIONS
 ========================================= */
+
 .control-section{
 margin-top:22px;
 }
+
 .section-title{
 font-size:15px;
 font-weight:700;
@@ -195,18 +232,22 @@ margin-bottom:14px;
 color:#cbd5e1;
 letter-spacing:0.5px;
 }
+
 /* =========================================
 BUTTON GRID
 ========================================= */
+
 .controls-grid{
 display:grid;
 grid-template-columns:repeat(2,1fr);
 gap:14px;
 margin-bottom:18px;
 }
+
 /* =========================================
 BUTTONS
 ========================================= */
+
 button,
 select{
 padding:15px;
@@ -215,201 +256,256 @@ border-radius:16px;
 font-size:15px;
 font-weight:600;
 }
+
 select{
 background:#172033;
 color:white;
 outline:none;
 cursor:pointer;
 }
+
 button{
 cursor:pointer;
 color:white;
 transition:0.3s;
 box-shadow:0 8px 18px rgba(0,0,0,0.25);
 }
+
 button:hover{
 transform:translateY(-2px) scale(1.01);
 opacity:0.96;
 }
+
 /* =========================================
 BUTTON COLORS
 ========================================= */
+
 .btn-upload{
 background:linear-gradient(135deg,#3b82f6,#06b6d4);
 }
+
 .btn-translate{
 background:linear-gradient(135deg,#8b5cf6,#ec4899);
 }
+
 .btn-summary{
 background:linear-gradient(135deg,#10b981,#14b8a6);
 }
+
 .btn-humanize{
 background:linear-gradient(135deg,#f43f5e,#ec4899);
 }
+
 .btn-copy{
 background:linear-gradient(135deg,#f59e0b,#f97316);
 }
+
 .btn-clear{
 background:linear-gradient(135deg,#ef4444,#dc2626);
 }
+
 .btn-download{
 background:linear-gradient(135deg,#0ea5e9,#2563eb);
 }
+
 .btn-speech{
 background:linear-gradient(135deg,#06b6d4,#0f766e);
 }
+
 .btn-tts{
 background:linear-gradient(135deg,#6366f1,#8b5cf6);
 }
-/* =========================================
-LOADING
-========================================= */
-.loading{
-display:none;
-text-align:center;
-margin-top:15px;
-font-size:15px;
-color:#38bdf8;
-}
-/* =========================================
-SCROLLBAR
-========================================= */
-::-webkit-scrollbar{
-width:8px;
-}
-::-webkit-scrollbar-thumb{
-background:#334155;
-border-radius:10px;
-}
+
 /* =========================================
 RESPONSIVE
 ========================================= */
+
 @media(max-width:1200px){
+
 .main-grid{
 grid-template-columns:1fr;
 }
+
 .output-box{
 height:450px;
 }
+
 }
+
 @media(max-width:700px){
+
 .controls-grid{
 grid-template-columns:1fr;
 }
+
 .navbar{
 flex-direction:column;
 gap:15px;
 }
+
 .logo{
 font-size:24px;
 }
+
 .card{
 padding:20px;
 }
+
 textarea{
 height:300px;
 }
+
 .output-box{
 height:350px;
 }
+
 }
+
 </style>
+
 </head>
+
 <body>
+
 <div class="container">
+
 <!-- NAVBAR -->
+
 <div class="navbar">
+
 <div class="logo">
 🌍 AI Translator
 </div>
+
 <div class="nav-links">
+
 <a href="/history-page">
 <i class="fa-solid fa-clock-rotate-left"></i>
 History
 </a>
+
 <a href="/humanize-page">
 <i class="fa-solid fa-pen-nib"></i>
 Humanize
 </a>
+
 <a href="/logout">
 <i class="fa-solid fa-right-from-bracket"></i>
 Logout
 </a>
+
 </div>
+
 </div>
+
 <!-- STATUS BAR -->
+
 <div id="statusBar" class="status-bar">
 ✅ Ready
 </div>
+
 <!-- MAIN GRID -->
+
 <div class="main-grid">
+
 <!-- LEFT CARD -->
+
 <div class="card">
+
 <h2>📂 Upload Document</h2>
+
 <div class="upload-box"
 onclick="document.getElementById('fileInput').click()">
+
 <i class="fa-solid fa-cloud-arrow-up"></i>
+
 <h3>Choose File</h3>
+
 <p>Upload TXT, PDF or DOCX</p>
+
 </div>
+
 <input type="file" id="fileInput" hidden>
+
 <p id="selectedFileName" class="file-name">
 📁 No file selected
 </p>
+
 <textarea
 id="inputText"
 placeholder="Uploaded text will appear here..."></textarea>
+
 <!-- MAIN ACTIONS -->
+
 <div class="control-section">
+
 <div class="section-title">
 ⚡ Main Controls
 </div>
+
 <div class="controls-grid">
+
 <select id="language">
+
 <option value="hi">Hindi</option>
 <option value="fr">French</option>
 <option value="de">German</option>
 <option value="es">Spanish</option>
 <option value="it">Italian</option>
 <option value="ja">Japanese</option>
+
 </select>
+
 <button class="btn-upload"
 onclick="uploadFile()">
 📤 Upload
 </button>
+
 <button class="btn-translate"
 onclick="translateText()">
 🌍 Translate
 </button>
+
 <button class="btn-summary"
 onclick="summarizeText()">
 📝 Summarize
 </button>
+
 <button class="btn-humanize"
 onclick="humanizeText()">
 ✨ Humanize
 </button>
+
 <button class="btn-copy"
 onclick="copyText()">
 📋 Copy
 </button>
+
 <button class="btn-clear"
 onclick="clearText()">
 🗑 Clear
 </button>
+
 <button class="btn-download"
 onclick="downloadPDF()">
 📄 Download
 </button>
+
 </div>
+
 </div>
+
 <!-- SPEECH TO TEXT -->
+
 <div class="control-section">
+
 <div class="section-title">
 🎤 Speech To Text
 </div>
+
 <a href="/speech-to-text"
 style="text-decoration:none;">
+
 <button
 class="btn-speech"
 style="
@@ -419,17 +515,26 @@ font-size:17px;
 border-radius:18px;
 margin-top:10px;
 ">
+
 🎤 Open Speech To Text Page
+
 </button>
+
 </a>
+
 </div>
+
 <!-- TEXT TO SPEECH -->
+
 <div class="control-section">
+
 <div class="section-title">
 🔊 Text To Speech
 </div>
+
 <a href="/text-to-speech"
 style="text-decoration:none;">
+
 <button
 class="btn-tts"
 style="
@@ -439,238 +544,423 @@ font-size:17px;
 border-radius:18px;
 margin-top:10px;
 ">
+
 🔊 Open Text To Speech Page
+
 </button>
+
 </a>
+
 </div>
-<div class="loading" id="loading">
-<p>Processing...</p>
+
 </div>
-</div>
+
 <!-- RIGHT CARD -->
+
 <div class="card">
+
 <h2>📄 Output</h2>
+
 <div class="output-box" id="outputText">
+
 Your translated, summarized, or humanized result will appear here...
+
 </div>
+
 </div>
+
 </div>
+
 </div>
+
 <script>
+
 /* =========================================
 STATUS
 ========================================= */
+
 function updateStatus(message){
+
 document.getElementById('statusBar').innerText =
 message;
+
 }
+
 /* =========================================
 FILE NAME
 ========================================= */
+
 document.getElementById('fileInput')
 .addEventListener('change',function(){
+
 const file = this.files[0];
+
 if(file){
+
 document.getElementById('selectedFileName')
 .innerText =
 '📂 Selected File: ' + file.name;
+
 updateStatus('📂 File selected');
+
 }
+
 });
+
 /* =========================================
 UPLOAD
 ========================================= */
+
 async function uploadFile(){
+
 const fileInput =
 document.getElementById('fileInput');
+
 const file = fileInput.files[0];
+
 if(!file){
+
 alert('Please choose a file');
+
 return;
+
 }
+
 updateStatus('📤 Uploading file...');
+
 const formData = new FormData();
+
 formData.append('file', file);
+
 try{
+
 const response = await fetch('/upload',{
+
 method:'POST',
 body:formData
+
 });
+
 const data = await response.json();
+
 if(data.error){
+
 alert(data.error);
+
 updateStatus('❌ Upload failed');
+
 return;
+
 }
+
 document.getElementById('inputText').value =
 data.text;
+
 document.getElementById('outputText').innerText =
 '✅ File uploaded successfully';
+
 updateStatus('✅ File uploaded successfully');
+
 }catch(error){
+
 alert('Upload failed');
+
 updateStatus('❌ Upload failed');
+
 }
+
 }
+
 /* =========================================
 TRANSLATE
 ========================================= */
+
 async function translateText(){
+
 const text =
 document.getElementById('inputText').value;
+
 const language =
 document.getElementById('language').value;
+
 if(!text){
+
 alert('Please upload or enter text');
+
 return;
+
 }
+
 updateStatus('🌍 Translating text...');
+
 try{
+
 const response = await fetch('/translate',{
+
 method:'POST',
+
 headers:{
 'Content-Type':'application/json'
 },
+
 body:JSON.stringify({
 text:text,
 language:language
 })
+
 });
+
 const data = await response.json();
+
 document.getElementById('outputText').innerText =
 data.result;
+
+localStorage.setItem(
+'translatedText',
+data.result
+);
+
 updateStatus('✅ Translation completed');
+
 }catch(error){
+
 alert('Translation Failed');
+
 updateStatus('❌ Translation failed');
+
 }
+
 }
+
 /* =========================================
 SUMMARIZE
 ========================================= */
+
 async function summarizeText(){
+
 const text =
 document.getElementById('inputText').value;
+
 const language =
 document.getElementById('language').value;
+
 if(!text){
+
 alert('Please upload or enter text');
+
 return;
+
 }
+
 updateStatus('📝 Generating summary...');
+
 try{
+
 const response = await fetch('/summarize',{
+
 method:'POST',
+
 headers:{
 'Content-Type':'application/json'
 },
+
 body:JSON.stringify({
 text:text,
 language:language
 })
+
 });
+
 const data = await response.json();
+
 document.getElementById('outputText').innerText =
 data.result;
+
+localStorage.setItem(
+'translatedText',
+data.result
+);
+
 updateStatus('✅ Summary completed');
+
 }catch(error){
+
 alert('Summary Failed');
+
 updateStatus('❌ Summary failed');
+
 }
+
 }
+
 /* =========================================
 HUMANIZE
 ========================================= */
+
 async function humanizeText(){
+
 const text =
 document.getElementById('inputText').value;
+
 if(!text){
+
 alert('Please upload or enter text');
+
 return;
+
 }
+
 updateStatus('✨ Humanizing text...');
+
 try{
+
 const response = await fetch('/humanize',{
+
 method:'POST',
+
 headers:{
 'Content-Type':'application/json'
 },
+
 body:JSON.stringify({
 text:text
 })
+
 });
+
 const data = await response.json();
+
 document.getElementById('outputText').innerText =
 data.result;
+
+localStorage.setItem(
+'translatedText',
+data.result
+);
+
 updateStatus('✅ Humanization completed');
+
 }catch(error){
+
 alert('Humanization Failed');
+
 updateStatus('❌ Humanization failed');
+
 }
+
 }
+
 /* =========================================
 COPY
 ========================================= */
+
 function copyText(){
+
 const text =
 document.getElementById('outputText').innerText;
+
 navigator.clipboard.writeText(text);
+
 alert('Copied Successfully');
+
 updateStatus('📋 Text copied');
+
 }
+
 /* =========================================
 CLEAR
 ========================================= */
+
 function clearText(){
+
 document.getElementById('inputText').value='';
+
 document.getElementById('outputText').innerText=
 'Output cleared';
+
 updateStatus('🧹 Cleared');
+
 }
+
 /* =========================================
 DOWNLOAD
 ========================================= */
+
 async function downloadPDF(){
+
 const text =
 document.getElementById('outputText').innerText;
+
 if(!text || text === 'Output cleared'){
+
 alert('No content to download');
+
 return;
+
 }
+
 updateStatus('📄 Downloading PDF...');
+
 try{
+
 const response = await fetch('/download',{
+
 method:'POST',
+
 headers:{
 'Content-Type':'application/json'
 },
+
 body:JSON.stringify({
 text:text
 })
+
 });
+
 if(!response.ok){
+
 alert('PDF generation failed');
+
 updateStatus('❌ PDF generation failed');
+
 return;
+
 }
+
 const blob = await response.blob();
+
 const blobUrl = window.URL.createObjectURL(
 new Blob([blob], { type: 'application/pdf' })
 );
+
 const link = document.createElement('a');
+
 link.href = blobUrl;
+
 link.download = 'translated_document.pdf';
+
 document.body.appendChild(link);
+
 link.click();
+
 link.remove();
+
 window.URL.revokeObjectURL(blobUrl);
+
 updateStatus('✅ PDF downloaded');
+
 }
 catch(error){
+
 alert('Download failed');
+
 updateStatus('❌ Download failed');
+
 }
+
 }
+
 </script>
+
 </body>
 </html>
