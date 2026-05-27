@@ -1,175 +1,249 @@
-```html id="tts984"
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Text To Speech</title>
-
+    <title>Text to Speech - DocuAI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <style>
-
-        *{
-            margin:0;
-            padding:0;
-            box-sizing:border-box;
-            font-family:'Poppins',sans-serif;
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        * {
+            font-family: 'Inter', system-ui, sans-serif;
         }
-
-        body{
-            background: linear-gradient(135deg,#020617,#0f172a,#1e293b);
-            min-height:100vh;
-            display:flex;
-            justify-content:center;
-            align-items:center;
-            padding:30px;
-            color:white;
+        
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e2937 100%);
+            min-height: 100vh;
         }
-
-        .container{
-            width:100%;
-            max-width:900px;
-            background:rgba(255,255,255,0.05);
-            border:1px solid rgba(255,255,255,0.1);
-            border-radius:25px;
-            backdrop-filter:blur(12px);
-            padding:35px;
-            box-shadow:0 0 30px rgba(0,0,0,0.4);
+        
+        .glass {
+            background: rgba(255, 255, 255, 0.09);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
         }
-
-        h1{
-            text-align:center;
-            margin-bottom:25px;
-            font-size:35px;
-            color:#22c55e;
+        
+        .speaking {
+            animation: speakPulse 1.2s infinite;
         }
-
-        textarea{
-            width:100%;
-            height:300px;
-            background:#111827;
-            border:none;
-            outline:none;
-            border-radius:20px;
-            padding:20px;
-            color:white;
-            font-size:16px;
-            resize:none;
-            margin-bottom:25px;
+        
+        @keyframes speakPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
         }
-
-        .btn-group{
-            display:grid;
-            grid-template-columns:1fr 1fr;
-            gap:20px;
-        }
-
-        button{
-            padding:16px;
-            border:none;
-            border-radius:15px;
-            font-size:16px;
-            font-weight:600;
-            cursor:pointer;
-            transition:0.3s;
-            color:white;
-        }
-
-        .start{
-            background:linear-gradient(135deg,#10b981,#059669);
-        }
-
-        .pause{
-            background:linear-gradient(135deg,#eab308,#ca8a04);
-        }
-
-        .stop{
-            background:linear-gradient(135deg,#ef4444,#dc2626);
-        }
-
-        .back{
-            background:linear-gradient(135deg,#3b82f6,#2563eb);
-        }
-
-        button:hover{
-            transform:translateY(-3px);
-            opacity:0.9;
-        }
-
     </style>
-
 </head>
+<body class="text-white">
+    <div class="max-w-4xl mx-auto p-6">
+        <!-- Navbar -->
+        <nav class="glass rounded-3xl px-8 py-5 flex items-center justify-between mb-10">
+            <div class="flex items-center gap-4">
+                <div class="w-11 h-11 bg-gradient-to-br from-indigo-500 to-cyan-400 rounded-2xl flex items-center justify-center">
+                    <span class="text-white text-3xl font-bold">AI</span>
+                </div>
+                <div>
+                    <h1 class="text-3xl font-bold tracking-tight">DocuAI</h1>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <a href="/" class="flex items-center gap-2 px-6 py-3 hover:bg-white/10 rounded-2xl transition">
+                    <i class="fa-solid fa-house"></i>
+                    Home
+                </a>
+                <a href="/history" class="flex items-center gap-2 px-6 py-3 hover:bg-white/10 rounded-2xl transition">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    History
+                </a>
+                <a href="/logout" class="flex items-center gap-2 px-6 py-3 hover:bg-red-500/10 hover:text-red-400 rounded-2xl transition">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    Logout
+                </a>
+            </div>
+        </nav>
 
-<body>
-
-    <div class="container">
-
-        <h1>🔊 Text To Speech</h1>
-
-        <textarea id="textInput" placeholder="Enter text here..."></textarea>
-
-        <div class="btn-group">
-
-            <button class="start" onclick="startSpeech()">
-                ▶️ Start Speech
-            </button>
-
-            <button class="pause" onclick="pauseSpeech()">
-                ⏸️ Pause Speech
-            </button>
-
-            <button class="stop" onclick="stopSpeech()">
-                ⏹️ Stop Speech
-            </button>
-
-            <button class="back" onclick="goBack()">
-                🔙 Back To Home
-            </button>
-
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <div class="inline-flex items-center gap-4 bg-white/10 px-6 py-3 rounded-3xl mb-6">
+                <i class="fa-solid fa-volume-high text-4xl text-emerald-400"></i>
+                <h1 class="text-5xl font-bold tracking-tight">Text to Speech</h1>
+            </div>
+            <p class="text-gray-400 text-xl max-w-lg mx-auto">
+                Convert your text into natural-sounding speech
+            </p>
         </div>
 
+        <div class="glass rounded-3xl p-10">
+            <!-- Status -->
+            <div id="statusBar" class="flex items-center justify-center gap-3 bg-white/5 border border-white/10 rounded-2xl py-4 mb-8 text-lg font-medium">
+                <i class="fa-solid fa-circle-check text-emerald-400"></i>
+                <span id="statusText">Ready to speak • Enter text below</span>
+            </div>
+
+            <!-- Speaker Visual -->
+            <div id="speakerContainer" 
+                 class="w-40 h-40 mx-auto mb-10 rounded-full border-8 border-white/10 flex items-center justify-center">
+                <i id="speakerIcon" class="fa-solid fa-volume-high text-7xl text-emerald-400"></i>
+            </div>
+
+            <!-- Text Input -->
+            <textarea id="textInput" rows="10"
+                class="w-full bg-white/5 border border-white/10 focus:border-emerald-500 rounded-3xl p-8 text-white placeholder-gray-400 focus:outline-none text-base leading-relaxed resize-none"
+                placeholder="Type or paste your text here..."></textarea>
+
+            <!-- Voice Settings -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-2">Voice</label>
+                    <select id="voiceSelect" 
+                            class="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 focus:outline-none focus:border-emerald-500">
+                        <option value="en-US">English (US) - Default</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-2">Speed: <span id="rateValue">1.0</span>x</label>
+                    <input type="range" id="rate" min="0.5" max="2" step="0.1" value="1" 
+                           class="w-full accent-emerald-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-2">Pitch: <span id="pitchValue">1.0</span></label>
+                    <input type="range" id="pitch" min="0.5" max="2" step="0.1" value="1" 
+                           class="w-full accent-emerald-500">
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-10">
+                <button onclick="startSpeech()" id="startBtn"
+                        class="flex items-center justify-center gap-3 bg-gradient-to-r from-emerald-500 to-teal-500 py-5 rounded-2xl font-semibold text-lg transition hover:scale-105">
+                    <i class="fa-solid fa-play"></i>
+                    <span>Start Speaking</span>
+                </button>
+                
+                <button onclick="pauseSpeech()" 
+                        class="flex items-center justify-center gap-3 bg-gradient-to-r from-amber-500 to-yellow-500 py-5 rounded-2xl font-semibold text-lg transition hover:scale-105">
+                    <i class="fa-solid fa-pause"></i>
+                    Pause
+                </button>
+                
+                <button onclick="stopSpeech()" 
+                        class="flex items-center justify-center gap-3 bg-gradient-to-r from-red-500 to-rose-500 py-5 rounded-2xl font-semibold text-lg transition hover:scale-105">
+                    <i class="fa-solid fa-stop"></i>
+                    Stop
+                </button>
+                
+                <button onclick="goHome()" 
+                        class="flex items-center justify-center gap-3 bg-gradient-to-r from-blue-600 to-indigo-600 py-5 rounded-2xl font-semibold text-lg transition hover:scale-105">
+                    <i class="fa-solid fa-house"></i>
+                    Back to Home
+                </button>
+            </div>
+        </div>
     </div>
 
-<script>
+    <!-- Toast -->
+    <div id="toast" class="fixed bottom-6 right-6 hidden bg-gray-800 border border-gray-700 rounded-2xl px-6 py-4 shadow-2xl"></div>
 
-    let speech = new SpeechSynthesisUtterance();
+    <script>
+        let utterance = new SpeechSynthesisUtterance();
+        let isSpeaking = false;
+        let isPaused = false;
 
-    function startSpeech(){
+        function showToast(message, type = "success") {
+            const toast = document.getElementById('toast');
+            toast.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid ${type === 'success' ? 'fa-check-circle text-green-400' : 'fa-exclamation-circle text-red-400'}"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 3000);
+        }
 
-        const text = document.getElementById("textInput").value;
+        function updateStatus(text) {
+            document.getElementById('statusText').innerHTML = text;
+        }
 
-        speech.text = text;
+        function updateSpeakerVisual(isActive) {
+            const container = document.getElementById('speakerContainer');
+            if (isActive) {
+                container.classList.add('speaking');
+            } else {
+                container.classList.remove('speaking');
+            }
+        }
 
-        speech.lang = "en-US";
+        function startSpeech() {
+            const text = document.getElementById("textInput").value.trim();
+            if (!text) {
+                showToast("Please enter some text", "error");
+                return;
+            }
 
-        speech.rate = 1;
+            utterance.text = text;
+            utterance.lang = "en-US";
+            utterance.rate = parseFloat(document.getElementById("rate").value);
+            utterance.pitch = parseFloat(document.getElementById("pitch").value);
 
-        speech.pitch = 1;
+            window.speechSynthesis.cancel(); // Clear previous
+            window.speechSynthesis.speak(utterance);
 
-        window.speechSynthesis.speak(speech);
-    }
+            isSpeaking = true;
+            isPaused = false;
+            updateSpeakerVisual(true);
+            updateStatus("🔊 Speaking...");
+            showToast("Speech started");
+        }
 
-    function pauseSpeech(){
+        function pauseSpeech() {
+            if (window.speechSynthesis.speaking) {
+                window.speechSynthesis.pause();
+                isPaused = true;
+                updateStatus("⏸️ Paused");
+                showToast("Speech paused");
+            }
+        }
 
-        window.speechSynthesis.pause();
-    }
+        function stopSpeech() {
+            window.speechSynthesis.cancel();
+            isSpeaking = false;
+            isPaused = false;
+            updateSpeakerVisual(false);
+            updateStatus("✅ Stopped");
+            showToast("Speech stopped");
+        }
 
-    function stopSpeech(){
+        function goHome() {
+            window.location.href = "/";
+        }
 
-        window.speechSynthesis.cancel();
-    }
+        // Range value display
+        document.getElementById("rate").addEventListener("input", function() {
+            document.getElementById("rateValue").textContent = this.value;
+        });
 
-    function goBack(){
+        document.getElementById("pitch").addEventListener("input", function() {
+            document.getElementById("pitchValue").textContent = this.value;
+        });
 
-        window.location.href = "/";
-    }
+        // Auto-stop visual when speech ends
+        utterance.onend = function() {
+            isSpeaking = false;
+            updateSpeakerVisual(false);
+            updateStatus("✅ Speech finished");
+        };
 
-</script>
-
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.key === "Enter" && document.getElementById("textInput") === document.activeElement) {
+                if (e.ctrlKey) {
+                    e.preventDefault();
+                    startSpeech();
+                }
+            }
+        });
+    </script>
 </body>
-
 </html>
-```
