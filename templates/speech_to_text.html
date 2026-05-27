@@ -1,185 +1,250 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Speech To Text</title>
-
+    <title>Speech to Text - DocuAI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <style>
-
-        *{
-            margin:0;
-            padding:0;
-            box-sizing:border-box;
-            font-family:'Poppins',sans-serif;
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        * {
+            font-family: 'Inter', system-ui, sans-serif;
         }
-
-        body{
-            background: linear-gradient(135deg,#0f172a,#1e293b,#020617);
-            min-height:100vh;
-            color:white;
-            display:flex;
-            justify-content:center;
-            align-items:center;
-            padding:30px;
+        
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e2937 100%);
+            min-height: 100vh;
         }
-
-        .container{
-            width:100%;
-            max-width:900px;
-            background:rgba(255,255,255,0.05);
-            border:1px solid rgba(255,255,255,0.1);
-            backdrop-filter: blur(12px);
-            border-radius:25px;
-            padding:35px;
-            box-shadow:0 0 30px rgba(0,0,0,0.4);
+        
+        .glass {
+            background: rgba(255, 255, 255, 0.09);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
         }
-
-        h1{
-            text-align:center;
-            margin-bottom:25px;
-            font-size:35px;
-            color:#38bdf8;
+        
+        .mic-icon {
+            transition: all 0.4s ease;
         }
-
-        textarea{
-            width:100%;
-            height:300px;
-            border:none;
-            outline:none;
-            border-radius:20px;
-            padding:20px;
-            font-size:16px;
-            resize:none;
-            background:#111827;
-            color:white;
-            margin-bottom:25px;
+        
+        .listening .mic-icon {
+            animation: pulse-mic 1.5s infinite;
+            color: #22c55e;
         }
-
-        .btn-group{
-            display:grid;
-            grid-template-columns:1fr 1fr;
-            gap:20px;
+        
+        @keyframes pulse-mic {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
         }
-
-        button{
-            padding:16px;
-            border:none;
-            border-radius:15px;
-            font-size:16px;
-            font-weight:600;
-            cursor:pointer;
-            transition:0.3s;
-            color:white;
-        }
-
-        .start{
-            background:linear-gradient(135deg,#10b981,#059669);
-        }
-
-        .stop{
-            background:linear-gradient(135deg,#ef4444,#dc2626);
-        }
-
-        .clear{
-            background:linear-gradient(135deg,#f59e0b,#d97706);
-        }
-
-        .back{
-            background:linear-gradient(135deg,#3b82f6,#2563eb);
-        }
-
-        button:hover{
-            transform:translateY(-3px);
-            opacity:0.9;
-        }
-
     </style>
-
 </head>
+<body class="text-white">
+    <div class="max-w-4xl mx-auto p-6">
+        <!-- Navbar -->
+        <nav class="glass rounded-3xl px-8 py-5 flex items-center justify-between mb-10">
+            <div class="flex items-center gap-4">
+                <div class="w-11 h-11 bg-gradient-to-br from-indigo-500 to-cyan-400 rounded-2xl flex items-center justify-center">
+                    <span class="text-white text-3xl font-bold">AI</span>
+                </div>
+                <div>
+                    <h1 class="text-3xl font-bold tracking-tight">DocuAI</h1>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <a href="/" class="flex items-center gap-2 px-6 py-3 hover:bg-white/10 rounded-2xl transition">
+                    <i class="fa-solid fa-house"></i>
+                    Home
+                </a>
+                <a href="/history" class="flex items-center gap-2 px-6 py-3 hover:bg-white/10 rounded-2xl transition">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    History
+                </a>
+                <a href="/logout" class="flex items-center gap-2 px-6 py-3 hover:bg-red-500/10 hover:text-red-400 rounded-2xl transition">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    Logout
+                </a>
+            </div>
+        </nav>
 
-<body>
-
-    <div class="container">
-
-        <h1>🎤 Speech To Text</h1>
-
-        <textarea id="output" placeholder="Your speech will appear here..."></textarea>
-
-        <div class="btn-group">
-
-            <button class="start" onclick="startRecognition()">
-                🎙️ Start Listening
-            </button>
-
-            <button class="stop" onclick="stopRecognition()">
-                ⏹️ Stop Listening
-            </button>
-
-            <button class="clear" onclick="clearText()">
-                🗑️ Clear Text
-            </button>
-
-            <button class="back" onclick="goBack()">
-                🔙 Back To Home
-            </button>
-
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <div class="inline-flex items-center gap-4 bg-white/10 px-6 py-3 rounded-3xl mb-6">
+                <i class="fa-solid fa-microphone text-4xl text-emerald-400"></i>
+                <h1 class="text-5xl font-bold tracking-tight">Speech to Text</h1>
+            </div>
+            <p class="text-gray-400 text-xl max-w-lg mx-auto">
+                Speak naturally and watch your words convert into text instantly
+            </p>
         </div>
 
+        <div class="glass rounded-3xl p-10">
+            <!-- Status -->
+            <div id="statusBar" class="flex items-center justify-center gap-3 bg-white/5 border border-white/10 rounded-2xl py-4 mb-8 text-lg font-medium">
+                <i class="fa-solid fa-circle-check text-emerald-400"></i>
+                <span id="statusText">Ready to listen • Click "Start Listening"</span>
+            </div>
+
+            <!-- Mic Visual -->
+            <div id="micContainer" 
+                 class="w-40 h-40 mx-auto mb-10 rounded-full border-8 border-white/10 flex items-center justify-center cursor-pointer hover:border-emerald-400 transition-all"
+                 onclick="toggleRecognition()">
+                <i id="micIcon" class="fa-solid fa-microphone mic-icon text-7xl text-white"></i>
+            </div>
+
+            <!-- Text Area -->
+            <textarea id="output" rows="12"
+                class="w-full bg-white/5 border border-white/10 focus:border-emerald-500 rounded-3xl p-8 text-white placeholder-gray-400 focus:outline-none text-base leading-relaxed resize-none"
+                placeholder="Your spoken words will appear here..."></textarea>
+
+            <!-- Controls -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-10">
+                <button onclick="toggleRecognition()" id="startBtn"
+                        class="flex items-center justify-center gap-3 bg-gradient-to-r from-emerald-500 to-teal-500 py-5 rounded-2xl font-semibold text-lg transition hover:scale-105">
+                    <i class="fa-solid fa-microphone"></i>
+                    <span id="btnText">Start Listening</span>
+                </button>
+                
+                <button onclick="stopRecognition()" 
+                        class="flex items-center justify-center gap-3 bg-gradient-to-r from-red-500 to-rose-500 py-5 rounded-2xl font-semibold text-lg transition hover:scale-105">
+                    <i class="fa-solid fa-stop"></i>
+                    Stop
+                </button>
+                
+                <button onclick="clearText()" 
+                        class="flex items-center justify-center gap-3 bg-gradient-to-r from-amber-500 to-orange-500 py-5 rounded-2xl font-semibold text-lg transition hover:scale-105">
+                    <i class="fa-solid fa-trash"></i>
+                    Clear
+                </button>
+                
+                <button onclick="goHome()" 
+                        class="flex items-center justify-center gap-3 bg-gradient-to-r from-blue-600 to-indigo-600 py-5 rounded-2xl font-semibold text-lg transition hover:scale-105">
+                    <i class="fa-solid fa-house"></i>
+                    Back to Home
+                </button>
+            </div>
+
+            <!-- Tips -->
+            <div class="mt-8 text-center text-sm text-gray-400">
+                💡 Speak clearly • Works best in quiet environment • Supports English
+            </div>
+        </div>
     </div>
 
-<script>
+    <!-- Toast -->
+    <div id="toast" class="fixed bottom-6 right-6 hidden bg-gray-800 border border-gray-700 rounded-2xl px-6 py-4 shadow-2xl"></div>
 
-    let recognition;
+    <script>
+        let recognition = null;
+        let isListening = false;
 
-    function startRecognition(){
+        function showToast(message, type = "success") {
+            const toast = document.getElementById('toast');
+            toast.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid ${type === 'success' ? 'fa-check-circle text-green-400' : 'fa-exclamation-circle text-red-400'}"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 3000);
+        }
 
-        recognition = new(window.SpeechRecognition || window.webkitSpeechRecognition)();
+        function updateStatus(text, color = "emerald") {
+            document.getElementById('statusText').innerHTML = text;
+        }
 
-        recognition.lang = "en-US";
+        function toggleRecognition() {
+            if (!isListening) {
+                startRecognition();
+            } else {
+                stopRecognition();
+            }
+        }
 
-        recognition.continuous = true;
-
-        recognition.interimResults = true;
-
-        recognition.onresult = function(event){
-
-            let transcript = "";
-
-            for(let i = 0; i < event.results.length; i++){
-
-                transcript += event.results[i][0].transcript;
+        function startRecognition() {
+            if (!('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
+                showToast("Your browser does not support Speech Recognition", "error");
+                return;
             }
 
-            document.getElementById("output").value = transcript;
-        };
+            recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = "en-US";
+            recognition.continuous = true;
+            recognition.interimResults = true;
 
-        recognition.start();
-    }
+            recognition.onresult = function(event) {
+                let transcript = "";
+                for (let i = 0; i < event.results.length; i++) {
+                    transcript += event.results[i][0].transcript;
+                }
+                document.getElementById("output").value = transcript;
+            };
 
-    function stopRecognition(){
+            recognition.onerror = function(event) {
+                showToast("Speech recognition error: " + event.error, "error");
+                stopRecognition();
+            };
 
-        if(recognition){
+            recognition.onend = function() {
+                isListening = false;
+                updateUI();
+            };
 
-            recognition.stop();
+            try {
+                recognition.start();
+                isListening = true;
+                updateUI();
+                updateStatus("🎙️ Listening... Speak now", "emerald");
+                showToast("Listening started");
+            } catch (e) {
+                showToast("Failed to start listening", "error");
+            }
         }
-    }
 
-    function clearText(){
+        function stopRecognition() {
+            if (recognition) {
+                recognition.stop();
+            }
+            isListening = false;
+            updateUI();
+            updateStatus("✅ Stopped listening", "emerald");
+        }
 
-        document.getElementById("output").value = "";
-    }
+        function updateUI() {
+            const container = document.getElementById('micContainer');
+            const btnText = document.getElementById('btnText');
+            const micIcon = document.getElementById('micIcon');
 
-    function goBack(){
+            if (isListening) {
+                container.classList.add('listening');
+                btnText.textContent = "Listening...";
+            } else {
+                container.classList.remove('listening');
+                btnText.textContent = "Start Listening";
+            }
+        }
 
-        window.location.href = "/";
-    }
+        function clearText() {
+            document.getElementById("output").value = "";
+            showToast("Text cleared");
+        }
 
-</script>
+        function goHome() {
+            window.location.href = "/";
+        }
 
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.key === " " && document.activeElement.tagName !== "TEXTAREA") {
+                e.preventDefault();
+                toggleRecognition();
+            }
+            if (e.key === "Escape" && isListening) {
+                stopRecognition();
+            }
+        });
+    </script>
 </body>
 </html>
-```
