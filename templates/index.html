@@ -1,281 +1,215 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DocuAI - AI Document Translator</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        * { font-family: 'Inter', system-ui, sans-serif; }
-        
-        body {
-            background: linear-gradient(135deg, #0f172a 0%, #1e2937 100%);
-            min-height: 100vh;
-        }
-        
-        .glass {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(24px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        
-        .upload-box {
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .upload-box:hover {
-            transform: scale(1.02);
-            border-color: rgb(129 140 248);
-            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
-        }
-        
-        .textarea-container {
-            position: relative;
-        }
-        .mic-controls {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            display: flex;
-            gap: 10px;
-            z-index: 20;
-        }
-        
-        .feature-btn {
-            transition: all 0.3s ease;
-        }
-        .feature-btn:hover {
-            transform: translateY(-3px) scale(1.05);
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Document Translator - DocuAI</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    
+    * { font-family: 'Inter', system-ui, sans-serif; }
+    
+    body {
+        background: linear-gradient(135deg, #020617, #0f172a, #111827);
+        min-height: 100vh;
+        color: white;
+    }
+    
+    .glass {
+        background: rgba(255,255,255,0.08);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255,255,255,0.15);
+    }
+    
+    .card {
+        transition: all 0.4s ease;
+    }
+    .card:hover {
+        transform: translateY(-8px);
+    }
+    
+    .upload-box {
+        transition: all 0.3s ease;
+    }
+    .upload-box:hover {
+        border-color: #6366f1;
+        background: rgba(255,255,255,0.1);
+    }
+</style>
 </head>
-<body class="text-white">
-    <div class="max-w-7xl mx-auto p-6">
-        <!-- Navbar -->
-        <nav class="glass rounded-3xl px-8 py-5 flex items-center justify-between mb-10 shadow-xl">
-            <div class="flex items-center gap-4">
-                <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 via-purple-500 to-cyan-400 rounded-3xl flex items-center justify-center shadow-lg">
-                    <span class="text-white text-3xl font-bold">AI</span>
-                </div>
-                <div>
-                    <h1 class="text-3xl font-bold tracking-tighter">DocuAI</h1>
-                    <p class="text-xs text-cyan-300">Intelligent Document Platform</p>
-                </div>
+<body>
+<div class="max-w-7xl mx-auto p-6">
+    <!-- Navbar -->
+    <nav class="glass rounded-3xl px-8 py-5 flex items-center justify-between mb-8">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-cyan-400 rounded-3xl flex items-center justify-center text-3xl font-bold">AI</div>
+            <h1 class="text-3xl font-bold">DocuAI</h1>
+        </div>
+        <div class="flex items-center gap-4">
+            <a href="/history" class="flex items-center gap-2 px-6 py-3 hover:bg-white/10 rounded-2xl transition">
+                <i class="fa-solid fa-clock-rotate-left"></i> History
+            </a>
+            <a href="/humanize" class="flex items-center gap-2 px-6 py-3 hover:bg-white/10 rounded-2xl transition">
+                <i class="fa-solid fa-pen-nib"></i> Humanize
+            </a>
+            <a href="/logout" class="flex items-center gap-2 px-6 py-3 hover:bg-red-500/10 hover:text-red-400 rounded-2xl transition">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout
+            </a>
+        </div>
+    </nav>
+
+    <!-- Status -->
+    <div id="statusBar" class="glass rounded-2xl px-6 py-4 mb-8 flex items-center gap-3 text-emerald-400">
+        <i class="fa-solid fa-circle-check"></i>
+        <span>✅ Ready to Process Documents</span>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- LEFT CARD -->
+        <div class="glass rounded-3xl p-8 card">
+            <h2 class="text-2xl font-semibold mb-6 flex items-center gap-3">
+                📂 Upload Document
+            </h2>
+            
+            <div onclick="document.getElementById('fileInput').click()" 
+                 class="upload-box border-2 border-dashed border-white/30 rounded-3xl p-16 text-center cursor-pointer mb-6">
+                <i class="fa-solid fa-cloud-arrow-up text-7xl text-indigo-400 mb-6"></i>
+                <h3 class="text-2xl font-semibold">Drop files here</h3>
+                <p class="text-gray-400 mt-2">PDF, DOCX, TXT supported</p>
             </div>
             
-            <div class="flex items-center gap-4">
-                <a href="/history" class="flex items-center gap-2 px-6 py-3 hover:bg-white/10 rounded-2xl transition">
-                    <i class="fa-solid fa-clock-rotate-left"></i> History
-                </a>
-                <a href="/humanize" class="flex items-center gap-2 px-6 py-3 hover:bg-white/10 rounded-2xl transition">
-                    <i class="fa-solid fa-pen-nib"></i> Humanize
-                </a>
-                <a href="/logout" class="flex items-center gap-2 px-6 py-3 hover:bg-red-500/10 hover:text-red-400 rounded-2xl transition">
-                    <i class="fa-solid fa-right-from-bracket"></i> Logout
-                </a>
-            </div>
-        </nav>
+            <input type="file" id="fileInput" hidden>
+            
+            <p id="selectedFileName" class="text-sm bg-white/5 px-5 py-3 rounded-2xl mb-6 hidden">
+                📄 Selected: <span id="fileNameText"></span>
+            </p>
 
-        <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
-            <!-- LEFT CARD: INPUT -->
-            <div class="glass rounded-3xl p-8">
-                <div class="flex items-center gap-3 mb-8">
-                    <img src="https://img.icons8.com/fluency/96/000000/cloud-upload.png" width="48" alt="Upload">
-                    <h2 class="text-3xl font-bold">Input Document</h2>
-                </div>
+            <textarea id="inputText" rows="12"
+                class="w-full bg-white/5 border border-white/10 rounded-3xl p-6 text-white placeholder-gray-400 focus:outline-none focus:border-indigo-500"
+                placeholder="Uploaded text will appear here..."></textarea>
 
-                <!-- Upload Area -->
-                <div onclick="document.getElementById('fileInput').click()" 
-                     class="upload-box border-2 border-dashed border-white/40 rounded-3xl p-20 text-center cursor-pointer mb-6 bg-gradient-to-br from-white/5 to-transparent">
-                    <img src="https://img.icons8.com/fluency/96/cloud-upload.png" width="80" class="mx-auto mb-4 opacity-80" alt="Upload Icon">
-                    <h3 class="text-2xl font-semibold mb-2">Drop files here</h3>
-                    <p class="text-gray-400">or click to browse</p>
-                    <p class="text-xs text-gray-500 mt-2">PDF, DOCX, TXT • Max 15MB</p>
-                </div>
-
-                <input type="file" id="fileInput" hidden accept=".pdf,.docx,.txt">
-
-                <div class="textarea-container">
-                    <textarea id="inputText" rows="13"
-                        class="w-full bg-white/5 border border-white/20 focus:border-indigo-400 rounded-3xl p-6 text-white placeholder-gray-400 focus:outline-none text-base leading-relaxed"
-                        placeholder="Or paste your text here..."></textarea>
-                    
-                    <!-- Floating Mic Controls -->
-                    <div class="mic-controls">
-                        <button onclick="toggleSpeechInput()" 
-                                class="bg-emerald-500 hover:bg-emerald-600 w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg transition">
-                            <i class="fa-solid fa-microphone text-xl"></i>
-                        </button>
-                        <button onclick="stopSpeechInput()" 
-                                class="bg-red-500 hover:bg-red-600 w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg transition">
-                            <i class="fa-solid fa-stop text-xl"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="mt-6">
-                    <label class="block text-sm font-medium text-gray-400 mb-2">Target Language</label>
-                    <select id="language" class="w-full bg-white/5 border border-white/20 rounded-2xl px-6 py-4 focus:outline-none focus:border-indigo-400">
-                        <option value="hi">🇮🇳 Hindi</option>
-                        <option value="en">🇬🇧 English</option>
-                        <option value="fr">🇫🇷 French</option>
-                        <option value="de">🇩🇪 German</option>
-                        <option value="es">🇪🇸 Spanish</option>
-                    </select>
-                </div>
-
-                <div class="grid grid-cols-3 gap-4 mt-8">
-                    <button onclick="uploadFile()" class="feature-btn bg-gradient-to-r from-blue-600 to-cyan-500 py-5 rounded-2xl font-semibold flex items-center justify-center gap-2 shadow-lg">
-                        <i class="fa-solid fa-upload"></i> Upload
-                    </button>
-                    <button onclick="translateText()" class="feature-btn bg-gradient-to-r from-violet-600 to-fuchsia-500 py-5 rounded-2xl font-semibold flex items-center justify-center gap-2 shadow-lg">
-                        <i class="fa-solid fa-language"></i> Translate
-                    </button>
-                    <button onclick="summarizeText()" class="feature-btn bg-gradient-to-r from-emerald-600 to-teal-500 py-5 rounded-2xl font-semibold flex items-center justify-center gap-2 shadow-lg">
-                        <i class="fa-solid fa-file-contract"></i> Summarize
-                    </button>
-                </div>
+            <!-- Controls -->
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mt-8">
+                <button onclick="uploadFile()" class="bg-gradient-to-r from-blue-600 to-cyan-500 py-4 rounded-2xl font-medium">📤 Upload</button>
+                <button onclick="translateText()" class="bg-gradient-to-r from-violet-600 to-fuchsia-500 py-4 rounded-2xl font-medium">🌍 Translate</button>
+                <button onclick="summarizeText()" class="bg-gradient-to-r from-emerald-600 to-teal-500 py-4 rounded-2xl font-medium">📝 Summarize</button>
+                <button onclick="humanizeText()" class="bg-gradient-to-r from-pink-500 to-rose-500 py-4 rounded-2xl font-medium">✨ Humanize</button>
+                <button onclick="copyText()" class="bg-gradient-to-r from-amber-500 to-orange-500 py-4 rounded-2xl font-medium">📋 Copy</button>
+                <button onclick="clearText()" class="bg-gradient-to-r from-red-500 to-rose-600 py-4 rounded-2xl font-medium">🗑 Clear</button>
             </div>
 
-            <!-- RIGHT CARD: OUTPUT -->
-            <div class="glass rounded-3xl p-8 flex flex-col">
-                <div class="flex items-center gap-3 mb-8">
-                    <img src="https://img.icons8.com/fluency/96/000000/artificial-intelligence.png" width="48" alt="AI">
-                    <h2 class="text-3xl font-bold">AI Output</h2>
-                </div>
-                
-                <div id="outputText" class="flex-1 bg-white/5 border border-white/20 rounded-3xl p-8 overflow-auto text-gray-100 leading-relaxed whitespace-pre-wrap min-h-[420px]">
-                    Your translated, summarized, or processed result will appear here...
-                </div>
+            <div class="mt-6 grid grid-cols-2 gap-4">
+                <a href="/speech-to-text" class="glass rounded-2xl p-6 text-center hover:bg-white/10 transition">
+                    <i class="fa-solid fa-microphone text-3xl mb-2"></i>
+                    <p>Speech to Text</p>
+                </a>
+                <a href="/text-to-speech" class="glass rounded-2xl p-6 text-center hover:bg-white/10 transition">
+                    <i class="fa-solid fa-volume-high text-3xl mb-2"></i>
+                    <p>Text to Speech</p>
+                </a>
+            </div>
+        </div>
 
-                <div class="flex gap-4 mt-8">
-                    <button onclick="copyText()" 
-                            class="flex-1 bg-white/10 hover:bg-white/20 py-5 rounded-2xl font-medium flex items-center justify-center gap-2 transition">
-                        <i class="fa-solid fa-copy"></i> Copy
-                    </button>
-                    <button onclick="downloadPDF()" 
-                            class="flex-1 bg-gradient-to-r from-sky-500 to-blue-600 py-5 rounded-2xl font-medium flex items-center justify-center gap-2 transition">
-                        <i class="fa-solid fa-download"></i> Download PDF
-                    </button>
-                </div>
+        <!-- RIGHT CARD -->
+        <div class="glass rounded-3xl p-8 card">
+            <h2 class="text-2xl font-semibold mb-6">📄 Output</h2>
+            <div id="outputText" class="bg-white/5 border border-white/10 rounded-3xl p-8 min-h-[500px] overflow-auto leading-relaxed whitespace-pre-wrap">
+                Your translated, summarized, or humanized result will appear here...
             </div>
         </div>
     </div>
+</div>
 
-    <script>
-        // ==================== ALL ORIGINAL FUNCTIONS (UNCHANGED) ====================
-        async function uploadFile() {
-            const fileInput = document.getElementById('fileInput');
-            const file = fileInput.files[0];
-            if (!file) return alert('Please choose a file');
-            
-            const formData = new FormData();
-            formData.append('file', file);
-            
-            try {
-                const response = await fetch('/upload', { method: 'POST', body: formData });
-                const data = await response.json();
-                if (data.error) return alert(data.error);
-                document.getElementById('inputText').value = data.text || '';
-                document.getElementById('outputText').innerText = '✅ File uploaded successfully!';
-            } catch (e) {
-                alert('Upload failed');
-            }
+<script>
+    // ==================== YOUR ORIGINAL FUNCTIONS ====================
+    document.getElementById('fileInput').addEventListener('change', function(){
+        const file = this.files[0];
+        if(file){
+            document.getElementById('selectedFileName').classList.remove('hidden');
+            document.getElementById('fileNameText').innerText = file.name;
         }
+    });
 
-        async function translateText() {
-            const text = document.getElementById('inputText').value.trim();
-            const language = document.getElementById('language').value;
-            if (!text) return alert('Please enter text');
-            
-            try {
-                const res = await fetch('/translate', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ text, language })
-                });
-                const data = await res.json();
-                document.getElementById('outputText').innerText = data.result || 'No result';
-            } catch (e) {
-                alert('Translation Failed');
-            }
+    async function uploadFile(){
+        const fileInput = document.getElementById('fileInput');
+        const file = fileInput.files[0];
+        if(!file) return alert('Please choose a file');
+        
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        try{
+            const response = await fetch('/upload',{ method:'POST', body:formData });
+            const data = await response.json();
+            document.getElementById('inputText').value = data.text || '';
+            document.getElementById('outputText').innerText = '✅ File uploaded successfully';
+        }catch(error){
+            alert('Upload failed');
         }
+    }
 
-        async function summarizeText() {
-            const text = document.getElementById('inputText').value.trim();
-            const language = document.getElementById('language').value;
-            if (!text) return alert('Please enter text');
-            
-            try {
-                const res = await fetch('/summarize', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ text, language })
-                });
-                const data = await res.json();
-                document.getElementById('outputText').innerText = data.result || 'No result';
-            } catch (e) {
-                alert('Summarization Failed');
-            }
+    async function translateText(){
+        const text = document.getElementById('inputText').value;
+        const language = document.getElementById('language').value;
+        if(!text) return alert('Please enter text');
+        try{
+            const response = await fetch('/translate',{
+                method:'POST',
+                headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({text:text, language:language})
+            });
+            const data = await response.json();
+            document.getElementById('outputText').innerText = data.result;
+        }catch(error){
+            alert('Translation Failed');
         }
+    }
 
-        function copyText() {
-            const text = document.getElementById('outputText').innerText;
-            navigator.clipboard.writeText(text);
-            alert('✅ Copied to clipboard!');
+    async function summarizeText(){
+        const text = document.getElementById('inputText').value;
+        const language = document.getElementById('language').value;
+        if(!text) return alert('Please enter text');
+        try{
+            const response = await fetch('/summarize',{
+                method:'POST',
+                headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({text:text, language:language})
+            });
+            const data = await response.json();
+            document.getElementById('outputText').innerText = data.result;
+        }catch(error){
+            alert('Summarization Failed');
         }
+    }
 
-        async function downloadPDF() {
-            const text = document.getElementById('outputText').innerText;
-            if (!text) return alert('No content to download');
-            
-            try {
-                const res = await fetch('/download', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ text })
-                });
-                const blob = await res.blob();
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'docuai-result.pdf';
-                a.click();
-                URL.revokeObjectURL(url);
-            } catch (e) {
-                alert('Download failed');
-            }
+    async function humanizeText(){
+        const text = document.getElementById('inputText').value;
+        if(!text) return alert('Please enter text');
+        try{
+            const response = await fetch('/humanize',{
+                method:'POST',
+                headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({text:text})
+            });
+            const data = await response.json();
+            document.getElementById('outputText').innerText = data.result;
+        }catch(error){
+            alert('Humanization Failed');
         }
+    }
 
-        // Speech Input
-        let recognition;
-        function toggleSpeechInput() {
-            if (!('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
-                return alert("Speech recognition not supported in this browser");
-            }
-            recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-            recognition.lang = "en-US";
-            recognition.onresult = (e) => {
-                let transcript = "";
-                for (let i = 0; i < e.results.length; i++) {
-                    transcript += e.results[i][0].transcript + " ";
-                }
-                document.getElementById('inputText').value += transcript;
-            };
-            recognition.start();
-        }
+    function copyText(){
+        const text = document.getElementById('outputText').innerText;
+        navigator.clipboard.writeText(text);
+        alert('Copied Successfully');
+    }
 
-        function stopSpeechInput() {
-            if (recognition) recognition.stop();
-        }
-
-        // File change feedback
-        document.getElementById('fileInput').addEventListener('change', function() {
-            if (this.files[0]) {
-                document.getElementById('outputText').innerText = `📄 Selected: ${this.files[0].name}`;
-            }
-        });
-    </script>
+    function clearText(){
+        document.getElementById('inputText').value = '';
+        document.getElementById('outputText').innerText = 'Your result will appear here...';
+    }
+</script>
 </body>
 </html>
