@@ -576,6 +576,40 @@ Your translated, summarized, or humanized result will appear here...
 <script>
 
 /* =========================================
+AUTO LOAD DATA
+========================================= */
+
+window.onload = () => {
+
+/* LOAD SPEECH TO TEXT RESULT */
+
+const savedSpeech =
+localStorage.getItem('speechText');
+
+if(savedSpeech){
+
+document.getElementById('inputText').value =
+savedSpeech;
+
+updateStatus('🎤 Speech text loaded');
+
+}
+
+/* LOAD TTS RESULT */
+
+const translatedText =
+localStorage.getItem('translatedText');
+
+if(translatedText){
+
+document.getElementById('outputText').innerText =
+translatedText;
+
+}
+
+};
+
+/* =========================================
 STATUS
 ========================================= */
 
@@ -877,6 +911,9 @@ document.getElementById('inputText').value='';
 
 document.getElementById('outputText').innerText=
 'Output cleared';
+
+localStorage.removeItem('translatedText');
+localStorage.removeItem('speechText');
 
 updateStatus('🧹 Cleared');
 
