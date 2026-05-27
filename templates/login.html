@@ -1,173 +1,137 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Login</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-<style>
-
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:'Poppins',sans-serif;
-}
-
-body{
-height:100vh;
-display:flex;
-justify-content:center;
-align-items:center;
-background:linear-gradient(135deg,#0f172a,#1e293b,#111827);
-overflow:hidden;
-}
-
-.container{
-width:420px;
-background:rgba(255,255,255,0.08);
-backdrop-filter:blur(20px);
-border-radius:30px;
-padding:40px;
-box-shadow:0 10px 40px rgba(0,0,0,0.4);
-border:1px solid rgba(255,255,255,0.1);
-animation:fadeIn 0.8s ease;
-}
-
-@keyframes fadeIn{
-from{
-opacity:0;
-transform:translateY(20px);
-}
-to{
-opacity:1;
-transform:translateY(0);
-}
-}
-
-h1{
-color:white;
-text-align:center;
-margin-bottom:10px;
-font-size:36px;
-}
-
-p{
-color:#cbd5e1;
-text-align:center;
-margin-bottom:25px;
-}
-
-.input-box{
-margin-bottom:20px;
-}
-
-.input-box input{
-width:100%;
-padding:15px;
-border:none;
-outline:none;
-border-radius:14px;
-background:rgba(255,255,255,0.08);
-color:white;
-font-size:15px;
-}
-
-.input-box input::placeholder{
-color:#cbd5e1;
-}
-
-button{
-width:100%;
-padding:15px;
-border:none;
-border-radius:14px;
-background:linear-gradient(135deg,#3b82f6,#06b6d4);
-color:white;
-font-size:16px;
-font-weight:600;
-cursor:pointer;
-transition:0.3s;
-}
-
-button:hover{
-transform:translateY(-2px);
-}
-
-.bottom{
-margin-top:20px;
-text-align:center;
-color:white;
-}
-
-.bottom a{
-color:#38bdf8;
-text-decoration:none;
-}
-
-.error{
-background:#ef4444;
-padding:10px;
-border-radius:10px;
-margin-bottom:15px;
-color:white;
-text-align:center;
-}
-
-</style>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - DocuAI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        * {
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e2937 100%);
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        
+        .input-field {
+            transition: all 0.3s ease;
+        }
+        
+        .input-field:focus {
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
+            border-color: rgb(99 102 241);
+        }
+    </style>
 </head>
+<body class="min-h-screen flex items-center justify-center p-6">
+    <div class="w-full max-w-md">
+        <!-- Logo -->
+        <div class="flex justify-center mb-8">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-cyan-400 rounded-2xl flex items-center justify-center shadow-xl">
+                    <span class="text-white text-3xl font-bold">AI</span>
+                </div>
+                <div>
+                    <h1 class="text-3xl font-bold text-white tracking-tight">DocuAI</h1>
+                </div>
+            </div>
+        </div>
 
-<body>
+        <!-- Main Card -->
+        <div class="glass-card rounded-3xl p-10 shadow-2xl">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-semibold text-white">Welcome Back</h2>
+                <p class="text-gray-400 mt-2">Sign in to continue to your workspace</p>
+            </div>
 
-<div class="container">
+            {% if error %}
+            <div class="bg-red-500/10 border border-red-500/30 text-red-400 px-5 py-4 rounded-2xl mb-8 flex items-start gap-3">
+                <i class="fa-solid fa-circle-exclamation mt-0.5"></i>
+                <span>{{ error }}</span>
+            </div>
+            {% endif %}
 
-<h1>Welcome Back</h1>
+            <form method="POST" action="/login" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
+                    <div class="relative">
+                        <input 
+                            type="email" 
+                            name="email"
+                            placeholder="you@example.com"
+                            required
+                            class="input-field w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white placeholder-gray-500 focus:outline-none"
+                        >
+                        <i class="fa-solid fa-envelope absolute right-5 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                    </div>
+                </div>
 
-<p>Login to continue</p>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Password</label>
+                    <div class="relative">
+                        <input 
+                            type="password" 
+                            name="password"
+                            placeholder="••••••••"
+                            required
+                            class="input-field w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white placeholder-gray-500 focus:outline-none"
+                        >
+                        <i class="fa-solid fa-lock absolute right-5 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                    </div>
+                </div>
 
-{% if error %}
-<div class="error">
-{{ error }}
-</div>
-{% endif %}
+                <div class="flex items-center justify-between">
+                    <label class="flex items-center gap-2 text-gray-400 cursor-pointer">
+                        <input type="checkbox" class="w-4 h-4 accent-indigo-600">
+                        <span class="text-sm">Remember me</span>
+                    </label>
+                    <a href="#" class="text-sm text-indigo-400 hover:text-indigo-300 transition">Forgot password?</a>
+                </div>
 
-<form method="POST" action="/login">
+                <button 
+                    type="submit"
+                    class="w-full bg-gradient-to-r from-indigo-600 via-blue-600 to-cyan-500 hover:from-indigo-500 hover:via-blue-500 hover:to-cyan-400 text-white font-semibold py-4 rounded-2xl text-lg transition-all duration-300 hover:scale-[1.02] shadow-lg shadow-indigo-500/40">
+                    Sign In
+                </button>
+            </form>
 
-<div class="input-box">
-<input
-type="email"
-name="email"
-placeholder="Enter Email"
-required
->
-</div>
+            <!-- Divider -->
+            <div class="flex items-center gap-4 my-8">
+                <div class="flex-1 h-px bg-white/10"></div>
+                <span class="text-gray-500 text-sm font-medium">OR</span>
+                <div class="flex-1 h-px bg-white/10"></div>
+            </div>
 
-<div class="input-box">
-<input
-type="password"
-name="password"
-placeholder="Enter Password"
-required
->
-</div>
+            <!-- Google Button -->
+            <button onclick="alert('Google login coming soon!')" 
+                    class="w-full bg-white/5 hover:bg-white/10 border border-white/10 text-white py-4 rounded-2xl flex items-center justify-center gap-3 transition font-medium">
+                <i class="fa-brands fa-google text-lg"></i>
+                Continue with Google
+            </button>
 
-<button type="submit">
-Login
-</button>
+            <!-- Signup Link -->
+            <div class="text-center mt-8">
+                <p class="text-gray-400">
+                    Don't have an account? 
+                    <a href="/signup" class="text-indigo-400 hover:text-indigo-300 font-medium transition">Sign up</a>
+                </p>
+            </div>
+        </div>
 
-</form>
-
-<div class="bottom">
-Don't have an account?
-<a href="/signup">Signup</a>
-</div>
-
-</div>
-
+        <!-- Footer -->
+        <p class="text-center text-gray-500 text-xs mt-8">
+            © 2026 DocuAI • Secure Document Processing
+        </p>
+    </div>
 </body>
 </html>
